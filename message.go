@@ -3,8 +3,10 @@ package main
 const (
 	netRegister   = "netRegister"
 	netUnregister = "netUnregister"
+	incChat       = "chat"
 	outConnect    = "connect"
 	outDisconnect = "disconnect"
+	outChat       = "chat"
 	gameTerminate = "terminate"
 )
 
