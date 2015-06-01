@@ -12,9 +12,9 @@ type game struct {
 
 func newGame(inc chan message, out chan message) *game {
 	return &game{
+		names: make(map[uint64]string),
 		inc:   inc,
 		out:   out,
-		names: make(map[uint64]string),
 	}
 }
 
@@ -28,18 +28,23 @@ func (g *game) run() {
 				g.register(&m)
 			case netUnregister:
 				g.unregister(&m)
+			case incStage:
+				g.stage(&m)
+			case incSeat:
+				g.seat(&m)
+			case incLeave:
+				g.leave(&m)
+			case incAbility:
+				g.ability(&m)
+			case incInterrupt:
+				g.interrupt(&m)
 			case incChat:
 				g.chat(&m)
 			default:
 				g.terminate(&m)
 			}
 		case <-tick:
-			g.out <- message{
-				t: "test",
-				d: map[string]interface{}{
-					"server_time": time.Now().String(),
-				},
-			}
+			g.tick()
 		}
 	}
 }
@@ -66,15 +71,42 @@ func (g *game) unregister(m *message) {
 	}
 }
 
+func (g *game) stage(m *message) {
+}
+
+func (g *game) seat(m *message) {
+}
+
+func (g *game) leave(m *message) {
+}
+
+func (g *game) ability(m *message) {
+}
+
+func (g *game) interrupt(m *message) {
+}
+
+func (g *game) tick() {
+	// todo mock
+	g.out <- message{
+		t: "tick",
+		d: map[string]interface{}{
+			"server_time": time.Now().String(),
+		},
+	}
+}
+
 func (g *game) chat(m *message) {
 	name := g.names[m.cid] // xxx
+	body := m.d["body"].(string)
 	g.out <- message{
 		t: incChat,
 		d: map[string]interface{}{
-			"name":    name,
-			"message": m.d["message"].(string),
+			"name": name,
+			"body": body,
 		},
 	}
+	log.Infof("@%s: %s", name, body)
 }
 
 func (g *game) terminate(m *message) {
