@@ -30,7 +30,7 @@ type connection struct {
 }
 
 type frame struct {
-	Code string           `json:"code"`
+	Type string           `json:"type"`
 	Data *json.RawMessage `json:"data"`
 }
 
@@ -93,6 +93,13 @@ func (n *network) wsHandler(w http.ResponseWriter, r *http.Request) {
 func (n *network) register(c *connection) {
 	n.cs[c.id] = c
 	n.names[c.name] = true
+	n.inc <- message{
+		cid: c.id,
+		t:   netRegister,
+		d: map[string]interface{}{
+			"name": c.name,
+		},
+	}
 	log.WithFields(logrus.Fields{
 		"cid":  c.id,
 		"name": c.name,
@@ -102,8 +109,6 @@ func (n *network) register(c *connection) {
 
 // unregister closes the connection and unregisters it
 func (n *network) unregister(c *connection) {
-	n.rw.Lock()
-	defer n.rw.Unlock()
 	if _, ok := n.cs[c.id]; !ok {
 		return
 	}
@@ -111,6 +116,10 @@ func (n *network) unregister(c *connection) {
 	delete(n.names, c.name)
 	close(c.buf)
 	c.ws.Close()
+	n.inc <- message{
+		cid: c.id,
+		t:   netUnregister,
+	}
 	log.WithFields(logrus.Fields{
 		"cid":  c.id,
 		"name": c.name,
@@ -120,7 +129,11 @@ func (n *network) unregister(c *connection) {
 
 // receiver reads frames from the connection then writes messages to the game routine
 func (n *network) receiver(c *connection) {
-	defer func() { n.unregister(c) }()
+	defer func() {
+		n.rw.Lock()
+		n.unregister(c)
+		n.rw.Unlock()
+	}()
 	for {
 		_, p, err := c.ws.ReadMessage()
 		if err != nil {
@@ -150,7 +163,11 @@ func (n *network) receiver(c *connection) {
 
 // sender reads frames from the write buffer then writes frames to the connection
 func (n *network) sender(c *connection) {
-	defer func() { n.unregister(c) }()
+	defer func() {
+		n.rw.Lock()
+		n.unregister(c)
+		n.rw.Unlock()
+	}()
 	for {
 		select {
 		case p, ok := <-c.buf:
@@ -182,18 +199,27 @@ func (n *network) dispatcher() {
 			if !ok {
 				log.Fatal("Cannot read the outgoing message channel")
 			}
-			n.rw.RLock()
-			for _, c := range n.cs {
-				p, err := encodeFrame(m)
-				if err != nil {
-					log.WithFields(logrus.Fields{
-						"message": m,
-						"err":     err,
-					}).Fatal("Failed encodeFrame()")
-				}
-				c.buf <- p
+			p, err := encodeFrame(m)
+			if err != nil {
+				log.WithFields(logrus.Fields{
+					"m":   m,
+					"err": err,
+				}).Fatal("Failed encodeFrame()")
 			}
-			n.rw.RUnlock()
+			switch m.t {
+			case gameTerminate:
+				n.rw.Lock()
+				if c, ok := n.cs[m.cid]; ok {
+					n.unregister(c)
+				}
+				n.rw.Unlock()
+			default:
+				n.rw.RLock()
+				for _, c := range n.cs {
+					c.buf <- p
+				}
+				n.rw.RUnlock()
+			}
 		}
 	}
 }
@@ -220,8 +246,8 @@ func decodeFrame(p []byte) (message, error) {
 	}
 	// todo validate d
 	return message{
-		code: f.Code,
-		data: d,
+		t: f.Type,
+		d: d,
 	}, nil
 }
 
@@ -230,12 +256,12 @@ func encodeFrame(m message) ([]byte, error) {
 	// todo validate m.data
 	d := new(json.RawMessage)
 	var err error
-	*d, err = json.Marshal(m.data)
+	*d, err = json.Marshal(m.d)
 	if err != nil {
 		return nil, err
 	}
 	return json.Marshal(frame{
-		Code: m.code,
+		Type: m.t,
 		Data: d,
 	})
 }
