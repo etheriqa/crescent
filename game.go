@@ -5,17 +5,28 @@ import (
 )
 
 type game struct {
-	names map[string]interface{}
+	names map[string]*unit
+	uid   uidType
+	uids  map[uidType]*unit
+	seats map[uint8]*unit
 	inc   chan message
 	out   chan message
 }
 
 func newGame(inc chan message, out chan message) *game {
 	return &game{
-		names: make(map[string]interface{}),
+		names: make(map[string]*unit),
+		uid:   0,
+		uids:  make(map[uidType]*unit),
+		seats: make(map[uint8]*unit),
 		inc:   inc,
 		out:   out,
 	}
+}
+
+func (g *game) nextUID() uidType {
+	g.uid++
+	return g.uid
 }
 
 func (g *game) run() {
@@ -60,6 +71,10 @@ func (g *game) register(m *message) {
 }
 
 func (g *game) unregister(m *message) {
+	if u, _ := g.names[m.name]; u != nil {
+		delete(g.uids, u.id)
+		delete(g.seats, u.seat)
+	}
 	delete(g.names, m.name)
 	g.out <- message{
 		t: outDisconnect,
@@ -73,9 +88,46 @@ func (g *game) stage(m *message) {
 }
 
 func (g *game) seat(m *message) {
+	seat := uint8(m.d["seat"].(float64))
+	unitName := m.d["unit"].(string)
+	if _, ok := g.seats[seat]; ok {
+		return
+	}
+	var u *unit
+	switch unitName {
+	case "Disabler":
+		u = newPlayerUnit(g.nextUID(), m.name, "Disabler", seat, unitDisablerStats)
+	default:
+		g.terminate(m.name)
+		return
+	}
+	g.names[m.name] = u
+	g.uids[u.id] = u
+	g.seats[seat] = u
+	g.out <- message{
+		t: outSeat,
+		d: map[string]interface{}{
+			"name": m.name,
+			"uid":  u.id,
+			"seat": seat,
+		},
+	}
 }
 
 func (g *game) leave(m *message) {
+	u, ok := g.names[m.name]
+	if !ok || u == nil {
+		return
+	}
+	delete(g.uids, u.id)
+	delete(g.seats, u.seat)
+	g.names[m.name] = nil
+	g.out <- message{
+		t: outLeave,
+		d: map[string]interface{}{
+			"seat": u.seat,
+		},
+	}
 }
 
 func (g *game) ability(m *message) {
@@ -97,7 +149,7 @@ func (g *game) tick() {
 func (g *game) chat(m *message) {
 	body := m.d["body"].(string)
 	g.out <- message{
-		t: incChat,
+		t: outChat,
 		d: map[string]interface{}{
 			"name": m.name,
 			"body": body,

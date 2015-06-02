@@ -13,9 +13,7 @@ var wsUpgrader = websocket.Upgrader{
 	CheckOrigin: func(*http.Request) bool { return true }, // fixme
 }
 
-type (
-	cidType uint64
-)
+type cidType uint64
 
 type network struct {
 	rw    *sync.RWMutex
