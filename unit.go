@@ -105,6 +105,7 @@ func (u *unit) updateModification() {
 	for o := range u.operators {
 		if m, ok := o.(modifier); ok {
 			// todo sum up
+			log.Debug(m)
 		}
 	}
 	// todo update u.um

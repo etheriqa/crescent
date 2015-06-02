@@ -14,13 +14,13 @@ type activating struct {
 }
 
 // isComplete returns true iff ability is activated
-func (a *activating) isComplete(u *unit) bool {
+func (a activating) isComplete(u *unit) bool {
 	// todo implement
 	return true
 }
 
 // onAttach confirms that the ability is available otherwise cancels activation of the ability
-func (a *activating) onAttach(u *unit) {
+func (a activating) onAttach(u *unit) {
 	a.u.attachStatsObserver(a)
 	a.u.attachDisableObserver(a)
 	if !a.checkCondition() {
@@ -34,21 +34,21 @@ func (a *activating) onAttach(u *unit) {
 }
 
 // onTick does nothing
-func (a *activating) onTick(u *unit) {}
+func (a activating) onTick(u *unit) {}
 
 // onComplete performs the ability
-func (a *activating) onComplete(u *unit) {
+func (a activating) onComplete(u *unit) {
 	// todo implement
 }
 
 // onDetach cleans up
-func (a *activating) onDetach(u *unit) {
+func (a activating) onDetach(u *unit) {
 	a.u.detachStatsObserver(a)
 	a.u.detachDisableObserver(a)
 }
 
 // update confirms that the ability is available otherwise interrupts activation of the ability
-func (a *activating) update() {
+func (a activating) update() {
 	if a.checkCondition() {
 		return
 	}
@@ -60,7 +60,7 @@ func (a *activating) update() {
 }
 
 // checkConditions returns true iff the ability satisfies prior condition
-func (a *activating) checkCondition() bool {
+func (a activating) checkCondition() bool {
 	// todo check cooldown time
 	// todo check health and mana
 	// todo check disabler
@@ -73,31 +73,67 @@ type modifier struct {
 }
 
 // isComplete returns false iff the modifier is effective
-func (m *modifier) isComplete(u *unit) bool {
+func (m modifier) isComplete(u *unit) bool {
 	// todo implement
 	return false
 }
 
 // onAttach updates the modification of the unit
-func (m *modifier) onAttach(u *unit) {
+func (m modifier) onAttach(u *unit) {
 	u.updateModification()
 	m.o <- message{
 		// todo pack message
-		t: outModifierAttach,
+		t: outModifierBegin,
 	}
 }
 
 // onTick does nothing
-func (m *modifier) onTick(u *unit) {}
+func (m modifier) onTick(u *unit) {}
 
-// onComplete does nothing
-func (m *modifier) onComplete(u *unit) {}
-
-// onDetach updates the modification of the unit
-func (m *modifier) onDetach(u *unit) {
-	u.updateModification()
+// onComplete sends a message
+func (m modifier) onComplete(u *unit) {
 	m.o <- message{
 		// todo pack message
-		t: outModifierDetach,
+		t: outModifierEnd,
 	}
 }
+
+// onDetach updates the modification of the unit
+func (m modifier) onDetach(u *unit) {
+	u.updateModification()
+}
+
+type disable struct {
+	u *unit
+	o chan message
+}
+
+// isComplete returns false iff the disable is effective
+func (d disable) isComplete(u *unit) bool {
+	// todo implement
+	return false
+}
+
+// onAttach triggers notifyDisable and sends a message
+func (d disable) onAttach(u *unit) {
+	d.u.notifyDisable()
+	// todo remove duplicate disable
+	d.o <- message{
+		// todo pack message
+		t: outDisableBegin,
+	}
+}
+
+// onTick does nothing
+func (d disable) onTick(u *unit) {}
+
+// onComplete sends a message
+func (d disable) onComplete(u *unit) {
+	d.o <- message{
+		// todo pack message
+		t: outDisableEnd,
+	}
+}
+
+// onDetach does nothing
+func (d disable) onDetach(u *unit) {}
