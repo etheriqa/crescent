@@ -13,8 +13,8 @@ type unit struct {
 	unitName       string
 	group          uint8
 	seat           uint8
-	stats          unitStatistics
-	mod            unitModification
+	us             unitStatistics
+	um             unitModification
 	operators      map[operator]interface{}
 	statsSubject   subject
 	disableSubject subject
@@ -43,53 +43,53 @@ type unitModification struct {
 }
 
 func (u *unit) health() int32 {
-	return u.stats.health
+	return u.us.health
 }
 
 func (u *unit) healthRegeneration() int32 {
-	return u.stats.healthRegeneration
+	return u.us.healthRegeneration
 }
 
 func (u *unit) mana() int32 {
-	return u.stats.mana
+	return u.us.mana
 }
 
 func (u *unit) manaRegeneration() int32 {
-	return u.stats.mana
+	return u.us.manaRegeneration
 }
 
 func (u *unit) armor() int32 {
-	return u.stats.armor + u.mod.armor
+	return u.us.armor + u.um.armor
 }
 
 func (u *unit) magicResistance() int32 {
-	return u.stats.magicResistance + u.mod.magicResistance
+	return u.us.magicResistance + u.um.magicResistance
 }
 
 func (u *unit) criticalStrikeChance() int32 {
-	return u.stats.criticalStrikeChance + u.mod.criticalStrikeChance
+	return u.us.criticalStrikeChance + u.um.criticalStrikeChance
 }
 
 func (u *unit) criticalStrikeDamage() int32 {
-	return u.stats.criticalStrikeDamage + u.mod.criticalStrikeDamage
+	return u.us.criticalStrikeDamage + u.um.criticalStrikeDamage
 }
 
 func (u *unit) cooldownReduction() int32 {
-	return u.stats.cooldownReduction + u.mod.cooldownReduction
+	return u.us.cooldownReduction + u.um.cooldownReduction
 }
 
 func (u *unit) threatFactor() int32 {
-	return u.stats.threatFactor + u.mod.threatFactor
+	return u.us.threatFactor + u.um.threatFactor
 }
 
 func (u *unit) attachOperator(o operator) {
 	u.operators[o] = nil
-	o.onAttach()
+	o.onAttach(u)
 }
 
 func (u *unit) detachOperator(o operator) {
 	delete(u.operators, o)
-	o.onDetach()
+	o.onDetach(u)
 }
 
 func (u *unit) attachStatsObserver(o observer) { u.statsSubject.attach(o) }
@@ -99,3 +99,14 @@ func (u *unit) notifyStats()                   { u.statsSubject.notify() }
 func (u *unit) attachDisableObserver(o observer) { u.disableSubject.attach(o) }
 func (u *unit) detachDisableObserver(o observer) { u.disableSubject.detach(o) }
 func (u *unit) notifyDisable()                   { u.disableSubject.notify() }
+
+// updateModification updates the unitModification by iterating over operators
+func (u *unit) updateModification() {
+	for o := range u.operators {
+		if m, ok := o.(modifier); ok {
+			// todo sum up
+		}
+	}
+	// todo update u.um
+	u.notifyStats()
+}
