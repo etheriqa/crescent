@@ -22,6 +22,10 @@ const (
 	outModifierEnd   = "modifierEnd"
 	outDisableBegin  = "disableBegin"
 	outDisableEnd    = "disableEnd"
+	outDoTBegin      = "dotBegin"
+	outDoTEnd        = "dotEnd"
+	outHoTBegin      = "hotBegin"
+	outHoTEnd        = "hotEnd"
 	gameTerminate    = "gameTerminate"
 )
 
