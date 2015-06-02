@@ -20,7 +20,7 @@ const (
 )
 
 type message struct {
-	cid uint64
-	t   string
-	d   map[string]interface{}
+	name string
+	t    string
+	d    map[string]interface{}
 }

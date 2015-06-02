@@ -13,17 +13,21 @@ var wsUpgrader = websocket.Upgrader{
 	CheckOrigin: func(*http.Request) bool { return true }, // fixme
 }
 
+type (
+	cidType uint64
+)
+
 type network struct {
 	rw    *sync.RWMutex
-	cid   uint64
-	cs    map[uint64]*connection
-	names map[string]bool
+	cid   cidType
+	cids  map[cidType]*connection
+	names map[string]*connection
 	inc   chan message
 	out   chan message
 }
 
 type connection struct {
-	id   uint64
+	id   cidType
 	name string
 	ws   *websocket.Conn
 	buf  chan []byte
@@ -39,15 +43,15 @@ func newNetwork(inc chan message, out chan message) *network {
 	return &network{
 		rw:    new(sync.RWMutex),
 		cid:   0,
-		cs:    make(map[uint64]*connection),
-		names: make(map[string]bool),
+		cids:  make(map[cidType]*connection),
+		names: make(map[string]*connection),
 		inc:   inc,
 		out:   out,
 	}
 }
 
 // nextCID generates a connection ID
-func (n *network) nextCID() uint64 {
+func (n *network) nextCID() cidType {
 	n.cid++
 	return n.cid
 }
@@ -91,14 +95,11 @@ func (n *network) wsHandler(w http.ResponseWriter, r *http.Request) {
 
 // register registers a connection
 func (n *network) register(c *connection) {
-	n.cs[c.id] = c
-	n.names[c.name] = true
+	n.cids[c.id] = c
+	n.names[c.name] = c
 	n.inc <- message{
-		cid: c.id,
-		t:   netRegister,
-		d: map[string]interface{}{
-			"name": c.name,
-		},
+		name: c.name,
+		t:    netRegister,
 	}
 	log.WithFields(logrus.Fields{
 		"cid":  c.id,
@@ -109,16 +110,16 @@ func (n *network) register(c *connection) {
 
 // unregister closes the connection and unregisters it
 func (n *network) unregister(c *connection) {
-	if _, ok := n.cs[c.id]; !ok {
+	if _, ok := n.cids[c.id]; !ok {
 		return
 	}
-	delete(n.cs, c.id)
+	delete(n.cids, c.id)
 	delete(n.names, c.name)
 	close(c.buf)
 	c.ws.Close()
 	n.inc <- message{
-		cid: c.id,
-		t:   netUnregister,
+		name: c.name,
+		t:    netUnregister,
 	}
 	log.WithFields(logrus.Fields{
 		"cid":  c.id,
@@ -138,25 +139,28 @@ func (n *network) receiver(c *connection) {
 		_, p, err := c.ws.ReadMessage()
 		if err != nil {
 			log.WithFields(logrus.Fields{
-				"cid": c.id,
-				"err": err,
+				"cid":  c.id,
+				"name": c.name,
+				"err":  err,
 			}).Warn("Failed websocket.ReadMessage()")
 			return
 		}
 		log.WithFields(logrus.Fields{
-			"cid": c.id,
-			"p":   string(p),
+			"cid":  c.id,
+			"name": c.name,
+			"p":    string(p),
 		}).Debug("websocket.ReadMessage()")
 		m, err := decodeFrame(p)
 		if err != nil {
 			log.WithFields(logrus.Fields{
-				"cid": c.id,
-				"p":   string(p),
-				"err": err,
+				"cid":  c.id,
+				"name": c.name,
+				"p":    string(p),
+				"err":  err,
 			}).Warn("Failed decodeFrame()")
 			return
 		}
-		m.cid = c.id
+		m.name = c.name
 		n.inc <- m
 	}
 }
@@ -178,14 +182,16 @@ func (n *network) sender(c *connection) {
 			err := c.ws.WriteMessage(websocket.TextMessage, p)
 			if err != nil {
 				log.WithFields(logrus.Fields{
-					"cid": c.id,
-					"err": err,
+					"cid":  c.id,
+					"name": c.name,
+					"err":  err,
 				}).Warn("Failed websocket.WriteMessage()")
 				return
 			}
 			log.WithFields(logrus.Fields{
-				"cid": c.id,
-				"p":   string(p),
+				"cid":  c.id,
+				"name": c.name,
+				"p":    string(p),
 			}).Debug("websocket.WriteMessage()")
 		}
 	}
@@ -209,13 +215,13 @@ func (n *network) dispatcher() {
 			switch m.t {
 			case gameTerminate:
 				n.rw.Lock()
-				if c, ok := n.cs[m.cid]; ok {
+				if c, ok := n.names[m.name]; ok {
 					n.unregister(c)
 				}
 				n.rw.Unlock()
 			default:
 				n.rw.RLock()
-				for _, c := range n.cs {
+				for _, c := range n.cids {
 					c.buf <- p
 				}
 				n.rw.RUnlock()
@@ -225,7 +231,7 @@ func (n *network) dispatcher() {
 }
 
 // newConnection initializes a connection
-func newConnection(id uint64, name string, ws *websocket.Conn) *connection {
+func newConnection(id cidType, name string, ws *websocket.Conn) *connection {
 	return &connection{
 		id:   id,
 		name: name,

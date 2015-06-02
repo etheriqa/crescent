@@ -5,14 +5,14 @@ import (
 )
 
 type game struct {
-	names map[uint64]string
+	names map[string]interface{}
 	inc   chan message
 	out   chan message
 }
 
 func newGame(inc chan message, out chan message) *game {
 	return &game{
-		names: make(map[uint64]string),
+		names: make(map[string]interface{}),
 		inc:   inc,
 		out:   out,
 	}
@@ -41,7 +41,7 @@ func (g *game) run() {
 			case incChat:
 				g.chat(&m)
 			default:
-				g.terminate(&m)
+				g.terminate(m.name)
 			}
 		case <-tick:
 			g.tick()
@@ -50,23 +50,21 @@ func (g *game) run() {
 }
 
 func (g *game) register(m *message) {
-	name := m.d["name"].(string)
-	g.names[m.cid] = name
+	g.names[m.name] = nil
 	g.out <- message{
 		t: outConnect,
 		d: map[string]interface{}{
-			"name": name,
+			"name": m.name,
 		},
 	}
 }
 
 func (g *game) unregister(m *message) {
-	name := g.names[m.cid] // xxx
-	delete(g.names, m.cid)
+	delete(g.names, m.name)
 	g.out <- message{
 		t: outDisconnect,
 		d: map[string]interface{}{
-			"name": name,
+			"name": m.name,
 		},
 	}
 }
@@ -97,21 +95,20 @@ func (g *game) tick() {
 }
 
 func (g *game) chat(m *message) {
-	name := g.names[m.cid] // xxx
 	body := m.d["body"].(string)
 	g.out <- message{
 		t: incChat,
 		d: map[string]interface{}{
-			"name": name,
+			"name": m.name,
 			"body": body,
 		},
 	}
-	log.Infof("@%s: %s", name, body)
+	log.Infof("@%s: %s", m.name, body)
 }
 
-func (g *game) terminate(m *message) {
+func (g *game) terminate(name string) {
 	g.out <- message{
-		cid: m.cid,
-		t:   gameTerminate,
+		name: name,
+		t:    gameTerminate,
 	}
 }
