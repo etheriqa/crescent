@@ -45,8 +45,8 @@ func (g *game) run() {
 				g.seat(&m)
 			case incLeave:
 				g.leave(&m)
-			case incAbility:
-				g.ability(&m)
+			case incActivate:
+				g.activate(&m)
 			case incInterrupt:
 				g.interrupt(&m)
 			case incChat:
@@ -95,8 +95,7 @@ func (g *game) seat(m *message) {
 	}
 	var u *unit
 	switch unitName {
-	case "Disabler":
-		u = newPlayerUnit(g.nextUID(), m.name, "Disabler", seat, unitDisablerStats)
+	// todo
 	default:
 		g.terminate(m.name)
 		return
@@ -130,7 +129,7 @@ func (g *game) leave(m *message) {
 	}
 }
 
-func (g *game) ability(m *message) {
+func (g *game) activate(m *message) {
 }
 
 func (g *game) interrupt(m *message) {

@@ -1,4 +1,68 @@
 package main
 
 type operator interface {
+	isComplete() bool
+	onAttach()
+	onTick()
+	onComplete()
+	onDetach()
+}
+
+type activating struct {
+	u *unit
+	o chan message
+}
+
+// isComplete returns true iff ability is activated
+func (a *activating) isComplete() bool {
+	// todo implement
+	return true
+}
+
+// onAttach confirms that the ability is available otherwise cancels activation of the ability
+func (a *activating) onAttach() {
+	a.u.attachStatsObserver(a)
+	a.u.attachDisableObserver(a)
+	if !a.checkCondition() {
+		a.u.detachOperator(a)
+		return
+	}
+	a.o <- message{
+		// todo pack message
+		t: outActivate,
+	}
+}
+
+// onTick does nothing
+func (a *activating) onTick() {}
+
+// onComplete performs the ability
+func (a *activating) onComplete() {
+	// todo implement
+}
+
+// onDetach cleans up
+func (a *activating) onDetach() {
+	a.u.detachStatsObserver(a)
+	a.u.detachDisableObserver(a)
+}
+
+// update confirms that the ability is available otherwise interrupts activation of the ability
+func (a *activating) update() {
+	if a.checkCondition() {
+		return
+	}
+	a.u.detachOperator(a)
+	a.o <- message{
+		// todo pack message
+		t: outInterrupt,
+	}
+}
+
+// checkConditions returns true iff the ability satisfies prior condition
+func (a *activating) checkCondition() bool {
+	// todo check cooldown time
+	// todo check health and mana
+	// todo check disabler
+	return true
 }

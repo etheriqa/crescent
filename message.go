@@ -6,7 +6,7 @@ const (
 	incStage      = "stage"
 	incSeat       = "seat"
 	incLeave      = "leave"
-	incAbility    = "ability"
+	incActivate   = "activate"
 	incInterrupt  = "interrupt"
 	incChat       = "chat"
 	outConnect    = "connect"
@@ -16,6 +16,8 @@ const (
 	outLeave      = "leave"
 	outEvent      = "event"
 	outChat       = "chat"
+	outActivate   = "activate"
+	outInterrupt  = "interrupt"
 	gameTerminate = "gameTerminate"
 )
 
