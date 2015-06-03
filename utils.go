@@ -1,17 +1,17 @@
 package main
 
 type subject struct {
-	observers map[observer]interface{}
+	observers map[observer]bool
 }
 
 func newSubject() *subject {
 	return &subject{
-		observers: make(map[observer]interface{}),
+		observers: make(map[observer]bool),
 	}
 }
 
 func (s *subject) attach(o observer) {
-	s.observers[o] = nil
+	s.observers[o] = true
 }
 
 func (s *subject) detach(o observer) {

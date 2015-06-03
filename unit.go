@@ -15,7 +15,7 @@ type unit struct {
 	seat           uint8
 	us             *unitStatistics
 	um             *unitModification
-	operators      map[operator]interface{}
+	operators      map[operator]bool
 	statsSubject   *subject
 	disableSubject *subject
 }
@@ -25,7 +25,7 @@ func newUnit() *unit {
 	return &unit{
 		us:             &unitStatistics{},
 		um:             &unitModification{},
-		operators:      make(map[operator]interface{}),
+		operators:      make(map[operator]bool),
 		statsSubject:   newSubject(),
 		disableSubject: newSubject(),
 	}
@@ -81,7 +81,7 @@ func (u *unit) threatFactor() int32 {
 
 // attachOperator adds the operator
 func (u *unit) attachOperator(o operator) {
-	u.operators[o] = nil
+	u.operators[o] = true
 	o.onAttach(u)
 }
 
@@ -137,8 +137,8 @@ func (u *unit) tick(out chan message) {
 func (u *unit) updateModification() {
 	u.um = &unitModification{}
 	for o := range u.operators {
-		if m, ok := o.(*modifier); ok {
-			u.um.add(m.um)
+		if _, ok := o.(*modifier); ok {
+			u.um.add(o.(*modifier).um)
 		}
 	}
 	u.notifyStats()

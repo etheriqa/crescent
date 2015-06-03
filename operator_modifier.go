@@ -6,13 +6,13 @@ type modifier struct {
 }
 
 // isComplete returns false iff the modifier is effective
-func (m modifier) isComplete(u *unit) bool {
+func (m *modifier) isComplete(u *unit) bool {
 	// todo implement
 	return false
 }
 
 // onAttach updates the modification of the unit
-func (m modifier) onAttach(u *unit) {
+func (m *modifier) onAttach(u *unit) {
 	u.updateModification()
 	m.o <- message{
 		// todo pack message
@@ -21,10 +21,10 @@ func (m modifier) onAttach(u *unit) {
 }
 
 // onTick does nothing
-func (m modifier) onTick(u *unit) {}
+func (m *modifier) onTick(u *unit) {}
 
 // onComplete sends a message
-func (m modifier) onComplete(u *unit) {
+func (m *modifier) onComplete(u *unit) {
 	m.o <- message{
 		// todo pack message
 		t: outModifierEnd,
@@ -32,6 +32,6 @@ func (m modifier) onComplete(u *unit) {
 }
 
 // onDetach updates the modification of the unit
-func (m modifier) onDetach(u *unit) {
+func (m *modifier) onDetach(u *unit) {
 	u.updateModification()
 }

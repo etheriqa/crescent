@@ -6,13 +6,13 @@ type activating struct {
 }
 
 // isComplete returns true iff ability is activated
-func (a activating) isComplete(u *unit) bool {
+func (a *activating) isComplete(u *unit) bool {
 	// todo implement
 	return true
 }
 
 // onAttach confirms that the ability is available otherwise cancels activation of the ability
-func (a activating) onAttach(u *unit) {
+func (a *activating) onAttach(u *unit) {
 	a.u.attachStatsObserver(a)
 	a.u.attachDisableObserver(a)
 	if !a.checkCondition() {
@@ -26,21 +26,21 @@ func (a activating) onAttach(u *unit) {
 }
 
 // onTick does nothing
-func (a activating) onTick(u *unit) {}
+func (a *activating) onTick(u *unit) {}
 
 // onComplete performs the ability
-func (a activating) onComplete(u *unit) {
+func (a *activating) onComplete(u *unit) {
 	// todo implement
 }
 
 // onDetach cleans up
-func (a activating) onDetach(u *unit) {
+func (a *activating) onDetach(u *unit) {
 	a.u.detachStatsObserver(a)
 	a.u.detachDisableObserver(a)
 }
 
 // update confirms that the ability is available otherwise interrupts activation of the ability
-func (a activating) update() {
+func (a *activating) update() {
 	if a.checkCondition() {
 		return
 	}
@@ -52,7 +52,7 @@ func (a activating) update() {
 }
 
 // checkConditions returns true iff the ability satisfies prior condition
-func (a activating) checkCondition() bool {
+func (a *activating) checkCondition() bool {
 	// todo check cooldown time
 	// todo check health and mana
 	// todo check disabler

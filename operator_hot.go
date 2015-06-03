@@ -6,13 +6,13 @@ type hot struct {
 }
 
 // isComplete returns false iff the HoT is effective
-func (h hot) isComplete(u *unit) bool {
+func (h *hot) isComplete(u *unit) bool {
 	// todo implement
 	return false
 }
 
 // onAttach removes duplicate HoTs and sends a message
-func (h hot) onAttach(u *unit) {
+func (h *hot) onAttach(u *unit) {
 	// todo removes duplicate HoTs
 	h.o <- message{
 		// todo pack message
@@ -21,12 +21,12 @@ func (h hot) onAttach(u *unit) {
 }
 
 // onTick performs HoT healing
-func (h hot) onTick(u *unit) {
+func (h *hot) onTick(u *unit) {
 	// todo implement
 }
 
 // onComplete sends a message
-func (h hot) onComplete(u *unit) {
+func (h *hot) onComplete(u *unit) {
 	h.o <- message{
 		// todo pack message
 		t: outHoTEnd,
@@ -34,4 +34,4 @@ func (h hot) onComplete(u *unit) {
 }
 
 // onDetach does nothing
-func (h hot) onDetach(u *unit) {}
+func (h *hot) onDetach(u *unit) {}
