@@ -68,7 +68,7 @@ func (a activating) checkCondition() bool {
 }
 
 type modifier struct {
-	um unitModification
+	um *unitModification
 	o  chan message
 }
 

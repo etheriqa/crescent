@@ -13,33 +13,22 @@ type unit struct {
 	unitName       string
 	group          uint8
 	seat           uint8
-	us             unitStatistics
-	um             unitModification
+	us             *unitStatistics
+	um             *unitModification
 	operators      map[operator]interface{}
-	statsSubject   subject
-	disableSubject subject
+	statsSubject   *subject
+	disableSubject *subject
 }
 
-type unitStatistics struct {
-	health               int32
-	healthRegeneration   int32
-	mana                 int32
-	manaRegeneration     int32
-	armor                int32
-	magicResistance      int32
-	criticalStrikeChance int32
-	criticalStrikeDamage int32
-	cooldownReduction    int32
-	threatFactor         int32
-}
-
-type unitModification struct {
-	armor                int32
-	magicResistance      int32
-	criticalStrikeChance int32
-	criticalStrikeDamage int32
-	cooldownReduction    int32
-	threatFactor         int32
+// newUnit initializes a unit
+func newUnit() *unit {
+	return &unit{
+		us:             &unitStatistics{},
+		um:             &unitModification{},
+		operators:      make(map[operator]interface{}),
+		statsSubject:   newSubject(),
+		disableSubject: newSubject(),
+	}
 }
 
 func (u *unit) health() int32 {
@@ -102,12 +91,11 @@ func (u *unit) notifyDisable()                   { u.disableSubject.notify() }
 
 // updateModification updates the unitModification by iterating over operators
 func (u *unit) updateModification() {
+	u.um = &unitModification{}
 	for o := range u.operators {
-		if m, ok := o.(modifier); ok {
-			// todo sum up
-			log.Debug(m)
+		if m, ok := o.(*modifier); ok {
+			u.um.add(m.um)
 		}
 	}
-	// todo update u.um
 	u.notifyStats()
 }

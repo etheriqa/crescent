@@ -4,6 +4,12 @@ type subject struct {
 	observers map[observer]interface{}
 }
 
+func newSubject() *subject {
+	return &subject{
+		observers: make(map[observer]interface{}),
+	}
+}
+
 func (s *subject) attach(o observer) {
 	s.observers[o] = nil
 }
