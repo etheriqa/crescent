@@ -31,6 +31,14 @@ func newUnit() *unit {
 	}
 }
 
+func (u *unit) isAlive() bool {
+	return u.health() > 0
+}
+
+func (u *unit) isDead() bool {
+	return u.health() <= 0
+}
+
 func (u *unit) health() int32 {
 	return u.us.health
 }
@@ -71,11 +79,13 @@ func (u *unit) threatFactor() int32 {
 	return u.us.threatFactor + u.um.threatFactor
 }
 
+// attachOperator adds the operator
 func (u *unit) attachOperator(o operator) {
 	u.operators[o] = nil
 	o.onAttach(u)
 }
 
+// detachOperator removes the operator
 func (u *unit) detachOperator(o operator) {
 	delete(u.operators, o)
 	o.onDetach(u)
@@ -89,7 +99,41 @@ func (u *unit) attachDisableObserver(o observer) { u.disableSubject.attach(o) }
 func (u *unit) detachDisableObserver(o observer) { u.disableSubject.detach(o) }
 func (u *unit) notifyDisable()                   { u.disableSubject.notify() }
 
-// updateModification updates the unitModification by iterating over operators
+// progress triggers onComplete iff the operator is completed
+func (u *unit) progress(out chan message) {
+	if u.isDead() {
+		return
+	}
+	for o := range u.operators {
+		if !o.isComplete(u) {
+			continue
+		}
+		o.onComplete(u)
+		u.detachOperator(o)
+	}
+}
+
+// tick triggers onTick and performs regeneration
+func (u *unit) tick(out chan message) {
+	if u.isDead() {
+		return
+	}
+	// todo perform health regeneration
+	out <- message{
+		// todo pack message
+		t: outHealthReg,
+	}
+	// todo perform mana regeneration
+	out <- message{
+		// todo pack message
+		t: outManaReg,
+	}
+	for o := range u.operators {
+		o.onTick(u)
+	}
+}
+
+// updateModification updates the unitModification
 func (u *unit) updateModification() {
 	u.um = &unitModification{}
 	for o := range u.operators {

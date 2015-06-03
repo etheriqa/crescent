@@ -26,6 +26,8 @@ const (
 	outDoTEnd        = "dotEnd"
 	outHoTBegin      = "hotBegin"
 	outHoTEnd        = "hotEnd"
+	outHealthReg     = "healthReg"
+	outManaReg       = "manaReg"
 	gameTerminate    = "gameTerminate"
 )
 
