@@ -13,6 +13,8 @@ type unit struct {
 	unitName       string
 	group          uint8
 	seat           uint8
+	hp             int32
+	mp             int32
 	us             *unitStatistics
 	um             *unitModification
 	operators      map[operator]bool
@@ -32,11 +34,11 @@ func newUnit() *unit {
 }
 
 func (u *unit) isAlive() bool {
-	return u.health() > 0
+	return u.hp > 0
 }
 
 func (u *unit) isDead() bool {
-	return u.health() <= 0
+	return u.hp <= 0
 }
 
 func (u *unit) health() int32 {
@@ -113,23 +115,40 @@ func (u *unit) progress(out chan message) {
 	}
 }
 
-// tick triggers onTick and performs regeneration
+// tick performs regeneration and triggers onTick
 func (u *unit) tick(out chan message) {
 	if u.isDead() {
 		return
 	}
-	// todo perform health regeneration
+	// todo perform mana regeneration
+	for o := range u.operators {
+		o.onTick(u)
+	}
+}
+
+// performHealthRegeneration performs health regeneration
+func (u *unit) performHealthRegeneration(out chan message) {
+	reg := u.healthRegeneration() + u.hp - u.health()
+	if reg < 0 {
+		return
+	}
+	u.hp += reg
 	out <- message{
 		// todo pack message
 		t: outHealthReg,
 	}
-	// todo perform mana regeneration
+}
+
+// performManaRegeneration performs mana regeneration
+func (u *unit) performManaRegeneration(out chan message) {
+	reg := u.manaRegeneration() + u.mp - u.mana()
+	if reg < 0 {
+		return
+	}
+	u.mp += reg
 	out <- message{
 		// todo pack message
 		t: outManaReg,
-	}
-	for o := range u.operators {
-		o.onTick(u)
 	}
 }
 
