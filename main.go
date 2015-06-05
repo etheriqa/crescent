@@ -24,7 +24,10 @@ func init() {
 }
 
 func main() {
-	log.Info("Start up")
+	log.WithFields(logrus.Fields{
+		"addr":  *addr,
+		"debug": *debug,
+	}).Info("Start up")
 	i := make(chan message)
 	o := make(chan message)
 	n := newNetwork(i, o)
