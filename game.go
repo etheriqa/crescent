@@ -1,10 +1,9 @@
 package main
 
-import (
-	"time"
-)
+type gameTime int64
 
 type game struct {
+	time  gameTime
 	names map[string]*unit
 	uid   uidType
 	uids  map[uidType]*unit
@@ -15,6 +14,7 @@ type game struct {
 
 func newGame(inc chan message, out chan message) *game {
 	return &game{
+		time:  0,
 		names: make(map[string]*unit),
 		uid:   0,
 		uids:  make(map[uidType]*unit),
@@ -30,12 +30,12 @@ func (g *game) nextUID() uidType {
 }
 
 func (g *game) run() {
-	gameTicker := time.Tick(time.Second / 20)
-	statsTicker := time.Tick(time.Second)
 	for {
 		select {
 		case m := <-g.inc:
 			switch m.t {
+			case sysTick:
+				g.tick(&m)
 			case netRegister:
 				g.register(&m)
 			case netUnregister:
@@ -55,11 +55,20 @@ func (g *game) run() {
 			default:
 				g.terminate(m.name)
 			}
-		case <-gameTicker:
-			g.gameTick()
-		case <-statsTicker:
-			g.statsTick()
 		}
+	}
+}
+
+func (g *game) tick(m *message) {
+	g.time++
+	for _, u := range g.uids {
+		u.gameTick(g.out)
+	}
+	if int64(g.time)*int64(gameTick)%int64(statsTick) != 0 {
+		return
+	}
+	for _, u := range g.uids {
+		u.statsTick(g.out)
 	}
 }
 
@@ -88,6 +97,7 @@ func (g *game) unregister(m *message) {
 }
 
 func (g *game) stage(m *message) {
+	// todo change stage
 }
 
 func (g *game) seat(m *message) {
@@ -136,20 +146,6 @@ func (g *game) activate(m *message) {
 }
 
 func (g *game) interrupt(m *message) {
-}
-
-// gameTick performs units' gameTick
-func (g *game) gameTick() {
-	for _, u := range g.uids {
-		u.gameTick(g.out)
-	}
-}
-
-// statsTick performs units' statsTick
-func (g *game) statsTick() {
-	for _, u := range g.uids {
-		u.statsTick(g.out)
-	}
 }
 
 func (g *game) chat(m *message) {

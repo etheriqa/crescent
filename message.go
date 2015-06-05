@@ -1,6 +1,7 @@
 package main
 
 const (
+	sysTick          = "sysTick"
 	netRegister      = "netRegister"
 	netUnregister    = "netUnregister"
 	incStage         = "stage"

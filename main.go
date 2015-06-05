@@ -2,8 +2,14 @@ package main
 
 import (
 	"flag"
+	"time"
 
 	"github.com/Sirupsen/logrus"
+)
+
+const (
+	gameTick  = time.Millisecond
+	statsTick = time.Second
 )
 
 var addr = flag.String("addr", ":25200", "service address")
@@ -24,5 +30,14 @@ func main() {
 	n := newNetwork(i, o)
 	g := newGame(i, o)
 	go n.run(*addr)
-	g.run()
+	go g.run()
+	t := time.Tick(gameTick)
+	for {
+		select {
+		case <-t:
+			i <- message{
+				t: "sysTick",
+			}
+		}
+	}
 }
