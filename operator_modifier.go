@@ -1,11 +1,11 @@
 package main
 
 type modifier struct {
-	unit *unit
-	um   *unitModification
+	partialOperator
+	um *unitModification
 }
 
-// onAttach updates the modification of the unit
+// onAttach updates the modificationStats of the unit
 func (m *modifier) onAttach() {
 	m.unit.addEventHandler(m, eventGameTick)
 	m.unit.updateModification()
@@ -15,25 +15,19 @@ func (m *modifier) onAttach() {
 	})
 }
 
-// onDetach updates the modification of the unit
+// onDetach updates the modificationStats of the unit
 func (m *modifier) onDetach() {
 	m.unit.removeEventHandler(m, eventGameTick)
 	m.unit.updateModification()
 }
 
-// handleEvent han
+// handleEvent handles the event
 func (m *modifier) handleEvent(e event) {
 	switch e {
 	case eventGameTick:
-		m.expire()
+		m.expire(m, message{
+			// todo pack message
+			t: outModifierEnd,
+		})
 	}
-}
-
-// expire expires the modifier iff it is expired
-func (m *modifier) expire() {
-	// todo expire
-	m.unit.publish(message{
-		// todo pack message
-		t: outModifierEnd,
-	})
 }

@@ -28,7 +28,9 @@ func TestThreatOnAttach(t *testing.T) {
 		threat: 100,
 	}
 	u.attachOperator(&disable{
-		unit: u,
+		partialOperator: partialOperator{
+			unit: u,
+		},
 	})
 	u.attachOperator(threat1)
 	u.attachOperator(threat2)

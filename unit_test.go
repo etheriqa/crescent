@@ -11,7 +11,9 @@ func TestUnitUpdateModification(t *testing.T) {
 	g := mockGame()
 	u := newUnit(g)
 	um1 := &modifier{
-		unit: u,
+		partialOperator: partialOperator{
+			unit: u,
+		},
 		um: &unitModification{
 			armor:                10,
 			magicResistance:      20,
@@ -22,7 +24,9 @@ func TestUnitUpdateModification(t *testing.T) {
 		},
 	}
 	um2 := &modifier{
-		unit: u,
+		partialOperator: partialOperator{
+			unit: u,
+		},
 		um: &unitModification{
 			armor:                1000,
 			magicResistance:      2000,

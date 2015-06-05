@@ -10,9 +10,8 @@ const (
 )
 
 type disable struct {
-	unit           *unit
-	disableType    disableType
-	expirationTime gameTime
+	partialOperator
+	disableType disableType
 }
 
 // onAttach removes duplicate disables and triggers eventDisable
@@ -46,20 +45,13 @@ func (d *disable) onDetach() {
 	d.unit.removeEventHandler(d, eventGameTick)
 }
 
-// handleEvent handles a event
+// handleEvent handles the event
 func (d *disable) handleEvent(e event) {
 	switch e {
 	case eventGameTick:
-		d.expire()
-	default:
-		return
+		d.expire(d, message{
+			// todo pack message
+			t: outDisableEnd,
+		})
 	}
-}
-
-// expire expires the disable iff it is expired
-func (d *disable) expire() {
-	if d.expirationTime > d.unit.now() {
-		return
-	}
-	d.unit.detachOperator(d)
 }

@@ -1,10 +1,10 @@
 package main
 
 type activating struct {
-	unit *unit
+	partialOperator
 }
 
-// onAttach confirms that the ability is available otherwise cancels activation of the ability
+// onAttach checks requirements
 func (a *activating) onAttach() {
 	a.unit.addEventHandler(a, eventDisable)
 	a.unit.addEventHandler(a, eventGameTick)
@@ -13,20 +13,20 @@ func (a *activating) onAttach() {
 		a.unit.detachOperator(a)
 		return
 	}
-	if !a.isActivated() {
+	if !a.isExpired() {
 		return
 	}
 	a.performAbility()
 }
 
-// onDetach cleans up
+// onDetach removes the eventHandlers
 func (a *activating) onDetach() {
 	a.unit.removeEventHandler(a, eventDisable)
 	a.unit.removeEventHandler(a, eventGameTick)
 	a.unit.removeEventHandler(a, eventStats)
 }
 
-// handleEvent checks the ability has been activated or not and performs it
+// handleEvent handles the event
 func (a *activating) handleEvent(e event) {
 	switch e {
 	case eventDisable:
@@ -43,7 +43,7 @@ func (a *activating) handleEvent(e event) {
 		})
 		return
 	}
-	if !a.isActivated() {
+	if !a.isExpired() {
 		return
 	}
 	a.performAbility()
@@ -55,12 +55,6 @@ func (a *activating) satisfiesRequirements() bool {
 	// todo check cooldown time
 	// todo check health and mana
 	// todo check disable
-	return true
-}
-
-// isActivated returns true iff the ability is activated
-func (a *activating) isActivated() bool {
-	// todo check charging/casting time
 	return true
 }
 

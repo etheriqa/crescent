@@ -1,14 +1,32 @@
 package main
 
+type hotType string
+
 type hot struct {
-	unit *unit
+	partialOperator
+	hotType hotType
 }
 
-// onAttach removes duplicate HoTs and sends a message
+// onAttach removes duplicate HoTs
 func (h *hot) onAttach() {
 	h.unit.addEventHandler(h, eventGameTick)
 	h.unit.addEventHandler(h, eventStatsTick)
-	// todo removes duplicate HoTs
+	for o := range h.unit.operators {
+		if o == h {
+			continue
+		}
+		if _, ok := o.(*hot); !ok {
+			continue
+		}
+		if o.(*hot).hotType != h.hotType {
+			continue
+		}
+		if o.(*disable).expirationTime >= h.expirationTime {
+			h.unit.detachOperator(h)
+			return
+		}
+		h.unit.detachOperator(o)
+	}
 	h.unit.publish(message{
 		// todo pack message
 		t: outHoTBegin,
@@ -21,23 +39,17 @@ func (h *hot) onDetach() {
 	h.unit.removeEventHandler(h, eventStatsTick)
 }
 
-// handleEvent handles events
+// handleEvent handles the event
 func (h *hot) handleEvent(e event) {
 	switch e {
 	case eventGameTick:
-		h.expire()
+		h.expire(h, message{
+			// todo pack message
+			t: outHoTEnd,
+		})
 	case eventStatsTick:
 		h.perform()
 	}
-}
-
-// expire expires the HoT iff it is expired
-func (h *hot) expire() {
-	// todo expire
-	h.unit.publish(message{
-		// todo pack message
-		t: outHoTEnd,
-	})
 }
 
 // perform performs the HoT
