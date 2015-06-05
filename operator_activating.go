@@ -13,10 +13,10 @@ func (a *activating) isComplete(u *unit) bool {
 
 // onAttach confirms that the ability is available otherwise cancels activation of the ability
 func (a *activating) onAttach(u *unit) {
-	a.u.attachStatsObserver(a)
-	a.u.attachDisableObserver(a)
+	u.addEventHandler(eventDisable, a)
+	u.addEventHandler(eventStats, a)
 	if !a.checkCondition() {
-		a.u.detachOperator(a)
+		u.detachOperator(a)
 		return
 	}
 	a.o <- message{
@@ -35,12 +35,18 @@ func (a *activating) onComplete(u *unit) {
 
 // onDetach cleans up
 func (a *activating) onDetach(u *unit) {
-	a.u.detachStatsObserver(a)
-	a.u.detachDisableObserver(a)
+	u.removeEventHandler(eventDisable, a)
+	u.removeEventHandler(eventStats, a)
 }
 
-// update confirms that the ability is available otherwise interrupts activation of the ability
-func (a *activating) update() {
+// handleEvent confirms that the ability is available otherwise interrupts activation of the ability
+func (a *activating) handleEvent(e event) {
+	switch e {
+	case eventDisable:
+	case eventStats:
+	default:
+		return
+	}
 	if a.checkCondition() {
 		return
 	}

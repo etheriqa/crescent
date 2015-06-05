@@ -8,28 +8,26 @@ const (
 type uidType uint64
 
 type unit struct {
-	id             uidType
-	playerName     string
-	unitName       string
-	group          uint8
-	seat           uint8
-	hp             int32
-	mp             int32
-	us             *unitStatistics
-	um             *unitModification
-	operators      map[operator]bool
-	statsSubject   *subject
-	disableSubject *subject
+	id         uidType
+	playerName string
+	unitName   string
+	group      uint8
+	seat       uint8
+	hp         int32
+	mp         int32
+	us         *unitStatistics
+	um         *unitModification
+	operators  map[operator]bool
+	dispatcher *eventDispatcher
 }
 
 // newUnit initializes a unit
 func newUnit() *unit {
 	return &unit{
-		us:             &unitStatistics{},
-		um:             &unitModification{},
-		operators:      make(map[operator]bool),
-		statsSubject:   newSubject(),
-		disableSubject: newSubject(),
+		us:         &unitStatistics{},
+		um:         &unitModification{},
+		operators:  make(map[operator]bool),
+		dispatcher: newEventDispatcher(),
 	}
 }
 
@@ -93,13 +91,9 @@ func (u *unit) detachOperator(o operator) {
 	o.onDetach(u)
 }
 
-func (u *unit) attachStatsObserver(o observer) { u.statsSubject.attach(o) }
-func (u *unit) detachStatsObserver(o observer) { u.statsSubject.detach(o) }
-func (u *unit) notifyStats()                   { u.statsSubject.notify() }
-
-func (u *unit) attachDisableObserver(o observer) { u.disableSubject.attach(o) }
-func (u *unit) detachDisableObserver(o observer) { u.disableSubject.detach(o) }
-func (u *unit) notifyDisable()                   { u.disableSubject.notify() }
+func (u *unit) addEventHandler(e event, h eventHandler)    { u.dispatcher.addEventHandler(e, h) }
+func (u *unit) removeEventHandler(e event, h eventHandler) { u.dispatcher.removeEventHandler(e, h) }
+func (u *unit) triggerEvent(e event)                       { u.dispatcher.triggerEvent(e) }
 
 // progress triggers onComplete iff the operator is completed
 func (u *unit) progress(out chan message) {
@@ -160,5 +154,5 @@ func (u *unit) updateModification() {
 			u.um.add(o.(*modifier).um)
 		}
 	}
-	u.notifyStats()
+	u.triggerEvent(eventStats)
 }

@@ -11,9 +11,9 @@ func (d *disable) isComplete(u *unit) bool {
 	return false
 }
 
-// onAttach triggers notifyDisable and sends a message
+// onAttach triggers eventDisable and sends a message
 func (d *disable) onAttach(u *unit) {
-	d.u.notifyDisable()
+	u.triggerEvent(eventDisable)
 	// todo remove duplicate disable
 	d.o <- message{
 		// todo pack message
