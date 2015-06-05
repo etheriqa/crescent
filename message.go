@@ -19,6 +19,7 @@ const (
 	outChat          = "chat"
 	outActivate      = "activate"
 	outInterrupt     = "interrupt"
+	outCooldown      = "cooldown"
 	outModifierBegin = "modifierBegin"
 	outModifierEnd   = "modifierEnd"
 	outDisableBegin  = "disableBegin"
