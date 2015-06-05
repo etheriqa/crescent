@@ -6,15 +6,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestThreatIsComplete(t *testing.T) {
-	u := newUnit()
-	target := newUnit()
-	threat := &threat{
-		target: target,
-	}
-	assert.False(t, threat.isComplete(u))
-}
-
 func TestThreatOnAttach(t *testing.T) {
 	assert := assert.New(t)
 	u := newUnit()

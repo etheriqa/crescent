@@ -5,15 +5,9 @@ type disable struct {
 	o chan message
 }
 
-// isComplete returns false iff the disable is effective
-func (d *disable) isComplete(u *unit) bool {
-	// todo implement
-	return false
-}
-
 // onAttach triggers eventDisable and sends a message
 func (d *disable) onAttach(u *unit) {
-	u.triggerEvent(eventDisable)
+	u.addEventHandler(d, eventGameTick)
 	// todo remove duplicate disable
 	d.o <- message{
 		// todo pack message
@@ -21,16 +15,22 @@ func (d *disable) onAttach(u *unit) {
 	}
 }
 
-// onTick does nothing
-func (d *disable) onTick(u *unit) {}
+// onDetach removes eventHandler
+func (d *disable) onDetach(u *unit) {
+	u.removeEventHandler(d, eventGameTick)
+}
 
-// onComplete sends a message
-func (d *disable) onComplete(u *unit) {
-	d.o <- message{
-		// todo pack message
-		t: outDisableEnd,
+// handleEvent checks the disable has been expired or not
+func (d *disable) handleEvent(e event) {
+	switch e {
+	case eventGameTick:
+		d.expire()
+	default:
+		return
 	}
 }
 
-// onDetach does nothing
-func (d *disable) onDetach(u *unit) {}
+// expire expires the disable iff it is expired
+func (d *disable) expire() {
+	// todo expire
+}

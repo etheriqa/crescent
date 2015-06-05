@@ -5,62 +5,67 @@ type activating struct {
 	o chan message
 }
 
-// isComplete returns true iff ability is activated
-func (a *activating) isComplete(u *unit) bool {
-	// todo implement
-	return true
-}
-
 // onAttach confirms that the ability is available otherwise cancels activation of the ability
 func (a *activating) onAttach(u *unit) {
-	u.addEventHandler(eventDisable, a)
-	u.addEventHandler(eventStats, a)
-	if !a.checkCondition() {
+	u.addEventHandler(a, eventDisable)
+	u.addEventHandler(a, eventGameTick)
+	u.addEventHandler(a, eventStats)
+	if !a.satisfiesRequirements() {
 		u.detachOperator(a)
 		return
 	}
-	a.o <- message{
-		// todo pack message
-		t: outActivate,
+	if !a.isActivated() {
+		return
 	}
-}
-
-// onTick does nothing
-func (a *activating) onTick(u *unit) {}
-
-// onComplete performs the ability
-func (a *activating) onComplete(u *unit) {
-	// todo implement
+	a.performAbility()
 }
 
 // onDetach cleans up
 func (a *activating) onDetach(u *unit) {
-	u.removeEventHandler(eventDisable, a)
-	u.removeEventHandler(eventStats, a)
+	u.removeEventHandler(a, eventDisable)
+	u.removeEventHandler(a, eventGameTick)
+	u.removeEventHandler(a, eventStats)
 }
 
-// handleEvent confirms that the ability is available otherwise interrupts activation of the ability
+// handleEvent checks the ability has been activated or not and performs it
 func (a *activating) handleEvent(e event) {
 	switch e {
 	case eventDisable:
+	case eventGameTick:
 	case eventStats:
 	default:
 		return
 	}
-	if a.checkCondition() {
+	if !a.satisfiesRequirements() {
+		a.u.detachOperator(a)
+		a.o <- message{
+			// todo pack message
+			t: outInterrupt,
+		}
 		return
 	}
-	a.u.detachOperator(a)
-	a.o <- message{
-		// todo pack message
-		t: outInterrupt,
+	if !a.isActivated() {
+		return
 	}
+	a.performAbility()
+	a.u.detachOperator(a)
 }
 
-// checkConditions returns true iff the ability satisfies prior condition
-func (a *activating) checkCondition() bool {
+// satisfiesRequirements returns true iff the ability satisfies requirements
+func (a *activating) satisfiesRequirements() bool {
 	// todo check cooldown time
 	// todo check health and mana
-	// todo check disabler
+	// todo check disable
 	return true
+}
+
+// isActivated returns true iff the ability is activated
+func (a *activating) isActivated() bool {
+	// todo check charging/casting time
+	return true
+}
+
+// performAbility performs the ability
+func (a *activating) performAbility() {
+	// todo perform the ability
 }

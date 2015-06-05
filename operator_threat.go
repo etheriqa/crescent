@@ -5,9 +5,6 @@ type threat struct {
 	v      int32
 }
 
-// isComplete returns always false
-func (t *threat) isComplete(u *unit) bool { return false }
-
 // onAttach merges threat operators they have same target
 func (t *threat) onAttach(u *unit) {
 	for o := range u.operators {
@@ -25,11 +22,5 @@ func (t *threat) onAttach(u *unit) {
 	}
 }
 
-// onTick does nothing
-func (t *threat) onTick(u *unit) {}
-
-// onComplete never triggered
-func (t *threat) onComplete(u *unit) {}
-
-// onDetach never triggered
+// onDetach does nothing
 func (t *threat) onDetach(u *unit) {}

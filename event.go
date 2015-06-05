@@ -5,7 +5,9 @@ type event uint8
 const (
 	eventDefault event = iota
 	eventDisable
+	eventGameTick
 	eventStats
+	eventStatsTick
 )
 
 type eventDispatcher struct {
@@ -22,11 +24,17 @@ func newEventDispatcher() *eventDispatcher {
 	}
 }
 
-func (d *eventDispatcher) addEventHandler(e event, h eventHandler) {
+func (d *eventDispatcher) addEventHandler(h eventHandler, e event) {
+	if d.handlers[e] == nil {
+		d.handlers[e] = make(map[eventHandler]bool)
+	}
 	d.handlers[e][h] = true
 }
 
-func (d *eventDispatcher) removeEventHandler(e event, h eventHandler) {
+func (d *eventDispatcher) removeEventHandler(h eventHandler, e event) {
+	if d.handlers[e] == nil {
+		d.handlers[e] = make(map[eventHandler]bool)
+	}
 	delete(d.handlers[e], h)
 }
 

@@ -91,33 +91,37 @@ func (u *unit) detachOperator(o operator) {
 	o.onDetach(u)
 }
 
-func (u *unit) addEventHandler(e event, h eventHandler)    { u.dispatcher.addEventHandler(e, h) }
-func (u *unit) removeEventHandler(e event, h eventHandler) { u.dispatcher.removeEventHandler(e, h) }
-func (u *unit) triggerEvent(e event)                       { u.dispatcher.triggerEvent(e) }
-
-// progress triggers onComplete iff the operator is completed
-func (u *unit) progress(out chan message) {
-	if u.isDead() {
-		return
-	}
-	for o := range u.operators {
-		if !o.isComplete(u) {
-			continue
-		}
-		o.onComplete(u)
-		u.detachOperator(o)
-	}
+// addEventHandler registers the eventHandler
+func (u *unit) addEventHandler(h eventHandler, e event) {
+	u.dispatcher.addEventHandler(h, e)
 }
 
-// tick performs regeneration and triggers onTick
-func (u *unit) tick(out chan message) {
+// addEventHandler unregisters the eventHandler
+func (u *unit) removeEventHandler(h eventHandler, e event) {
+	u.dispatcher.removeEventHandler(h, e)
+}
+
+// triggerEvent triggers the event
+func (u *unit) triggerEvent(e event) {
+	u.dispatcher.triggerEvent(e)
+}
+
+// gameTick triggers onComplete iff the operator is completed
+func (u *unit) gameTick(out chan message) {
 	if u.isDead() {
 		return
 	}
-	// todo perform mana regeneration
-	for o := range u.operators {
-		o.onTick(u)
+	u.triggerEvent(eventGameTick)
+}
+
+// statsTick performs regeneration and triggers statsTick
+func (u *unit) statsTick(out chan message) {
+	if u.isDead() {
+		return
 	}
+	u.performHealthRegeneration(out)
+	u.performManaRegeneration(out)
+	u.triggerEvent(eventStatsTick)
 }
 
 // performHealthRegeneration performs health regeneration

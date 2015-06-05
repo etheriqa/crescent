@@ -5,14 +5,10 @@ type hot struct {
 	o chan message
 }
 
-// isComplete returns false iff the HoT is effective
-func (h *hot) isComplete(u *unit) bool {
-	// todo implement
-	return false
-}
-
 // onAttach removes duplicate HoTs and sends a message
 func (h *hot) onAttach(u *unit) {
+	u.addEventHandler(h, eventGameTick)
+	u.addEventHandler(h, eventStatsTick)
 	// todo removes duplicate HoTs
 	h.o <- message{
 		// todo pack message
@@ -20,18 +16,32 @@ func (h *hot) onAttach(u *unit) {
 	}
 }
 
-// onTick performs HoT healing
-func (h *hot) onTick(u *unit) {
-	// todo implement
+// onDetach removes the eventHandlers
+func (h *hot) onDetach(u *unit) {
+	u.removeEventHandler(h, eventGameTick)
+	u.removeEventHandler(h, eventStatsTick)
 }
 
-// onComplete sends a message
-func (h *hot) onComplete(u *unit) {
+// handleEvent handles events
+func (h *hot) handleEvent(e event) {
+	switch e {
+	case eventGameTick:
+		h.expire()
+	case eventStatsTick:
+		h.perform()
+	}
+}
+
+// expire expires the HoT iff it is expired
+func (h *hot) expire() {
+	// todo expire
 	h.o <- message{
 		// todo pack message
 		t: outHoTEnd,
 	}
 }
 
-// onDetach does nothing
-func (h *hot) onDetach(u *unit) {}
+// perform performs the HoT
+func (h *hot) perform() {
+	// todo perform the HoT
+}

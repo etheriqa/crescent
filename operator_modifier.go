@@ -5,14 +5,9 @@ type modifier struct {
 	o  chan message
 }
 
-// isComplete returns false iff the modifier is effective
-func (m *modifier) isComplete(u *unit) bool {
-	// todo implement
-	return false
-}
-
 // onAttach updates the modification of the unit
 func (m *modifier) onAttach(u *unit) {
+	u.addEventHandler(m, eventGameTick)
 	u.updateModification()
 	m.o <- message{
 		// todo pack message
@@ -20,18 +15,25 @@ func (m *modifier) onAttach(u *unit) {
 	}
 }
 
-// onTick does nothing
-func (m *modifier) onTick(u *unit) {}
+// onDetach updates the modification of the unit
+func (m *modifier) onDetach(u *unit) {
+	u.removeEventHandler(m, eventGameTick)
+	u.updateModification()
+}
 
-// onComplete sends a message
-func (m *modifier) onComplete(u *unit) {
+// handleEvent han
+func (m *modifier) handleEvent(e event) {
+	switch e {
+	case eventGameTick:
+		m.expire()
+	}
+}
+
+// expire expires the modifier iff it is expired
+func (m *modifier) expire() {
+	// todo expire
 	m.o <- message{
 		// todo pack message
 		t: outModifierEnd,
 	}
-}
-
-// onDetach updates the modification of the unit
-func (m *modifier) onDetach(u *unit) {
-	u.updateModification()
 }

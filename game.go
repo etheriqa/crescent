@@ -30,8 +30,8 @@ func (g *game) nextUID() uidType {
 }
 
 func (g *game) run() {
-	progress := time.Tick(10 * time.Millisecond)
-	tick := time.Tick(time.Second)
+	gameTicker := time.Tick(time.Second / 20)
+	statsTicker := time.Tick(time.Second)
 	for {
 		select {
 		case m := <-g.inc:
@@ -55,10 +55,10 @@ func (g *game) run() {
 			default:
 				g.terminate(m.name)
 			}
-		case <-progress:
-			g.progress()
-		case <-tick:
-			g.tick()
+		case <-gameTicker:
+			g.gameTick()
+		case <-statsTicker:
+			g.statsTick()
 		}
 	}
 }
@@ -138,17 +138,17 @@ func (g *game) activate(m *message) {
 func (g *game) interrupt(m *message) {
 }
 
-// progress performs units' progress
-func (g *game) progress() {
+// gameTick performs units' gameTick
+func (g *game) gameTick() {
 	for _, u := range g.uids {
-		u.progress(g.out)
+		u.gameTick(g.out)
 	}
 }
 
-// tick performs units' tick
-func (g *game) tick() {
+// statsTick performs units' statsTick
+func (g *game) statsTick() {
 	for _, u := range g.uids {
-		u.tick(g.out)
+		u.statsTick(g.out)
 	}
 }
 
