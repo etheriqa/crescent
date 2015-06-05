@@ -3,7 +3,7 @@ package main
 type event uint8
 
 const (
-	eventDefault event = iota
+	_ event = iota
 	eventDisable
 	eventGameTick
 	eventStats
