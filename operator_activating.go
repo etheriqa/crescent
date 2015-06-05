@@ -1,17 +1,16 @@
 package main
 
 type activating struct {
-	u *unit
-	o chan message
+	unit *unit
 }
 
 // onAttach confirms that the ability is available otherwise cancels activation of the ability
-func (a *activating) onAttach(u *unit) {
-	u.addEventHandler(a, eventDisable)
-	u.addEventHandler(a, eventGameTick)
-	u.addEventHandler(a, eventStats)
+func (a *activating) onAttach() {
+	a.unit.addEventHandler(a, eventDisable)
+	a.unit.addEventHandler(a, eventGameTick)
+	a.unit.addEventHandler(a, eventStats)
 	if !a.satisfiesRequirements() {
-		u.detachOperator(a)
+		a.unit.detachOperator(a)
 		return
 	}
 	if !a.isActivated() {
@@ -21,10 +20,10 @@ func (a *activating) onAttach(u *unit) {
 }
 
 // onDetach cleans up
-func (a *activating) onDetach(u *unit) {
-	u.removeEventHandler(a, eventDisable)
-	u.removeEventHandler(a, eventGameTick)
-	u.removeEventHandler(a, eventStats)
+func (a *activating) onDetach() {
+	a.unit.removeEventHandler(a, eventDisable)
+	a.unit.removeEventHandler(a, eventGameTick)
+	a.unit.removeEventHandler(a, eventStats)
 }
 
 // handleEvent checks the ability has been activated or not and performs it
@@ -37,18 +36,18 @@ func (a *activating) handleEvent(e event) {
 		return
 	}
 	if !a.satisfiesRequirements() {
-		a.u.detachOperator(a)
-		a.o <- message{
+		a.unit.detachOperator(a)
+		a.unit.publish(message{
 			// todo pack message
 			t: outInterrupt,
-		}
+		})
 		return
 	}
 	if !a.isActivated() {
 		return
 	}
 	a.performAbility()
-	a.u.detachOperator(a)
+	a.unit.detachOperator(a)
 }
 
 // satisfiesRequirements returns true iff the ability satisfies requirements

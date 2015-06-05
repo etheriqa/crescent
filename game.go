@@ -24,6 +24,14 @@ func newGame(inc chan message, out chan message) *game {
 	}
 }
 
+func (g *game) now() gameTime {
+	return g.time
+}
+
+func (g *game) publish(m message) {
+	g.out <- m
+}
+
 func (g *game) nextUID() uidType {
 	g.uid++
 	return g.uid
@@ -62,24 +70,24 @@ func (g *game) run() {
 func (g *game) tick(m *message) {
 	g.time++
 	for _, u := range g.uids {
-		u.gameTick(g.out)
+		u.gameTick()
 	}
 	if int64(g.time)*int64(gameTick)%int64(statsTick) != 0 {
 		return
 	}
 	for _, u := range g.uids {
-		u.statsTick(g.out)
+		u.statsTick()
 	}
 }
 
 func (g *game) register(m *message) {
 	g.names[m.name] = nil
-	g.out <- message{
+	g.publish(message{
 		t: outConnect,
 		d: map[string]interface{}{
 			"name": m.name,
 		},
-	}
+	})
 }
 
 func (g *game) unregister(m *message) {
@@ -88,12 +96,12 @@ func (g *game) unregister(m *message) {
 		delete(g.seats, u.seat)
 	}
 	delete(g.names, m.name)
-	g.out <- message{
+	g.publish(message{
 		t: outDisconnect,
 		d: map[string]interface{}{
 			"name": m.name,
 		},
-	}
+	})
 }
 
 func (g *game) stage(m *message) {
@@ -116,14 +124,14 @@ func (g *game) seat(m *message) {
 	g.names[m.name] = u
 	g.uids[u.id] = u
 	g.seats[seat] = u
-	g.out <- message{
+	g.publish(message{
 		t: outSeat,
 		d: map[string]interface{}{
 			"name": m.name,
 			"uid":  u.id,
 			"seat": seat,
 		},
-	}
+	})
 }
 
 func (g *game) leave(m *message) {
@@ -134,12 +142,12 @@ func (g *game) leave(m *message) {
 	delete(g.uids, u.id)
 	delete(g.seats, u.seat)
 	g.names[m.name] = nil
-	g.out <- message{
+	g.publish(message{
 		t: outLeave,
 		d: map[string]interface{}{
 			"seat": u.seat,
 		},
-	}
+	})
 }
 
 func (g *game) activate(m *message) {
@@ -150,19 +158,19 @@ func (g *game) interrupt(m *message) {
 
 func (g *game) chat(m *message) {
 	body := m.d["body"].(string)
-	g.out <- message{
+	g.publish(message{
 		t: outChat,
 		d: map[string]interface{}{
 			"name": m.name,
 			"body": body,
 		},
-	}
+	})
 	log.Infof("@%s: %s", m.name, body)
 }
 
 func (g *game) terminate(name string) {
-	g.out <- message{
+	g.publish(message{
 		name: name,
 		t:    gameTerminate,
-	}
+	})
 }

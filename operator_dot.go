@@ -1,25 +1,24 @@
 package main
 
 type dot struct {
-	u *unit
-	o chan message
+	unit *unit
 }
 
 // onAttach removes duplicate DoTs and sends a message
-func (d *dot) onAttach(u *unit) {
-	u.addEventHandler(d, eventGameTick)
-	u.addEventHandler(d, eventStatsTick)
+func (d *dot) onAttach() {
+	d.unit.addEventHandler(d, eventGameTick)
+	d.unit.addEventHandler(d, eventStatsTick)
 	// todo removes duplicate DoTs
-	d.o <- message{
+	d.unit.publish(message{
 		// todo pack message
 		t: outDoTBegin,
-	}
+	})
 }
 
 // onDetach removes the eventHandlers
-func (d *dot) onDetach(u *unit) {
-	u.removeEventHandler(d, eventGameTick)
-	u.removeEventHandler(d, eventStatsTick)
+func (d *dot) onDetach() {
+	d.unit.removeEventHandler(d, eventGameTick)
+	d.unit.removeEventHandler(d, eventStatsTick)
 }
 
 // handleEvent handles events
@@ -40,8 +39,8 @@ func (d *dot) expire() {
 // perform performs the DoT
 func (d *dot) perform() {
 	// todo perform the DoT
-	d.o <- message{
+	d.unit.publish(message{
 		// todo pack message
 		t: outDoTEnd,
-	}
+	})
 }

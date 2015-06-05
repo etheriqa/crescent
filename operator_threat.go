@@ -1,13 +1,14 @@
 package main
 
 type threat struct {
+	unit   *unit
 	target *unit
-	v      int32
+	threat int32
 }
 
 // onAttach merges threat operators they have same target
-func (t *threat) onAttach(u *unit) {
-	for o := range u.operators {
+func (t *threat) onAttach() {
+	for o := range t.unit.operators {
 		if o == t {
 			continue
 		}
@@ -17,10 +18,10 @@ func (t *threat) onAttach(u *unit) {
 		if o.(*threat).target != t.target {
 			continue
 		}
-		t.v += o.(*threat).v
-		u.detachOperator(o)
+		t.threat += o.(*threat).threat
+		t.unit.detachOperator(o)
 	}
 }
 
 // onDetach does nothing
-func (t *threat) onDetach(u *unit) {}
+func (t *threat) onDetach() {}

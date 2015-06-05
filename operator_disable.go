@@ -1,23 +1,22 @@
 package main
 
 type disable struct {
-	u *unit
-	o chan message
+	unit *unit
 }
 
 // onAttach triggers eventDisable and sends a message
-func (d *disable) onAttach(u *unit) {
-	u.addEventHandler(d, eventGameTick)
+func (d *disable) onAttach() {
+	d.unit.addEventHandler(d, eventGameTick)
 	// todo remove duplicate disable
-	d.o <- message{
+	d.unit.publish(message{
 		// todo pack message
 		t: outDisableBegin,
-	}
+	})
 }
 
 // onDetach removes eventHandler
-func (d *disable) onDetach(u *unit) {
-	u.removeEventHandler(d, eventGameTick)
+func (d *disable) onDetach() {
+	d.unit.removeEventHandler(d, eventGameTick)
 }
 
 // handleEvent checks the disable has been expired or not

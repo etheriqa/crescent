@@ -8,24 +8,27 @@ import (
 
 func TestThreatOnAttach(t *testing.T) {
 	assert := assert.New(t)
-	u := newUnit()
-	target1 := newUnit()
-	target2 := newUnit()
+	g := mockGame()
+	u := newUnit(g)
+	target1 := newUnit(g)
+	target2 := newUnit(g)
 	threat1 := &threat{
+		unit:   u,
 		target: target1,
-		v:      10,
+		threat: 10,
 	}
 	threat2 := &threat{
+		unit:   u,
 		target: target1,
-		v:      10,
+		threat: 10,
 	}
 	threat3 := &threat{
+		unit:   u,
 		target: target2,
-		v:      100,
+		threat: 100,
 	}
 	u.attachOperator(&disable{
-		u: u,
-		o: make(chan message, 100),
+		unit: u,
 	})
 	u.attachOperator(threat1)
 	u.attachOperator(threat2)
@@ -33,6 +36,6 @@ func TestThreatOnAttach(t *testing.T) {
 	assert.False(u.operators[threat1])
 	assert.True(u.operators[threat2])
 	assert.True(u.operators[threat3])
-	assert.EqualValues(20, threat2.v)
-	assert.EqualValues(100, threat3.v)
+	assert.EqualValues(20, threat2.threat)
+	assert.EqualValues(100, threat3.threat)
 }

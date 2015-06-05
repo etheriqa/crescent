@@ -8,8 +8,10 @@ import (
 
 func TestUnitUpdateModification(t *testing.T) {
 	assert := assert.New(t)
-	u := newUnit()
+	g := mockGame()
+	u := newUnit(g)
 	um1 := &modifier{
+		unit: u,
 		um: &unitModification{
 			armor:                10,
 			magicResistance:      20,
@@ -18,9 +20,9 @@ func TestUnitUpdateModification(t *testing.T) {
 			cooldownReduction:    50,
 			threatFactor:         60,
 		},
-		o: make(chan message, 100),
 	}
 	um2 := &modifier{
+		unit: u,
 		um: &unitModification{
 			armor:                1000,
 			magicResistance:      2000,
@@ -29,7 +31,6 @@ func TestUnitUpdateModification(t *testing.T) {
 			cooldownReduction:    5000,
 			threatFactor:         6000,
 		},
-		o: make(chan message, 100),
 	}
 	assert.EqualValues(0, u.armor())
 	assert.EqualValues(0, u.magicResistance())

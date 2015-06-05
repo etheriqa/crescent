@@ -19,16 +19,26 @@ type unit struct {
 	um         *unitModification
 	operators  map[operator]bool
 	dispatcher *eventDispatcher
+	game       *game
 }
 
 // newUnit initializes a unit
-func newUnit() *unit {
+func newUnit(g *game) *unit {
 	return &unit{
 		us:         &unitStatistics{},
 		um:         &unitModification{},
 		operators:  make(map[operator]bool),
 		dispatcher: newEventDispatcher(),
+		game:       g,
 	}
+}
+
+func (u *unit) now() gameTime {
+	return u.game.now()
+}
+
+func (u *unit) publish(m message) {
+	u.game.publish(m)
 }
 
 func (u *unit) isAlive() bool {
@@ -82,13 +92,13 @@ func (u *unit) threatFactor() int32 {
 // attachOperator adds the operator
 func (u *unit) attachOperator(o operator) {
 	u.operators[o] = true
-	o.onAttach(u)
+	o.onAttach()
 }
 
 // detachOperator removes the operator
 func (u *unit) detachOperator(o operator) {
 	delete(u.operators, o)
-	o.onDetach(u)
+	o.onDetach()
 }
 
 // addEventHandler registers the eventHandler
@@ -107,7 +117,7 @@ func (u *unit) triggerEvent(e event) {
 }
 
 // gameTick triggers onComplete iff the operator is completed
-func (u *unit) gameTick(out chan message) {
+func (u *unit) gameTick() {
 	if u.isDead() {
 		return
 	}
@@ -115,39 +125,39 @@ func (u *unit) gameTick(out chan message) {
 }
 
 // statsTick performs regeneration and triggers statsTick
-func (u *unit) statsTick(out chan message) {
+func (u *unit) statsTick() {
 	if u.isDead() {
 		return
 	}
-	u.performHealthRegeneration(out)
-	u.performManaRegeneration(out)
+	u.performHealthRegeneration()
+	u.performManaRegeneration()
 	u.triggerEvent(eventStatsTick)
 }
 
 // performHealthRegeneration performs health regeneration
-func (u *unit) performHealthRegeneration(out chan message) {
+func (u *unit) performHealthRegeneration() {
 	reg := u.healthRegeneration() + u.hp - u.health()
 	if reg < 0 {
 		return
 	}
 	u.hp += reg
-	out <- message{
+	u.publish(message{
 		// todo pack message
 		t: outHealthReg,
-	}
+	})
 }
 
 // performManaRegeneration performs mana regeneration
-func (u *unit) performManaRegeneration(out chan message) {
+func (u *unit) performManaRegeneration() {
 	reg := u.manaRegeneration() + u.mp - u.mana()
 	if reg < 0 {
 		return
 	}
 	u.mp += reg
-	out <- message{
+	u.publish(message{
 		// todo pack message
 		t: outManaReg,
-	}
+	})
 }
 
 // updateModification updates the unitModification
