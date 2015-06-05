@@ -5,10 +5,10 @@ const (
 	groupEnemy
 )
 
-type uidType uint64
+type unitID uint64
 
 type unit struct {
-	id         uidType
+	id         unitID
 	playerName string
 	unitName   string
 	group      uint8

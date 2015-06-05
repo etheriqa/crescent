@@ -13,19 +13,19 @@ var wsUpgrader = websocket.Upgrader{
 	CheckOrigin: func(*http.Request) bool { return true }, // fixme
 }
 
-type cidType uint64
+type connectionID uint64
 
 type network struct {
 	rw    *sync.RWMutex
-	cid   cidType
-	cids  map[cidType]*connection
+	cid   connectionID
+	cids  map[connectionID]*connection
 	names map[string]*connection
 	inc   chan message
 	out   chan message
 }
 
 type connection struct {
-	id   cidType
+	id   connectionID
 	name string
 	ws   *websocket.Conn
 	buf  chan []byte
@@ -41,15 +41,15 @@ func newNetwork(inc chan message, out chan message) *network {
 	return &network{
 		rw:    new(sync.RWMutex),
 		cid:   0,
-		cids:  make(map[cidType]*connection),
+		cids:  make(map[connectionID]*connection),
 		names: make(map[string]*connection),
 		inc:   inc,
 		out:   out,
 	}
 }
 
-// nextCID generates a connection ID
-func (n *network) nextCID() cidType {
+// nextConnectionID generates a connection ID
+func (n *network) nextConnectionID() connectionID {
 	n.cid++
 	return n.cid
 }
@@ -84,7 +84,7 @@ func (n *network) wsHandler(w http.ResponseWriter, r *http.Request) {
 		n.rw.Unlock()
 		return
 	}
-	c := newConnection(n.nextCID(), name, ws)
+	c := newConnection(n.nextConnectionID(), name, ws)
 	n.register(c)
 	n.rw.Unlock()
 	go n.receiver(c)
@@ -229,7 +229,7 @@ func (n *network) dispatcher() {
 }
 
 // newConnection initializes a connection
-func newConnection(id cidType, name string, ws *websocket.Conn) *connection {
+func newConnection(id connectionID, name string, ws *websocket.Conn) *connection {
 	return &connection{
 		id:   id,
 		name: name,

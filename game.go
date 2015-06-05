@@ -5,8 +5,8 @@ type gameTime int64
 type game struct {
 	time  gameTime
 	names map[string]*unit
-	uid   uidType
-	uids  map[uidType]*unit
+	uid   unitID
+	uids  map[unitID]*unit
 	seats map[uint8]*unit
 	inc   chan message
 	out   chan message
@@ -17,7 +17,7 @@ func newGame(inc chan message, out chan message) *game {
 		time:  0,
 		names: make(map[string]*unit),
 		uid:   0,
-		uids:  make(map[uidType]*unit),
+		uids:  make(map[unitID]*unit),
 		seats: make(map[uint8]*unit),
 		inc:   inc,
 		out:   out,
@@ -32,7 +32,7 @@ func (g *game) publish(m message) {
 	g.out <- m
 }
 
-func (g *game) nextUID() uidType {
+func (g *game) nextUnitID() unitID {
 	g.uid++
 	return g.uid
 }
