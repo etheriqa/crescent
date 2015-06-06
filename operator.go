@@ -10,6 +10,12 @@ type partialOperator struct {
 	expirationTime gameTime
 }
 
+// onAttach does nothing
+func (p *partialOperator) onAttach() {}
+
+// onDetach does nothing
+func (p *partialOperator) onDetach() {}
+
 // isExpired returns true iff it is expired
 func (p *partialOperator) isExpired() bool {
 	return p.expirationTime > p.unit.now()
