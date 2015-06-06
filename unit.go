@@ -13,13 +13,17 @@ type unit struct {
 	unitName   string
 	group      uint8
 	seat       uint8
-	hp         int32
-	mp         int32
+	ur         *unitResource
 	us         *unitStatistics
 	um         *unitModification
 	operators  map[operator]bool
 	dispatcher *eventDispatcher
 	game       *game
+}
+
+type unitResource struct {
+	health int32
+	mana   int32
 }
 
 // newUnit initializes a unit
@@ -42,14 +46,18 @@ func (u *unit) publish(m message) {
 }
 
 func (u *unit) isAlive() bool {
-	return u.hp > 0
+	return u.ur.health > 0
 }
 
 func (u *unit) isDead() bool {
-	return u.hp <= 0
+	return u.ur.health <= 0
 }
 
 func (u *unit) health() int32 {
+	return u.ur.health
+}
+
+func (u *unit) maxHealth() int32 {
 	return u.us.health
 }
 
@@ -58,6 +66,10 @@ func (u *unit) healthRegeneration() int32 {
 }
 
 func (u *unit) mana() int32 {
+	return u.ur.mana
+}
+
+func (u *unit) maxMana() int32 {
 	return u.us.mana
 }
 
@@ -136,11 +148,11 @@ func (u *unit) statsTick() {
 
 // performHealthRegeneration performs health regeneration
 func (u *unit) performHealthRegeneration() {
-	reg := u.healthRegeneration() + u.hp - u.health()
+	reg := u.healthRegeneration() + u.health() - u.maxHealth()
 	if reg < 0 {
 		return
 	}
-	u.hp += reg
+	u.ur.health += reg
 	u.publish(message{
 		// todo pack message
 		t: outHealthReg,
@@ -149,11 +161,11 @@ func (u *unit) performHealthRegeneration() {
 
 // performManaRegeneration performs mana regeneration
 func (u *unit) performManaRegeneration() {
-	reg := u.manaRegeneration() + u.mp - u.mana()
+	reg := u.manaRegeneration() + u.mana() - u.maxMana()
 	if reg < 0 {
 		return
 	}
-	u.mp += reg
+	u.ur.mana += reg
 	u.publish(message{
 		// todo pack message
 		t: outManaReg,
