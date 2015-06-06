@@ -7,6 +7,7 @@ type ability interface {
 
 type partialAbility struct {
 	disableTypes []disableType
+	cost         int32
 }
 
 // perform does nothing
@@ -14,6 +15,9 @@ func (p *partialAbility) perform() {}
 
 // satisfiedRequirements returns true iff the ability satisfy activation requirements
 func (p *partialAbility) satisfiedRequirements(u *unit) bool {
+	if u.mana() < p.cost {
+		return false
+	}
 	for o := range u.operators {
 		switch o := o.(type) {
 		case *cooldown:
@@ -31,6 +35,5 @@ func (p *partialAbility) satisfiedRequirements(u *unit) bool {
 			}
 		}
 	}
-	// todo check cost
 	return true
 }
