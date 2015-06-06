@@ -2,6 +2,7 @@ package main
 
 type cooldown struct {
 	partialOperator
+	ability ability
 }
 
 func (c *cooldown) onAttach() {
