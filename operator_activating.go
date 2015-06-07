@@ -2,7 +2,7 @@ package main
 
 type activating struct {
 	partialOperator
-	ability ability
+	*ability
 }
 
 // onAttach checks requirements
@@ -37,7 +37,7 @@ func (a *activating) handleEvent(e event) {
 }
 
 func (a *activating) checkRequirements() bool {
-	if a.ability.satisfiedRequirements(a.unit) {
+	if a.satisfiedRequirements(a.unit) {
 		return true
 	}
 	a.detachOperator(a)

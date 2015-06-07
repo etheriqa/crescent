@@ -16,7 +16,7 @@ func newClassTank() *class {
 		damageThreatFactor:   defaultDamageThreatFactor + 2.0,
 		healingThreatFactor:  defaultHealingThreatFactor,
 		// TODO abilities
-		abilities: make([]ability, 4),
+		abilities: make([]*ability, 4),
 	}
 	return class
 }

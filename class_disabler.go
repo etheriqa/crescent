@@ -16,7 +16,7 @@ func newClassDisabler() *class {
 		damageThreatFactor:   defaultDamageThreatFactor,
 		healingThreatFactor:  defaultHealingThreatFactor,
 		// TODO abilities
-		abilities: make([]ability, 4),
+		abilities: make([]*ability, 4),
 	}
 	return class
 }

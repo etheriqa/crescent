@@ -23,5 +23,5 @@ type class struct {
 	cooldownReduction    statistic
 	damageThreatFactor   statistic
 	healingThreatFactor  statistic
-	abilities            []ability
+	abilities            []*ability
 }

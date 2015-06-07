@@ -1,30 +1,20 @@
 package main
 
-type ability interface {
-	perform()
-	satisfiedRequirements(u *unit) bool
-}
-
-type partialAbility struct {
+type ability struct {
+	perform      func()
 	disableTypes []disableType
 	cost         statistic
 }
 
-// perform does nothing
-func (p *partialAbility) perform() {}
-
 // satisfiedRequirements returns true iff the ability satisfy activation requirements
-func (p *partialAbility) satisfiedRequirements(performer *unit) bool {
+func (p *ability) satisfiedRequirements(performer *unit) bool {
 	if performer.mana() < p.cost {
 		return false
 	}
 	for o := range performer.operators {
 		switch o := o.(type) {
 		case *cooldown:
-			if _, ok := o.ability.(*partialAbility); !ok {
-				continue
-			}
-			if p == o.ability.(*partialAbility) {
+			if p == o.ability {
 				return false
 			}
 		case *disable:
