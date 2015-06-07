@@ -103,8 +103,8 @@ func (u *unit) threatFactor() int32 {
 
 // addHealth adds health and returns before/after health
 func (u *unit) addHealth(d int32) (before, after int32) {
-	before := u.health()
-	after := u.health() + d
+	before = u.health()
+	after = u.health() + d
 	if after < 0 {
 		after = 0
 	}
@@ -117,8 +117,8 @@ func (u *unit) addHealth(d int32) (before, after int32) {
 
 // addMana adds mana and returns before/after mana
 func (u *unit) addMana(d int32) (before, after int32) {
-	before := u.mana()
-	after := u.mana() + d
+	before = u.mana()
+	after = u.mana() + d
 	if after < 0 {
 		after = 0
 	}
