@@ -28,6 +28,26 @@ func (g *game) now() gameTime {
 	return g.time
 }
 
+// friends returns given unit's friend units **including itself**
+func (g *game) friends(u *unit) (us []*unit) {
+	for _, unit := range g.uids {
+		if unit.group == u.group {
+			us = append(us, unit)
+		}
+	}
+	return
+}
+
+// enemies returns given unit's enemy units
+func (g *game) enemies(u *unit) (us []*unit) {
+	for _, unit := range g.uids {
+		if unit.group != u.group {
+			us = append(us, unit)
+		}
+	}
+	return
+}
+
 func (g *game) publish(m message) {
 	g.out <- m
 }
