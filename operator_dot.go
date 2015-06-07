@@ -56,6 +56,9 @@ func (d *dot) handleEvent(e event) {
 
 // perform performs the DoT
 func (d *dot) perform() {
+	if d.unit.isDead() {
+		return
+	}
 	d.unit.addHealth(-d.damage)
 	d.unit.attachOperator(newThreat(d.unit, d.performer, d.threat))
 }

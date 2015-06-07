@@ -56,8 +56,14 @@ func (h *hot) handleEvent(e event) {
 
 // perform performs the HoT
 func (h *hot) perform() {
+	if h.unit.isDead() {
+		return
+	}
 	h.unit.addHealth(h.healing)
 	for _, enemy := range h.unit.game.enemies(h.performer) {
+		if h.performer.isDead() || enemy.isDead() {
+			return
+		}
 		enemy.attachOperator(newThreat(enemy, h.performer, h.threat))
 	}
 }
