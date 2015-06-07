@@ -11,16 +11,32 @@ const (
 	targetTypeAllEnemies
 )
 
+type damageType uint8
+
+const (
+	_ damageType = iota
+	damageTypePhysical
+	damageTypeMagic
+	damageTypeTrue
+)
+
 type ability struct {
-	targetType
-	manaCost     statistic
-	cooldown     gameDuration
-	disableTypes []disableType
-	perform      func(performer, receiver *unit)
+	name               string
+	targetType         targetType
+	damageType         damageType
+	healthCost         statistic
+	manaCost           statistic
+	activationDuration gameDuration
+	cooldownDuration   gameDuration
+	disableTypes       []disableType
+	perform            func(performer, receiver *unit)
 }
 
 // satisfiedRequirements returns true iff the ability satisfy activation requirements
 func (a *ability) satisfiedRequirements(performer *unit) bool {
+	if performer.health() < a.healthCost {
+		return false
+	}
 	if performer.mana() < a.manaCost {
 		return false
 	}
