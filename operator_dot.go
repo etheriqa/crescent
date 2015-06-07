@@ -6,6 +6,7 @@ type dot struct {
 	partialOperator
 	dotType dotType
 	damage  int32
+	threat  int32
 }
 
 // onAttach removes duplicate DoTs
@@ -56,6 +57,5 @@ func (d *dot) handleEvent(e event) {
 // perform performs the DoT
 func (d *dot) perform() {
 	d.unit.addHealth(-d.damage)
-	// TODO threat
-	// TODO check died
+	d.unit.attachOperator(newThreat(d.unit, d.performer, d.threat))
 }
