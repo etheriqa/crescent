@@ -1,12 +1,30 @@
 package main
 
+import (
+	"time"
+)
+
 type modifier struct {
 	partialOperator
-	um *unitModification
+	unitModification
+}
+
+// newModifier initalizes a modifier
+func newModifier(u *unit, duration time.Duration, m unitModification) *modifier {
+	return &modifier{
+		partialOperator: partialOperator{
+			unit:           u,
+			performer:      nil,
+			expirationTime: u.now() + gameTime(duration/gameTick),
+		},
+		unitModification: m,
+	}
 }
 
 // onAttach updates the modificationStats of the unit
 func (m *modifier) onAttach() {
+	// TODO stack
+	// TODO remove duplicates
 	m.addEventHandler(m, eventDead)
 	m.addEventHandler(m, eventGameTick)
 	m.updateModification()

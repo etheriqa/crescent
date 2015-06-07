@@ -15,7 +15,7 @@ func TestUnitUpdateModification(t *testing.T) {
 		partialOperator: partialOperator{
 			unit: u,
 		},
-		um: &unitModification{
+		unitModification: unitModification{
 			armor:                10,
 			magicResistance:      20,
 			criticalStrikeChance: 30,
@@ -29,7 +29,7 @@ func TestUnitUpdateModification(t *testing.T) {
 		partialOperator: partialOperator{
 			unit: u,
 		},
-		um: &unitModification{
+		unitModification: unitModification{
 			armor:                1000,
 			magicResistance:      2000,
 			criticalStrikeChance: 3000,

@@ -212,7 +212,7 @@ func (u *unit) updateModification() {
 	u.modification = unitModification{}
 	for o := range u.operators {
 		if _, ok := o.(*modifier); ok {
-			u.modification.add(o.(*modifier).um)
+			u.modification.add(&o.(*modifier).unitModification)
 		}
 	}
 	u.triggerEvent(eventStats)
