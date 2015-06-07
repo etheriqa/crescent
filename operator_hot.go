@@ -11,10 +11,10 @@ type hot struct {
 
 // onAttach removes duplicate HoTs
 func (h *hot) onAttach() {
-	h.unit.addEventHandler(h, eventDead)
-	h.unit.addEventHandler(h, eventGameTick)
-	h.unit.addEventHandler(h, eventStatsTick)
-	for o := range h.unit.operators {
+	h.addEventHandler(h, eventDead)
+	h.addEventHandler(h, eventGameTick)
+	h.addEventHandler(h, eventStatsTick)
+	for o := range h.operators {
 		if o == h {
 			continue
 		}
@@ -25,12 +25,12 @@ func (h *hot) onAttach() {
 			continue
 		}
 		if o.(*disable).expirationTime >= h.expirationTime {
-			h.unit.detachOperator(h)
+			h.detachOperator(h)
 			return
 		}
-		h.unit.detachOperator(o)
+		h.detachOperator(o)
 	}
-	h.unit.publish(message{
+	h.publish(message{
 		// TODO pack message
 		t: outHoTBegin,
 	})
@@ -38,16 +38,16 @@ func (h *hot) onAttach() {
 
 // onDetach removes the eventHandlers
 func (h *hot) onDetach() {
-	h.unit.removeEventHandler(h, eventDead)
-	h.unit.removeEventHandler(h, eventGameTick)
-	h.unit.removeEventHandler(h, eventStatsTick)
+	h.removeEventHandler(h, eventDead)
+	h.removeEventHandler(h, eventGameTick)
+	h.removeEventHandler(h, eventStatsTick)
 }
 
 // handleEvent handles the event
 func (h *hot) handleEvent(e event) {
 	switch e {
 	case eventDead:
-		h.terminate(h)
+		h.detachOperator(h)
 	case eventGameTick:
 		h.expire(h, message{
 			// TODO pack message
@@ -60,11 +60,11 @@ func (h *hot) handleEvent(e event) {
 
 // perform performs the HoT
 func (h *hot) perform() {
-	h.unit.addHealth(h.healing)
+	h.addHealth(h.healing)
 	if h.performer.isDead() {
 		return
 	}
-	for _, enemy := range h.unit.game.enemies(h.performer) {
+	for _, enemy := range h.game.enemies(h.performer) {
 		if enemy.isDead() {
 			return
 		}

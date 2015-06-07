@@ -6,7 +6,7 @@ type operator interface {
 }
 
 type partialOperator struct {
-	unit           *unit
+	*unit
 	performer      *unit
 	expirationTime gameTime
 }
@@ -19,7 +19,7 @@ func (p *partialOperator) onDetach() {}
 
 // isExpired returns true iff it is expired
 func (p *partialOperator) isExpired() bool {
-	return p.expirationTime > p.unit.now()
+	return p.expirationTime > p.now()
 }
 
 // expire expires the operator iff it is expired
@@ -27,11 +27,6 @@ func (p *partialOperator) expire(o operator, m message) {
 	if p.isExpired() {
 		return
 	}
-	p.terminate(o)
-	p.unit.publish(m)
-}
-
-// terminate detaches the operator
-func (p *partialOperator) terminate(o operator) {
-	p.unit.detachOperator(o)
+	p.detachOperator(o)
+	p.publish(m)
 }

@@ -11,10 +11,10 @@ type dot struct {
 
 // onAttach removes duplicate DoTs
 func (d *dot) onAttach() {
-	d.unit.addEventHandler(d, eventDead)
-	d.unit.addEventHandler(d, eventGameTick)
-	d.unit.addEventHandler(d, eventStatsTick)
-	for o := range d.unit.operators {
+	d.addEventHandler(d, eventDead)
+	d.addEventHandler(d, eventGameTick)
+	d.addEventHandler(d, eventStatsTick)
+	for o := range d.operators {
 		if o == d {
 			continue
 		}
@@ -25,12 +25,12 @@ func (d *dot) onAttach() {
 			continue
 		}
 		if o.(*disable).expirationTime >= d.expirationTime {
-			d.unit.detachOperator(d)
+			d.detachOperator(d)
 			return
 		}
-		d.unit.detachOperator(o)
+		d.detachOperator(o)
 	}
-	d.unit.publish(message{
+	d.publish(message{
 		// TODO pack message
 		t: outDoTBegin,
 	})
@@ -38,16 +38,16 @@ func (d *dot) onAttach() {
 
 // onDetach removes the eventHandlers
 func (d *dot) onDetach() {
-	d.unit.removeEventHandler(d, eventDead)
-	d.unit.removeEventHandler(d, eventGameTick)
-	d.unit.removeEventHandler(d, eventStatsTick)
+	d.removeEventHandler(d, eventDead)
+	d.removeEventHandler(d, eventGameTick)
+	d.removeEventHandler(d, eventStatsTick)
 }
 
 // handleEvent handles the event
 func (d *dot) handleEvent(e event) {
 	switch e {
 	case eventDead:
-		d.terminate(d)
+		d.detachOperator(d)
 	case eventGameTick:
 		d.expire(d, message{
 			// TODO pack message
@@ -60,7 +60,7 @@ func (d *dot) handleEvent(e event) {
 
 // perform performs the DoT
 func (d *dot) perform() {
-	d.unit.addHealth(-d.damage)
-	d.unit.attachOperator(newThreat(d.unit, d.performer, d.threat))
-	d.unit.triggerEvent(eventStats)
+	d.addHealth(-d.damage)
+	d.attachOperator(newThreat(d.unit, d.performer, d.threat))
+	d.triggerEvent(eventStats)
 }

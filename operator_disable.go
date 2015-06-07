@@ -16,9 +16,9 @@ type disable struct {
 
 // onAttach removes duplicate disables and triggers eventDisable
 func (d *disable) onAttach() {
-	d.unit.addEventHandler(d, eventDead)
-	d.unit.addEventHandler(d, eventGameTick)
-	for o := range d.unit.operators {
+	d.addEventHandler(d, eventDead)
+	d.addEventHandler(d, eventGameTick)
+	for o := range d.operators {
 		if o == d {
 			continue
 		}
@@ -29,28 +29,29 @@ func (d *disable) onAttach() {
 			continue
 		}
 		if o.(*disable).expirationTime >= d.expirationTime {
-			d.terminate(d)
+			d.detachOperator(d)
 			return
 		}
-		d.terminate(o)
+		d.detachOperator(o)
 	}
-	d.unit.publish(message{
+	d.publish(message{
 		// TODO pack message
 		t: outDisableBegin,
 	})
-	d.unit.triggerEvent(eventDisable)
+	d.triggerEvent(eventDisable)
 }
 
 // onDetach removes the eventHandler
 func (d *disable) onDetach() {
-	d.unit.removeEventHandler(d, eventGameTick)
+	d.removeEventHandler(d, eventDead)
+	d.removeEventHandler(d, eventGameTick)
 }
 
 // handleEvent handles the event
 func (d *disable) handleEvent(e event) {
 	switch e {
 	case eventDead:
-		d.terminate(d)
+		d.detachOperator(d)
 	case eventGameTick:
 		d.expire(d, message{
 			// TODO pack message
