@@ -10,5 +10,6 @@ type unitStatistics struct {
 	criticalStrikeChance int32
 	criticalStrikeDamage int32
 	cooldownReduction    int32
-	threatFactor         int32
+	damageThreatFactor   int32
+	healingThreatFactor  int32
 }

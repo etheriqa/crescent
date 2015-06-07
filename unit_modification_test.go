@@ -14,7 +14,8 @@ func TestUnitModificationAdd(t *testing.T) {
 		criticalStrikeChance: 30,
 		criticalStrikeDamage: 40,
 		cooldownReduction:    50,
-		threatFactor:         60,
+		damageThreatFactor:   60,
+		healingThreatFactor:  70,
 	}
 	um2 := &unitModification{
 		armor:                1000,
@@ -22,7 +23,8 @@ func TestUnitModificationAdd(t *testing.T) {
 		criticalStrikeChance: 3000,
 		criticalStrikeDamage: 4000,
 		cooldownReduction:    5000,
-		threatFactor:         6000,
+		damageThreatFactor:   6000,
+		healingThreatFactor:  7000,
 	}
 	um1.add(um2)
 	assert.EqualValues(1010, um1.armor)
@@ -30,11 +32,13 @@ func TestUnitModificationAdd(t *testing.T) {
 	assert.EqualValues(3030, um1.criticalStrikeChance)
 	assert.EqualValues(4040, um1.criticalStrikeDamage)
 	assert.EqualValues(5050, um1.cooldownReduction)
-	assert.EqualValues(6060, um1.threatFactor)
+	assert.EqualValues(6060, um1.damageThreatFactor)
+	assert.EqualValues(7070, um1.healingThreatFactor)
 	assert.EqualValues(1000, um2.armor)
 	assert.EqualValues(2000, um2.magicResistance)
 	assert.EqualValues(3000, um2.criticalStrikeChance)
 	assert.EqualValues(4000, um2.criticalStrikeDamage)
 	assert.EqualValues(5000, um2.cooldownReduction)
-	assert.EqualValues(6000, um2.threatFactor)
+	assert.EqualValues(6000, um2.damageThreatFactor)
+	assert.EqualValues(7000, um2.healingThreatFactor)
 }

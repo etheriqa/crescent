@@ -97,8 +97,12 @@ func (u *unit) cooldownReduction() int32 {
 	return u.us.cooldownReduction + u.um.cooldownReduction
 }
 
-func (u *unit) threatFactor() int32 {
-	return u.us.threatFactor + u.um.threatFactor
+func (u *unit) damageThreatFactor() int32 {
+	return u.us.damageThreatFactor + u.um.damageThreatFactor
+}
+
+func (u *unit) healingThreatFactor() int32 {
+	return u.us.healingThreatFactor + u.um.healingThreatFactor
 }
 
 // addHealth adds health and returns before/after health
