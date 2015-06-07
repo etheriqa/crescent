@@ -14,11 +14,11 @@ type partialAbility struct {
 func (p *partialAbility) perform() {}
 
 // satisfiedRequirements returns true iff the ability satisfy activation requirements
-func (p *partialAbility) satisfiedRequirements(u *unit) bool {
-	if u.mana() < p.cost {
+func (p *partialAbility) satisfiedRequirements(performer *unit) bool {
+	if performer.mana() < p.cost {
 		return false
 	}
-	for o := range u.operators {
+	for o := range performer.operators {
 		switch o := o.(type) {
 		case *cooldown:
 			if _, ok := o.ability.(*partialAbility); !ok {
