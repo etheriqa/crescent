@@ -10,21 +10,27 @@ func TestThreatOnAttach(t *testing.T) {
 	assert := assert.New(t)
 	g := mockGame()
 	u := newUnit(g)
-	target1 := newUnit(g)
-	target2 := newUnit(g)
+	performer1 := newUnit(g)
+	performer2 := newUnit(g)
 	threat1 := &threat{
-		unit:   u,
-		target: target1,
+		partialOperator: partialOperator{
+			unit:      u,
+			performer: performer1,
+		},
 		threat: 10,
 	}
 	threat2 := &threat{
-		unit:   u,
-		target: target1,
+		partialOperator: partialOperator{
+			unit:      u,
+			performer: performer1,
+		},
 		threat: 10,
 	}
 	threat3 := &threat{
-		unit:   u,
-		target: target2,
+		partialOperator: partialOperator{
+			unit:      u,
+			performer: performer2,
+		},
 		threat: 100,
 	}
 	u.attachOperator(&disable{
