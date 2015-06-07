@@ -4,7 +4,9 @@ type hotType string
 
 type hot struct {
 	partialOperator
-	hotType hotType
+	performer *unit
+	hotType   hotType
+	healing   int32
 }
 
 // onAttach removes duplicate HoTs
@@ -54,5 +56,6 @@ func (h *hot) handleEvent(e event) {
 
 // perform performs the HoT
 func (h *hot) perform() {
-	// todo perform the HoT
+	h.unit.addHealth(h.healing)
+	// todo threat
 }

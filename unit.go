@@ -101,26 +101,32 @@ func (u *unit) threatFactor() int32 {
 	return u.us.threatFactor + u.um.threatFactor
 }
 
-// addHealth adds health
-func (u *unit) addHealth(d int32) {
-	u.ur.health += d
-	if u.health() < 0 {
-		u.ur.health = 0
+// addHealth adds health and returns before/after health
+func (u *unit) addHealth(d int32) (before, after int32) {
+	before := u.health()
+	after := u.health() + d
+	if after < 0 {
+		after = 0
 	}
-	if u.health() > u.maxHealth() {
-		u.ur.health = u.maxHealth()
+	if after > u.maxHealth() {
+		after = u.maxHealth()
 	}
+	u.ur.health = after
+	return
 }
 
-// addMana adds mana
-func (u *unit) addMana(d int32) {
-	u.ur.mana += d
-	if u.mana() < 0 {
-		u.ur.mana = 0
+// addMana adds mana and returns before/after mana
+func (u *unit) addMana(d int32) (before, after int32) {
+	before := u.mana()
+	after := u.mana() + d
+	if after < 0 {
+		after = 0
 	}
-	if u.mana() > u.maxMana() {
-		u.ur.mana = u.maxMana()
+	if after > u.maxMana() {
+		after = u.maxMana()
 	}
+	u.ur.mana = after
+	return
 }
 
 // attachOperator adds the operator
