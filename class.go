@@ -1,6 +1,7 @@
 package main
 
-type unitStatistics struct {
+type class struct {
+	name                 string
 	health               statistic
 	healthRegeneration   statistic
 	mana                 statistic
@@ -12,4 +13,5 @@ type unitStatistics struct {
 	cooldownReduction    statistic
 	damageThreatFactor   statistic
 	healingThreatFactor  statistic
+	abilities            []ability
 }

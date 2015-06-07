@@ -8,17 +8,17 @@ const (
 type unitID uint64
 
 type unit struct {
-	id         unitID
-	playerName string
-	unitName   string
-	group      uint8
-	seat       uint8
-	ur         *unitResource
-	us         *unitStatistics
-	um         *unitModification
-	operators  map[operator]bool
-	dispatcher *eventDispatcher
-	game       *game
+	id           unitID
+	playerName   string
+	unitName     string
+	group        uint8
+	seat         uint8
+	class        *class
+	resource     unitResource
+	modification unitModification
+	operators    map[operator]bool
+	dispatcher   *eventDispatcher
+	game         *game
 }
 
 type unitResource struct {
@@ -26,14 +26,25 @@ type unitResource struct {
 	mana   statistic
 }
 
+type unitModification struct {
+	armor                statistic
+	magicResistance      statistic
+	criticalStrikeChance statistic
+	criticalStrikeFactor statistic
+	cooldownReduction    statistic
+	damageThreatFactor   statistic
+	healingThreatFactor  statistic
+}
+
 // newUnit initializes a unit
-func newUnit(g *game) *unit {
+func newUnit(g *game, c *class) *unit {
 	return &unit{
-		us:         &unitStatistics{},
-		um:         &unitModification{},
-		operators:  make(map[operator]bool),
-		dispatcher: newEventDispatcher(),
-		game:       g,
+		class:        c,
+		resource:     unitResource{},
+		modification: unitModification{},
+		operators:    make(map[operator]bool),
+		dispatcher:   newEventDispatcher(),
+		game:         g,
 	}
 }
 
@@ -46,90 +57,90 @@ func (u *unit) publish(m message) {
 }
 
 func (u *unit) isAlive() bool {
-	return u.ur.health > 0
+	return u.resource.health > 0
 }
 
 func (u *unit) isDead() bool {
-	return u.ur.health <= 0
+	return u.resource.health <= 0
 }
 
 func (u *unit) health() statistic {
-	return u.ur.health
+	return u.resource.health
 }
 
 func (u *unit) maxHealth() statistic {
-	return u.us.health
+	return u.class.health
 }
 
 func (u *unit) healthRegeneration() statistic {
-	return u.us.healthRegeneration
+	return u.class.healthRegeneration
 }
 
 func (u *unit) mana() statistic {
-	return u.ur.mana
+	return u.resource.mana
 }
 
 func (u *unit) maxMana() statistic {
-	return u.us.mana
+	return u.class.mana
 }
 
 func (u *unit) manaRegeneration() statistic {
-	return u.us.manaRegeneration
+	return u.class.manaRegeneration
 }
 
 func (u *unit) armor() statistic {
-	return u.us.armor + u.um.armor
+	return u.class.armor + u.modification.armor
 }
 
 func (u *unit) magicResistance() statistic {
-	return u.us.magicResistance + u.um.magicResistance
+	return u.class.magicResistance + u.modification.magicResistance
 }
 
 func (u *unit) criticalStrikeChance() statistic {
-	return u.us.criticalStrikeChance + u.um.criticalStrikeChance
+	return u.class.criticalStrikeChance + u.modification.criticalStrikeChance
 }
 
 func (u *unit) criticalStrikeFactor() statistic {
-	return u.us.criticalStrikeFactor + u.um.criticalStrikeFactor
+	return u.class.criticalStrikeFactor + u.modification.criticalStrikeFactor
 }
 
 func (u *unit) cooldownReduction() statistic {
-	return u.us.cooldownReduction + u.um.cooldownReduction
+	return u.class.cooldownReduction + u.modification.cooldownReduction
 }
 
 func (u *unit) damageThreatFactor() statistic {
-	return u.us.damageThreatFactor + u.um.damageThreatFactor
+	return u.class.damageThreatFactor + u.modification.damageThreatFactor
 }
 
 func (u *unit) healingThreatFactor() statistic {
-	return u.us.healingThreatFactor + u.um.healingThreatFactor
+	return u.class.healingThreatFactor + u.modification.healingThreatFactor
 }
 
 // addHealth adds health and returns before/after health
-func (u *unit) addHealth(d statistic) (before, after statistic) {
+func (u *unit) addHealth(delta statistic) (before, after statistic) {
 	before = u.health()
-	after = u.health() + d
+	after = u.health() + delta
 	if after < 0 {
 		after = 0
 	}
 	if after > u.maxHealth() {
 		after = u.maxHealth()
 	}
-	u.ur.health = after
+	u.resource.health = after
 	return
 }
 
 // addMana adds mana and returns before/after mana
-func (u *unit) addMana(d statistic) (before, after statistic) {
+func (u *unit) addMana(delta statistic) (before, after statistic) {
 	before = u.mana()
-	after = u.mana() + d
+	after = u.mana() + delta
 	if after < 0 {
 		after = 0
 	}
 	if after > u.maxMana() {
 		after = u.maxMana()
 	}
-	u.ur.mana = after
+	u.resource.mana = after
 	return
 }
 
@@ -198,11 +209,22 @@ func (u *unit) performManaRegeneration() {
 
 // updateModification updates the unitModification
 func (u *unit) updateModification() {
-	u.um = &unitModification{}
+	u.modification = unitModification{}
 	for o := range u.operators {
 		if _, ok := o.(*modifier); ok {
-			u.um.add(o.(*modifier).um)
+			u.modification.add(o.(*modifier).um)
 		}
 	}
 	u.triggerEvent(eventStats)
+}
+
+// add adds two unitModifications
+func (um *unitModification) add(operand *unitModification) {
+	um.armor += operand.armor
+	um.magicResistance += operand.magicResistance
+	um.criticalStrikeChance += operand.criticalStrikeChance
+	um.criticalStrikeFactor += operand.criticalStrikeFactor
+	um.cooldownReduction += operand.cooldownReduction
+	um.damageThreatFactor += operand.damageThreatFactor
+	um.healingThreatFactor += operand.healingThreatFactor
 }

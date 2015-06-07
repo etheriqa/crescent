@@ -9,9 +9,10 @@ import (
 func TestThreatOnAttach(t *testing.T) {
 	assert := assert.New(t)
 	g := mockGame()
-	u := newUnit(g)
-	performer1 := newUnit(g)
-	performer2 := newUnit(g)
+	c := &class{}
+	u := newUnit(g, c)
+	performer1 := newUnit(g, c)
+	performer2 := newUnit(g, c)
 	threat1 := &threat{
 		partialOperator: partialOperator{
 			unit:      u,
