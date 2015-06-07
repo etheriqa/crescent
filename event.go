@@ -8,7 +8,7 @@ const (
 	eventDisable
 	eventGameTick
 	eventStats
-	eventStatsTick
+	eventXoT
 )
 
 type eventDispatcher struct {

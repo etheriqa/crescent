@@ -13,7 +13,7 @@ type dot struct {
 func (d *dot) onAttach() {
 	d.addEventHandler(d, eventDead)
 	d.addEventHandler(d, eventGameTick)
-	d.addEventHandler(d, eventStatsTick)
+	d.addEventHandler(d, eventXoT)
 	for o := range d.operators {
 		if o == d {
 			continue
@@ -40,7 +40,7 @@ func (d *dot) onAttach() {
 func (d *dot) onDetach() {
 	d.removeEventHandler(d, eventDead)
 	d.removeEventHandler(d, eventGameTick)
-	d.removeEventHandler(d, eventStatsTick)
+	d.removeEventHandler(d, eventXoT)
 }
 
 // handleEvent handles the event
@@ -53,7 +53,7 @@ func (d *dot) handleEvent(e event) {
 			// TODO pack message
 			t: outDoTEnd,
 		})
-	case eventStatsTick:
+	case eventXoT:
 		d.perform()
 	}
 }

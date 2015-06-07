@@ -13,7 +13,7 @@ type hot struct {
 func (h *hot) onAttach() {
 	h.addEventHandler(h, eventDead)
 	h.addEventHandler(h, eventGameTick)
-	h.addEventHandler(h, eventStatsTick)
+	h.addEventHandler(h, eventXoT)
 	for o := range h.operators {
 		if o == h {
 			continue
@@ -40,7 +40,7 @@ func (h *hot) onAttach() {
 func (h *hot) onDetach() {
 	h.removeEventHandler(h, eventDead)
 	h.removeEventHandler(h, eventGameTick)
-	h.removeEventHandler(h, eventStatsTick)
+	h.removeEventHandler(h, eventXoT)
 }
 
 // handleEvent handles the event
@@ -53,7 +53,7 @@ func (h *hot) handleEvent(e event) {
 			// TODO pack message
 			t: outHoTEnd,
 		})
-	case eventStatsTick:
+	case eventXoT:
 		h.perform()
 	}
 }

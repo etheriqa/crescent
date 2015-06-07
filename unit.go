@@ -175,7 +175,7 @@ func (u *unit) statsTick() {
 	}
 	u.performHealthRegeneration()
 	u.performManaRegeneration()
-	u.triggerEvent(eventStatsTick)
+	u.triggerEvent(eventXoT)
 }
 
 // performHealthRegeneration performs health regeneration
