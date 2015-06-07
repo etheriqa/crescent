@@ -1,5 +1,9 @@
 package main
 
+import (
+	"time"
+)
+
 type targetType uint8
 
 const (
@@ -11,29 +15,20 @@ const (
 	targetTypeAllEnemies
 )
 
-type damageType uint8
-
-const (
-	_ damageType = iota
-	damageTypePhysical
-	damageTypeMagic
-	damageTypeTrue
-)
-
 type ability struct {
 	name               string
 	targetType         targetType
-	damageType         damageType
 	healthCost         statistic
 	manaCost           statistic
-	activationDuration gameDuration
-	cooldownDuration   gameDuration
+	activationDuration time.Duration
+	cooldownDuration   time.Duration
 	disableTypes       []disableType
 	perform            func(performer, receiver *unit)
 }
 
 // satisfiedRequirements returns true iff the ability satisfy activation requirements
 func (a *ability) satisfiedRequirements(performer *unit) bool {
+	// TODO check receiver
 	if performer.health() < a.healthCost {
 		return false
 	}
