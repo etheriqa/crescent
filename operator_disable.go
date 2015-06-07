@@ -4,9 +4,9 @@ type disableType uint8
 
 const (
 	_ disableType = iota
-	disableSilence
-	disableStun
-	disableTaunt
+	disableTypeSilence
+	disableTypeStun
+	disableTypeTaunt
 )
 
 type disable struct {
