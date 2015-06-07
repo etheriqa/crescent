@@ -27,6 +27,11 @@ func (p *partialOperator) expire(o operator, m message) {
 	if p.isExpired() {
 		return
 	}
-	p.unit.detachOperator(o)
+	p.terminate(o)
 	p.unit.publish(m)
+}
+
+// terminate detaches the operator
+func (p *partialOperator) terminate(o operator) {
+	p.unit.detachOperator(o)
 }

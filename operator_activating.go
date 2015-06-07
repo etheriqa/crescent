@@ -7,6 +7,7 @@ type activating struct {
 
 // onAttach checks requirements
 func (a *activating) onAttach() {
+	a.unit.addEventHandler(a, eventDead)
 	a.unit.addEventHandler(a, eventDisable)
 	a.unit.addEventHandler(a, eventGameTick)
 	a.unit.addEventHandler(a, eventStats)
@@ -15,6 +16,7 @@ func (a *activating) onAttach() {
 
 // onDetach removes the eventHandlers
 func (a *activating) onDetach() {
+	a.unit.removeEventHandler(a, eventDead)
 	a.unit.removeEventHandler(a, eventDisable)
 	a.unit.removeEventHandler(a, eventGameTick)
 	a.unit.removeEventHandler(a, eventStats)
@@ -23,6 +25,8 @@ func (a *activating) onDetach() {
 // handleEvent handles the event
 func (a *activating) handleEvent(e event) {
 	switch e {
+	case eventDead:
+		a.terminate(a)
 	case eventDisable:
 		a.checkRequirements()
 	case eventGameTick:
@@ -36,7 +40,7 @@ func (a *activating) checkRequirements() bool {
 	if a.ability.satisfiedRequirements(a.unit) {
 		return true
 	}
-	a.unit.detachOperator(a)
+	a.terminate(a)
 	a.unit.publish(message{
 		t: outInterrupt,
 		// TODO pack message
@@ -52,5 +56,5 @@ func (a *activating) perform() {
 		return
 	}
 	a.ability.perform()
-	a.unit.detachOperator(a)
+	a.terminate(a)
 }

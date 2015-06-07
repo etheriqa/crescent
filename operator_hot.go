@@ -11,6 +11,7 @@ type hot struct {
 
 // onAttach removes duplicate HoTs
 func (h *hot) onAttach() {
+	h.unit.addEventHandler(h, eventDead)
 	h.unit.addEventHandler(h, eventGameTick)
 	h.unit.addEventHandler(h, eventStatsTick)
 	for o := range h.unit.operators {
@@ -37,6 +38,7 @@ func (h *hot) onAttach() {
 
 // onDetach removes the eventHandlers
 func (h *hot) onDetach() {
+	h.unit.removeEventHandler(h, eventDead)
 	h.unit.removeEventHandler(h, eventGameTick)
 	h.unit.removeEventHandler(h, eventStatsTick)
 }
@@ -44,6 +46,8 @@ func (h *hot) onDetach() {
 // handleEvent handles the event
 func (h *hot) handleEvent(e event) {
 	switch e {
+	case eventDead:
+		h.terminate(h)
 	case eventGameTick:
 		h.expire(h, message{
 			// TODO pack message
@@ -56,12 +60,12 @@ func (h *hot) handleEvent(e event) {
 
 // perform performs the HoT
 func (h *hot) perform() {
-	if h.unit.isDead() {
+	h.unit.addHealth(h.healing)
+	if h.performer.isDead() {
 		return
 	}
-	h.unit.addHealth(h.healing)
 	for _, enemy := range h.unit.game.enemies(h.performer) {
-		if h.performer.isDead() || enemy.isDead() {
+		if enemy.isDead() {
 			return
 		}
 		enemy.attachOperator(newThreat(enemy, h.performer, h.threat))

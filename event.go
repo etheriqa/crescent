@@ -4,6 +4,7 @@ type event uint8
 
 const (
 	_ event = iota
+	eventDead
 	eventDisable
 	eventGameTick
 	eventStats
