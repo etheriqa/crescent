@@ -22,8 +22,8 @@ type unit struct {
 }
 
 type unitResource struct {
-	health int32
-	mana   int32
+	health statistic
+	mana   statistic
 }
 
 // newUnit initializes a unit
@@ -53,60 +53,60 @@ func (u *unit) isDead() bool {
 	return u.ur.health <= 0
 }
 
-func (u *unit) health() int32 {
+func (u *unit) health() statistic {
 	return u.ur.health
 }
 
-func (u *unit) maxHealth() int32 {
+func (u *unit) maxHealth() statistic {
 	return u.us.health
 }
 
-func (u *unit) healthRegeneration() int32 {
+func (u *unit) healthRegeneration() statistic {
 	return u.us.healthRegeneration
 }
 
-func (u *unit) mana() int32 {
+func (u *unit) mana() statistic {
 	return u.ur.mana
 }
 
-func (u *unit) maxMana() int32 {
+func (u *unit) maxMana() statistic {
 	return u.us.mana
 }
 
-func (u *unit) manaRegeneration() int32 {
+func (u *unit) manaRegeneration() statistic {
 	return u.us.manaRegeneration
 }
 
-func (u *unit) armor() int32 {
+func (u *unit) armor() statistic {
 	return u.us.armor + u.um.armor
 }
 
-func (u *unit) magicResistance() int32 {
+func (u *unit) magicResistance() statistic {
 	return u.us.magicResistance + u.um.magicResistance
 }
 
-func (u *unit) criticalStrikeChance() int32 {
+func (u *unit) criticalStrikeChance() statistic {
 	return u.us.criticalStrikeChance + u.um.criticalStrikeChance
 }
 
-func (u *unit) criticalStrikeFactor() int32 {
+func (u *unit) criticalStrikeFactor() statistic {
 	return u.us.criticalStrikeFactor + u.um.criticalStrikeFactor
 }
 
-func (u *unit) cooldownReduction() int32 {
+func (u *unit) cooldownReduction() statistic {
 	return u.us.cooldownReduction + u.um.cooldownReduction
 }
 
-func (u *unit) damageThreatFactor() int32 {
+func (u *unit) damageThreatFactor() statistic {
 	return u.us.damageThreatFactor + u.um.damageThreatFactor
 }
 
-func (u *unit) healingThreatFactor() int32 {
+func (u *unit) healingThreatFactor() statistic {
 	return u.us.healingThreatFactor + u.um.healingThreatFactor
 }
 
 // addHealth adds health and returns before/after health
-func (u *unit) addHealth(d int32) (before, after int32) {
+func (u *unit) addHealth(d statistic) (before, after statistic) {
 	before = u.health()
 	after = u.health() + d
 	if after < 0 {
@@ -120,7 +120,7 @@ func (u *unit) addHealth(d int32) (before, after int32) {
 }
 
 // addMana adds mana and returns before/after mana
-func (u *unit) addMana(d int32) (before, after int32) {
+func (u *unit) addMana(d statistic) (before, after statistic) {
 	before = u.mana()
 	after = u.mana() + d
 	if after < 0 {

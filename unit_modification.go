@@ -1,13 +1,13 @@
 package main
 
 type unitModification struct {
-	armor                int32
-	magicResistance      int32
-	criticalStrikeChance int32
-	criticalStrikeFactor int32
-	cooldownReduction    int32
-	damageThreatFactor   int32
-	healingThreatFactor  int32
+	armor                statistic
+	magicResistance      statistic
+	criticalStrikeChance statistic
+	criticalStrikeFactor statistic
+	cooldownReduction    statistic
+	damageThreatFactor   statistic
+	healingThreatFactor  statistic
 }
 
 // add adds two unitModifications

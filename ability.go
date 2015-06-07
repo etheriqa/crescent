@@ -7,7 +7,7 @@ type ability interface {
 
 type partialAbility struct {
 	disableTypes []disableType
-	cost         int32
+	cost         statistic
 }
 
 // perform does nothing

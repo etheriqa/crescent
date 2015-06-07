@@ -2,11 +2,11 @@ package main
 
 type threat struct {
 	partialOperator
-	threat int32
+	threat statistic
 }
 
 // newThreat initializes a threat operator
-func newThreat(unit, performer *unit, t int32) *threat {
+func newThreat(unit, performer *unit, t statistic) *threat {
 	return &threat{
 		partialOperator: partialOperator{
 			unit:      unit,
@@ -17,12 +17,12 @@ func newThreat(unit, performer *unit, t int32) *threat {
 }
 
 // newDamageThreat initializes a threat operator with damage
-func newDamageThreat(unit, performer *unit, damage int32) *threat {
+func newDamageThreat(unit, performer *unit, damage statistic) *threat {
 	return newThreat(unit, performer, damage*performer.damageThreatFactor())
 }
 
 // newHealingThreat initializes a threat operator with healing
-func newHealingThreat(unit, performer *unit, healing int32) *threat {
+func newHealingThreat(unit, performer *unit, healing statistic) *threat {
 	return newThreat(unit, performer, healing*performer.healingThreatFactor())
 }
 
