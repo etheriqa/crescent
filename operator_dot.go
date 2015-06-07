@@ -61,4 +61,5 @@ func (d *dot) perform() {
 	}
 	d.unit.addHealth(-d.damage)
 	d.unit.attachOperator(newThreat(d.unit, d.performer, d.threat))
+	d.unit.triggerEvent(eventStats)
 }
