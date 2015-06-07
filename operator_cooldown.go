@@ -8,7 +8,7 @@ type cooldown struct {
 func (c *cooldown) onAttach() {
 	c.unit.addEventHandler(c, eventGameTick)
 	c.unit.publish(message{
-		// todo pack message
+		// TODO pack message
 		t: outCooldown,
 	})
 }
@@ -23,7 +23,7 @@ func (c *cooldown) handleEvent(e event) {
 	switch e {
 	case eventGameTick:
 		c.expire(c, message{
-			// todo pack message
+			// TODO pack message
 			t: outCooldown,
 		})
 	}

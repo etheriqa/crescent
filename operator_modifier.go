@@ -10,7 +10,7 @@ func (m *modifier) onAttach() {
 	m.unit.addEventHandler(m, eventGameTick)
 	m.unit.updateModification()
 	m.unit.publish(message{
-		// todo pack message
+		// TODO pack message
 		t: outModifierBegin,
 	})
 }
@@ -26,7 +26,7 @@ func (m *modifier) handleEvent(e event) {
 	switch e {
 	case eventGameTick:
 		m.expire(m, message{
-			// todo pack message
+			// TODO pack message
 			t: outModifierEnd,
 		})
 	}

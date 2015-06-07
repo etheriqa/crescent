@@ -34,7 +34,7 @@ func (d *disable) onAttach() {
 		d.unit.detachOperator(o)
 	}
 	d.unit.publish(message{
-		// todo pack message
+		// TODO pack message
 		t: outDisableBegin,
 	})
 	d.unit.triggerEvent(eventDisable)
@@ -50,7 +50,7 @@ func (d *disable) handleEvent(e event) {
 	switch e {
 	case eventGameTick:
 		d.expire(d, message{
-			// todo pack message
+			// TODO pack message
 			t: outDisableEnd,
 		})
 	}

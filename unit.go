@@ -178,7 +178,7 @@ func (u *unit) statsTick() {
 func (u *unit) performHealthRegeneration() {
 	u.addHealth(u.healthRegeneration())
 	u.publish(message{
-		// todo pack message
+		// TODO pack message
 		t: outHealthReg,
 	})
 }
@@ -187,7 +187,7 @@ func (u *unit) performHealthRegeneration() {
 func (u *unit) performManaRegeneration() {
 	u.addMana(u.manaRegeneration())
 	u.publish(message{
-		// todo pack message
+		// TODO pack message
 		t: outManaReg,
 	})
 }

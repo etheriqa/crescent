@@ -30,7 +30,7 @@ func (h *hot) onAttach() {
 		h.unit.detachOperator(o)
 	}
 	h.unit.publish(message{
-		// todo pack message
+		// TODO pack message
 		t: outHoTBegin,
 	})
 }
@@ -46,7 +46,7 @@ func (h *hot) handleEvent(e event) {
 	switch e {
 	case eventGameTick:
 		h.expire(h, message{
-			// todo pack message
+			// TODO pack message
 			t: outHoTEnd,
 		})
 	case eventStatsTick:
@@ -57,5 +57,5 @@ func (h *hot) handleEvent(e event) {
 // perform performs the HoT
 func (h *hot) perform() {
 	h.unit.addHealth(h.healing)
-	// todo threat
+	// TODO threat
 }

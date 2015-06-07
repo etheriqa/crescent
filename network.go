@@ -248,7 +248,7 @@ func decodeFrame(p []byte) (message, error) {
 	if err := json.Unmarshal(*f.Data, &d); err != nil {
 		return message{}, err
 	}
-	// todo validate d
+	// TODO validate d
 	return message{
 		t: f.Type,
 		d: d,
@@ -257,7 +257,7 @@ func decodeFrame(p []byte) (message, error) {
 
 // encodeFrame converts a outgoing message into a JSON text and validates JSON schema
 func encodeFrame(m message) ([]byte, error) {
-	// todo validate m.data
+	// TODO validate m.data
 	d := new(json.RawMessage)
 	var err error
 	*d, err = json.Marshal(m.d)

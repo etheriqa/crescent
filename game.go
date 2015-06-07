@@ -105,7 +105,7 @@ func (g *game) unregister(m *message) {
 }
 
 func (g *game) stage(m *message) {
-	// todo change stage
+	// TODO change stage
 }
 
 func (g *game) seat(m *message) {
@@ -116,7 +116,7 @@ func (g *game) seat(m *message) {
 	}
 	var u *unit
 	switch unitName {
-	// todo
+	// TODO
 	default:
 		g.terminate(m.name)
 		return

@@ -39,7 +39,7 @@ func (a *activating) checkRequirements() bool {
 	a.unit.detachOperator(a)
 	a.unit.publish(message{
 		t: outInterrupt,
-		// todo pack message
+		// TODO pack message
 	})
 	return false
 }
