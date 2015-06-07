@@ -6,10 +6,10 @@ type threat struct {
 }
 
 // newThreat initializes a threat operator
-func newThreat(unit, performer *unit, t statistic) *threat {
+func newThreat(performer, receiver *unit, t statistic) *threat {
 	return &threat{
 		partialOperator: partialOperator{
-			unit:      unit,
+			unit:      receiver,
 			performer: performer,
 		},
 		threat: t,
@@ -17,13 +17,13 @@ func newThreat(unit, performer *unit, t statistic) *threat {
 }
 
 // newDamageThreat initializes a threat operator with damage
-func newDamageThreat(unit, performer *unit, damage statistic) *threat {
-	return newThreat(unit, performer, damage*performer.damageThreatFactor())
+func newDamageThreat(performer, receiver *unit, damage statistic) *threat {
+	return newThreat(performer, receiver, damage*performer.damageThreatFactor())
 }
 
 // newHealingThreat initializes a threat operator with healing
-func newHealingThreat(unit, performer *unit, healing statistic) *threat {
-	return newThreat(unit, performer, healing*performer.healingThreatFactor())
+func newHealingThreat(performer, receiver *unit, healing statistic) *threat {
+	return newThreat(performer, receiver, healing*performer.healingThreatFactor())
 }
 
 // onAttach merges threat operators they have same performer
