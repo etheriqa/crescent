@@ -211,20 +211,16 @@ func (u *unit) performManaRegeneration() {
 func (u *unit) updateModification() {
 	u.modification = unitModification{}
 	for o := range u.operators {
-		if _, ok := o.(*modifier); ok {
-			u.modification.add(&o.(*modifier).unitModification)
+		switch o := o.(type) {
+		case *modifier:
+			u.modification.armor += o.armor
+			u.modification.magicResistance += o.magicResistance
+			u.modification.criticalStrikeChance += o.criticalStrikeChance
+			u.modification.criticalStrikeFactor += o.criticalStrikeFactor
+			u.modification.cooldownReduction += o.cooldownReduction
+			u.modification.damageThreatFactor += o.damageThreatFactor
+			u.modification.healingThreatFactor += o.healingThreatFactor
 		}
 	}
 	u.triggerEvent(eventStats)
-}
-
-// add adds two unitModifications
-func (um *unitModification) add(operand *unitModification) {
-	um.armor += operand.armor
-	um.magicResistance += operand.magicResistance
-	um.criticalStrikeChance += operand.criticalStrikeChance
-	um.criticalStrikeFactor += operand.criticalStrikeFactor
-	um.cooldownReduction += operand.cooldownReduction
-	um.damageThreatFactor += operand.damageThreatFactor
-	um.healingThreatFactor += operand.healingThreatFactor
 }
