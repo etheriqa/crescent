@@ -1,6 +1,7 @@
 package main
 
 type gameTime int64
+type gameDuration int64
 
 type game struct {
 	time  gameTime

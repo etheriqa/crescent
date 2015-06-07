@@ -1,24 +1,37 @@
 package main
 
+type targetType uint8
+
+const (
+	_ targetType = iota
+	targetTypeOneself
+	targetTypeFriend
+	targetTypeAllFriends
+	targetTypeEnemy
+	targetTypeAllEnemies
+)
+
 type ability struct {
-	perform      func()
+	targetType
+	manaCost     statistic
+	cooldown     gameDuration
 	disableTypes []disableType
-	cost         statistic
+	perform      func(performer, receiver *unit)
 }
 
 // satisfiedRequirements returns true iff the ability satisfy activation requirements
-func (p *ability) satisfiedRequirements(performer *unit) bool {
-	if performer.mana() < p.cost {
+func (a *ability) satisfiedRequirements(performer *unit) bool {
+	if performer.mana() < a.manaCost {
 		return false
 	}
 	for o := range performer.operators {
 		switch o := o.(type) {
 		case *cooldown:
-			if p == o.ability {
+			if a == o.ability {
 				return false
 			}
 		case *disable:
-			for d := range p.disableTypes {
+			for d := range a.disableTypes {
 				if disableType(d) == o.disableType {
 					return false
 				}

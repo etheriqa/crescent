@@ -3,6 +3,7 @@ package main
 type activating struct {
 	partialOperator
 	*ability
+	receiver *unit
 }
 
 // onAttach checks requirements
@@ -55,6 +56,6 @@ func (a *activating) perform() {
 	if !a.isExpired() {
 		return
 	}
-	a.ability.perform()
+	a.ability.perform(a.unit, a.receiver)
 	a.detachOperator(a)
 }
