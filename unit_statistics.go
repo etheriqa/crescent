@@ -8,7 +8,7 @@ type unitStatistics struct {
 	armor                int32
 	magicResistance      int32
 	criticalStrikeChance int32
-	criticalStrikeDamage int32
+	criticalStrikeFactor int32
 	cooldownReduction    int32
 	damageThreatFactor   int32
 	healingThreatFactor  int32

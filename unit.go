@@ -89,8 +89,8 @@ func (u *unit) criticalStrikeChance() int32 {
 	return u.us.criticalStrikeChance + u.um.criticalStrikeChance
 }
 
-func (u *unit) criticalStrikeDamage() int32 {
-	return u.us.criticalStrikeDamage + u.um.criticalStrikeDamage
+func (u *unit) criticalStrikeFactor() int32 {
+	return u.us.criticalStrikeFactor + u.um.criticalStrikeFactor
 }
 
 func (u *unit) cooldownReduction() int32 {

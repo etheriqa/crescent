@@ -4,7 +4,7 @@ type unitModification struct {
 	armor                int32
 	magicResistance      int32
 	criticalStrikeChance int32
-	criticalStrikeDamage int32
+	criticalStrikeFactor int32
 	cooldownReduction    int32
 	damageThreatFactor   int32
 	healingThreatFactor  int32
@@ -15,7 +15,7 @@ func (um *unitModification) add(operand *unitModification) {
 	um.armor += operand.armor
 	um.magicResistance += operand.magicResistance
 	um.criticalStrikeChance += operand.criticalStrikeChance
-	um.criticalStrikeDamage += operand.criticalStrikeDamage
+	um.criticalStrikeFactor += operand.criticalStrikeFactor
 	um.cooldownReduction += operand.cooldownReduction
 	um.damageThreatFactor += operand.damageThreatFactor
 	um.healingThreatFactor += operand.healingThreatFactor
