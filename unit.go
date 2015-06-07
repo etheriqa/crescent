@@ -168,8 +168,8 @@ func (u *unit) gameTick() {
 	u.triggerEvent(eventGameTick)
 }
 
-// statsTick performs regeneration and triggers statsTick
-func (u *unit) statsTick() {
+// xotTick performs regeneration and triggers evnentXoT
+func (u *unit) xotTick() {
 	if u.isDead() {
 		return
 	}
