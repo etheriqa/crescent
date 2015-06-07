@@ -4,9 +4,8 @@ type dotType string
 
 type dot struct {
 	partialOperator
-	performer *unit
-	dotType   dotType
-	damage    int32
+	dotType dotType
+	damage  int32
 }
 
 // onAttach removes duplicate DoTs

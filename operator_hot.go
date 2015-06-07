@@ -4,9 +4,8 @@ type hotType string
 
 type hot struct {
 	partialOperator
-	performer *unit
-	hotType   hotType
-	healing   int32
+	hotType hotType
+	healing int32
 }
 
 // onAttach removes duplicate HoTs

@@ -7,6 +7,7 @@ type operator interface {
 
 type partialOperator struct {
 	unit           *unit
+	performer      *unit
 	expirationTime gameTime
 }
 
