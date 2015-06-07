@@ -101,6 +101,28 @@ func (u *unit) threatFactor() int32 {
 	return u.us.threatFactor + u.um.threatFactor
 }
 
+// addHealth adds health
+func (u *unit) addHealth(d int32) {
+	u.ur.health += d
+	if u.health() < 0 {
+		u.ur.health = 0
+	}
+	if u.health() > u.maxHealth() {
+		u.ur.health = u.maxHealth()
+	}
+}
+
+// addMana adds mana
+func (u *unit) addMana(d int32) {
+	u.ur.mana += d
+	if u.mana() < 0 {
+		u.ur.mana = 0
+	}
+	if u.mana() > u.maxMana() {
+		u.ur.mana = u.maxMana()
+	}
+}
+
 // attachOperator adds the operator
 func (u *unit) attachOperator(o operator) {
 	u.operators[o] = true
@@ -148,11 +170,7 @@ func (u *unit) statsTick() {
 
 // performHealthRegeneration performs health regeneration
 func (u *unit) performHealthRegeneration() {
-	reg := u.healthRegeneration() + u.health() - u.maxHealth()
-	if reg < 0 {
-		return
-	}
-	u.ur.health += reg
+	u.addHealth(u.healthRegeneration())
 	u.publish(message{
 		// todo pack message
 		t: outHealthReg,
@@ -161,11 +179,7 @@ func (u *unit) performHealthRegeneration() {
 
 // performManaRegeneration performs mana regeneration
 func (u *unit) performManaRegeneration() {
-	reg := u.manaRegeneration() + u.mana() - u.maxMana()
-	if reg < 0 {
-		return
-	}
-	u.ur.mana += reg
+	u.addMana(u.manaRegeneration())
 	u.publish(message{
 		// todo pack message
 		t: outManaReg,
