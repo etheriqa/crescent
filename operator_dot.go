@@ -62,5 +62,5 @@ func (d *dot) handleEvent(e event) {
 func (d *dot) perform() {
 	d.addHealth(-d.damage)
 	d.attachOperator(newThreat(d.unit, d.performer, d.threat))
-	d.triggerEvent(eventStats)
+	d.triggerEvent(eventResourceDecreased)
 }

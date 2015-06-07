@@ -222,5 +222,4 @@ func (u *unit) updateModification() {
 			u.modification.healingThreatFactor += o.healingThreatFactor
 		}
 	}
-	u.triggerEvent(eventStats)
 }

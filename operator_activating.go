@@ -11,7 +11,7 @@ func (a *activating) onAttach() {
 	a.addEventHandler(a, eventDead)
 	a.addEventHandler(a, eventDisable)
 	a.addEventHandler(a, eventGameTick)
-	a.addEventHandler(a, eventStats)
+	a.addEventHandler(a, eventResourceDecreased)
 	a.checkRequirements()
 }
 
@@ -20,7 +20,7 @@ func (a *activating) onDetach() {
 	a.removeEventHandler(a, eventDead)
 	a.removeEventHandler(a, eventDisable)
 	a.removeEventHandler(a, eventGameTick)
-	a.removeEventHandler(a, eventStats)
+	a.removeEventHandler(a, eventResourceDecreased)
 }
 
 // handleEvent handles the event
@@ -32,7 +32,7 @@ func (a *activating) handleEvent(e event) {
 		a.checkRequirements()
 	case eventGameTick:
 		a.perform()
-	case eventStats:
+	case eventResourceDecreased:
 		a.checkRequirements()
 	}
 }

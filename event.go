@@ -7,7 +7,7 @@ const (
 	eventDead
 	eventDisable
 	eventGameTick
-	eventStats
+	eventResourceDecreased
 	eventXoT
 )
 
