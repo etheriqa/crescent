@@ -6,7 +6,6 @@ type hot struct {
 	partialOperator
 	hotType hotType
 	healing healing
-	threat  statistic
 }
 
 // onAttach removes duplicate HoTs
@@ -60,14 +59,5 @@ func (h *hot) handleEvent(e event) {
 
 // perform performs the HoT
 func (h *hot) perform() {
-	h.takeHealing(h.healing)
-	if h.performer.isDead() {
-		return
-	}
-	for _, enemy := range h.game.enemies(h.performer) {
-		if enemy.isDead() {
-			return
-		}
-		enemy.attachOperator(newThreat(enemy, h.performer, h.threat))
-	}
+	h.healing.perform(h.unit.game)
 }

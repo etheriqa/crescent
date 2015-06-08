@@ -5,6 +5,7 @@ import (
 )
 
 func newClassTank() *class {
+	var q, w, e, r *ability
 	class := &class{
 		name: "Tank",
 		// TODO stats
@@ -20,8 +21,8 @@ func newClassTank() *class {
 		damageThreatFactor:   defaultDamageThreatFactor,
 		healingThreatFactor:  defaultHealingThreatFactor,
 	}
-	// Physical / Increasing threat factor
-	q := &ability{
+	// True / Increasing threat factor
+	q = &ability{
 		name:               "Mortal Breath",
 		targetType:         targetTypeEnemy,
 		healthCost:         0,
@@ -33,22 +34,19 @@ func newClassTank() *class {
 		},
 		perform: func(performer, receiver *unit) {
 			// TODO remove duplicate modifiers
-			performer.attachOperator(newModifier(performer, 10*time.Second, unitModification{
-				damageThreatFactor: 4,
-			}))
-			damage := diceTrueDamage(performer, receiver, 120)
-			receiver.takeDamage(damage)
-			receiver.attachOperator(newDamageThreat(performer, receiver, damage))
-			// TODO refactor
-			if receiver.isAlive() {
-				receiver.triggerEvent(eventResourceDecreased)
-			} else {
-				receiver.triggerEvent(eventDead)
-			}
+			performer.attachOperator(newModifier(
+				performer,
+				10*time.Second,
+				unitModification{
+					damageThreatFactor: 4,
+				},
+			))
+			// TODO handle the error
+			newTrueDamage(performer, receiver, 120, q.name).perform(performer.game)
 		},
 	}
 	// Physical / Increasing AR & MR
-	w := &ability{
+	w = &ability{
 		name:               "Type Unsafe",
 		targetType:         targetTypeEnemy,
 		healthCost:         0,
@@ -60,23 +58,20 @@ func newClassTank() *class {
 		},
 		perform: func(performer, receiver *unit) {
 			// TODO remove duplicate modifiers
-			performer.attachOperator(newModifier(performer, 2*time.Second, unitModification{
-				armor:           50,
-				magicResistance: 50,
-			}))
-			damage := dicePhysicalDamage(performer, receiver, 200)
-			receiver.takeDamage(damage)
-			receiver.attachOperator(newDamageThreat(performer, receiver, damage))
-			// TODO refactor
-			if receiver.isAlive() {
-				receiver.triggerEvent(eventResourceDecreased)
-			} else {
-				receiver.triggerEvent(eventDead)
-			}
+			performer.attachOperator(newModifier(
+				performer,
+				2*time.Second,
+				unitModification{
+					armor:           50,
+					magicResistance: 50,
+				},
+			))
+			// TODO handle the error
+			newPhysicalDamage(performer, receiver, 200, w.name).perform(performer.game)
 		},
 	}
 	// Physical / Life steal
-	e := &ability{
+	e = &ability{
 		name:               "Bloody Mary",
 		targetType:         targetTypeEnemy,
 		healthCost:         0,
@@ -87,21 +82,14 @@ func newClassTank() *class {
 			disableTypeStun,
 		},
 		perform: func(performer, receiver *unit) {
-			// TODO remove duplicate modifiers
-			damage := dicePhysicalDamage(performer, receiver, 300)
-			before, after := receiver.takeDamage(damage)
-			receiver.attachOperator(newDamageThreat(performer, receiver, damage))
-			performer.takeHealing(healing(before - after))
-			// TODO refactor
-			if receiver.isAlive() {
-				receiver.triggerEvent(eventResourceDecreased)
-			} else {
-				receiver.triggerEvent(eventDead)
-			}
+			// TODO handle the error
+			before, after, _ := newPhysicalDamage(performer, receiver, 300, e.name).perform(performer.game)
+			// TODO handle the error
+			newPureHealing(performer, receiver, (before-after)*0.6, e.name).perform(performer.game)
 		},
 	}
 	// Increasing AR & MR
-	r := &ability{
+	r = &ability{
 		name:               "Tetragrammaton",
 		targetType:         targetTypeOneself,
 		healthCost:         0,

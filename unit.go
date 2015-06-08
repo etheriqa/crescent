@@ -1,5 +1,11 @@
 package main
 
+import (
+	"errors"
+
+	"github.com/Sirupsen/logrus"
+)
+
 const (
 	groupPlayer = iota
 	groupEnemy
@@ -96,6 +102,14 @@ func (u *unit) magicResistance() statistic {
 	return u.class.magicResistance + u.modification.magicResistance
 }
 
+func (u *unit) physicalDamageReductionFactor() statistic {
+	return damageReductionFactor(u.armor())
+}
+
+func (u *unit) magicDamageReductionFactor() statistic {
+	return damageReductionFactor(u.magicResistance())
+}
+
 func (u *unit) criticalStrikeChance() statistic {
 	return u.class.criticalStrikeChance + u.modification.criticalStrikeChance
 }
@@ -116,26 +130,11 @@ func (u *unit) healingThreatFactor() statistic {
 	return u.class.healingThreatFactor + u.modification.healingThreatFactor
 }
 
-// takeDamage takes the damage and returns before/after health
-func (u *unit) takeDamage(d damage) (before, after statistic) {
-	if d < 0 {
-		// FIXME handle the error
-		log.Fatal("Damage must be non-negative")
-	}
-	return u.modifyHealth(-statistic(d))
-}
-
-// takeHealing takes the healing and returns before/after health
-func (u *unit) takeHealing(h healing) (before, after statistic) {
-	if h < 0 {
-		// FIXME handle the error
-		log.Fatal("Healing must be non negative")
-	}
-	return u.modifyHealth(statistic(h))
-}
-
 // modifyHealth modifies the unit health and returns before/after health
-func (u *unit) modifyHealth(delta statistic) (before, after statistic) {
+func (u *unit) modifyHealth(delta statistic) (before, after statistic, err error) {
+	if u.isDead() {
+		return u.health(), u.health(), errors.New("Cannot modify the health of dead unit")
+	}
 	before = u.health()
 	after = u.health() + delta
 	if after < 0 {
@@ -145,11 +144,22 @@ func (u *unit) modifyHealth(delta statistic) (before, after statistic) {
 		after = u.maxHealth()
 	}
 	u.resource.health = after
+	if delta < 0 {
+		switch {
+		case u.isAlive():
+			u.triggerEvent(eventResourceDecreased)
+		case u.isDead():
+			u.triggerEvent(eventDead)
+		}
+	}
 	return
 }
 
 // modifyMana modifies the unit mana and returns before/after mana
-func (u *unit) modifyMana(delta statistic) (before, after statistic) {
+func (u *unit) modifyMana(delta statistic) (before, after statistic, err error) {
+	if u.isDead() {
+		return u.health(), u.health(), errors.New("Cannot modify the mana of dead unit")
+	}
 	before = u.mana()
 	after = u.mana() + delta
 	if after < 0 {
@@ -159,6 +169,9 @@ func (u *unit) modifyMana(delta statistic) (before, after statistic) {
 		after = u.maxMana()
 	}
 	u.resource.mana = after
+	if delta < 0 {
+		u.triggerEvent(eventResourceDecreased)
+	}
 	return
 }
 
@@ -209,20 +222,34 @@ func (u *unit) xotTick() {
 
 // performHealthRegeneration performs health regeneration
 func (u *unit) performHealthRegeneration() {
-	u.takeHealing(healing(u.healthRegeneration()))
-	u.publish(message{
-		// TODO pack message
-		t: outHealthReg,
-	})
+	_, _, err := newPureHealing(nil, u, u.healthRegeneration(), "").perform(u.game)
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"err": err,
+		}).Fatal("Failed unit.performHealthRegeneration")
+	}
 }
 
 // performManaRegeneration performs mana regeneration
 func (u *unit) performManaRegeneration() {
-	u.modifyMana(u.manaRegeneration())
-	u.publish(message{
-		// TODO pack message
-		t: outManaReg,
+	err := u.performManaModification(u.manaRegeneration())
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"err": err,
+		}).Fatal("Failed unit.performManaRegeneration")
+	}
+}
+
+// performManaModification performs mana modification
+func (u *unit) performManaModification(delta statistic) error {
+	_, _, err := u.modifyMana(delta)
+	if err != nil {
+		return err
+	}
+	u.game.publish(message{
+	// TODO pack message
 	})
+	return nil
 }
 
 // updateModification updates the unitModification
