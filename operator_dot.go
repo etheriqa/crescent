@@ -4,8 +4,19 @@ type dotType string
 
 type dot struct {
 	partialOperator
-	dotType dotType
-	damage  damage
+	damage *damage
+}
+
+// newDoT returns a DoT
+func newDoT(d *damage, expirationTime gameTime) *dot {
+	return &dot{
+		partialOperator: partialOperator{
+			unit:           d.receiver,
+			performer:      d.performer,
+			expirationTime: expirationTime,
+		},
+		damage: d,
+	}
 }
 
 // onAttach removes duplicate DoTs
@@ -20,7 +31,7 @@ func (d *dot) onAttach() {
 		if _, ok := o.(*dot); !ok {
 			continue
 		}
-		if o.(*dot).dotType != d.dotType {
+		if o.(*dot).damage.name != d.damage.name {
 			continue
 		}
 		if o.(*disable).expirationTime >= d.expirationTime {

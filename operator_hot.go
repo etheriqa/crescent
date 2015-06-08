@@ -4,8 +4,19 @@ type hotType string
 
 type hot struct {
 	partialOperator
-	hotType hotType
-	healing healing
+	healing *healing
+}
+
+// newHoT returns a HoT
+func newHoT(h *healing, expirationTime gameTime) *hot {
+	return &hot{
+		partialOperator: partialOperator{
+			unit:           h.receiver,
+			performer:      h.performer,
+			expirationTime: expirationTime,
+		},
+		healing: h,
+	}
 }
 
 // onAttach removes duplicate HoTs
@@ -20,7 +31,7 @@ func (h *hot) onAttach() {
 		if _, ok := o.(*hot); !ok {
 			continue
 		}
-		if o.(*hot).hotType != h.hotType {
+		if o.(*hot).healing.name != h.healing.name {
 			continue
 		}
 		if o.(*disable).expirationTime >= h.expirationTime {
