@@ -5,7 +5,7 @@ type dotType string
 type dot struct {
 	partialOperator
 	dotType dotType
-	damage  statistic
+	damage  damage
 	threat  statistic
 }
 
@@ -60,7 +60,7 @@ func (d *dot) handleEvent(e event) {
 
 // perform performs the DoT
 func (d *dot) perform() {
-	d.addHealth(-d.damage)
+	d.takeDamage(d.damage)
 	d.attachOperator(newThreat(d.unit, d.performer, d.threat))
 	d.triggerEvent(eventResourceDecreased)
 }

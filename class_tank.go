@@ -37,7 +37,7 @@ func newClassTank() *class {
 				damageThreatFactor: 4,
 			}))
 			damage := diceTrueDamage(performer, receiver, 120)
-			receiver.addHealth(-damage)
+			receiver.takeDamage(damage)
 			receiver.attachOperator(newDamageThreat(performer, receiver, damage))
 			// TODO refactor
 			if receiver.isAlive() {
@@ -65,7 +65,7 @@ func newClassTank() *class {
 				magicResistance: 50,
 			}))
 			damage := dicePhysicalDamage(performer, receiver, 200)
-			receiver.addHealth(-damage)
+			receiver.takeDamage(damage)
 			receiver.attachOperator(newDamageThreat(performer, receiver, damage))
 			// TODO refactor
 			if receiver.isAlive() {
@@ -89,9 +89,9 @@ func newClassTank() *class {
 		perform: func(performer, receiver *unit) {
 			// TODO remove duplicate modifiers
 			damage := dicePhysicalDamage(performer, receiver, 300)
-			before, after := receiver.addHealth(-damage)
+			before, after := receiver.takeDamage(damage)
 			receiver.attachOperator(newDamageThreat(performer, receiver, damage))
-			performer.addHealth(before - after)
+			performer.takeHealing(healing(before - after))
 			// TODO refactor
 			if receiver.isAlive() {
 				receiver.triggerEvent(eventResourceDecreased)

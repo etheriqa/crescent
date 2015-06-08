@@ -17,13 +17,13 @@ func newThreat(performer, receiver *unit, t statistic) *threat {
 }
 
 // newDamageThreat initializes a threat operator with damage
-func newDamageThreat(performer, receiver *unit, damage statistic) *threat {
-	return newThreat(performer, receiver, damage*performer.damageThreatFactor())
+func newDamageThreat(performer, receiver *unit, d damage) *threat {
+	return newThreat(performer, receiver, statistic(d)*performer.damageThreatFactor())
 }
 
 // newHealingThreat initializes a threat operator with healing
-func newHealingThreat(performer, receiver *unit, healing statistic) *threat {
-	return newThreat(performer, receiver, healing*performer.healingThreatFactor())
+func newHealingThreat(performer, receiver *unit, h healing) *threat {
+	return newThreat(performer, receiver, statistic(h)*performer.healingThreatFactor())
 }
 
 // onAttach merges threat operators they have same performer

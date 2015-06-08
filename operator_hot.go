@@ -5,7 +5,7 @@ type hotType string
 type hot struct {
 	partialOperator
 	hotType hotType
-	healing statistic
+	healing healing
 	threat  statistic
 }
 
@@ -60,7 +60,7 @@ func (h *hot) handleEvent(e event) {
 
 // perform performs the HoT
 func (h *hot) perform() {
-	h.addHealth(h.healing)
+	h.takeHealing(h.healing)
 	if h.performer.isDead() {
 		return
 	}

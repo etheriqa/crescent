@@ -116,8 +116,26 @@ func (u *unit) healingThreatFactor() statistic {
 	return u.class.healingThreatFactor + u.modification.healingThreatFactor
 }
 
-// addHealth adds health and returns before/after health
-func (u *unit) addHealth(delta statistic) (before, after statistic) {
+// takeDamage takes the damage and returns before/after health
+func (u *unit) takeDamage(d damage) (before, after statistic) {
+	if d < 0 {
+		// FIXME handle the error
+		log.Fatal("Damage must be non-negative")
+	}
+	return u.modifyHealth(-statistic(d))
+}
+
+// takeHealing takes the healing and returns before/after health
+func (u *unit) takeHealing(h healing) (before, after statistic) {
+	if h < 0 {
+		// FIXME handle the error
+		log.Fatal("Healing must be non negative")
+	}
+	return u.modifyHealth(statistic(h))
+}
+
+// modifyHealth modifies the unit health and returns before/after health
+func (u *unit) modifyHealth(delta statistic) (before, after statistic) {
 	before = u.health()
 	after = u.health() + delta
 	if after < 0 {
@@ -130,8 +148,8 @@ func (u *unit) addHealth(delta statistic) (before, after statistic) {
 	return
 }
 
-// addMana adds mana and returns before/after mana
-func (u *unit) addMana(delta statistic) (before, after statistic) {
+// modifyMana modifies the unit mana and returns before/after mana
+func (u *unit) modifyMana(delta statistic) (before, after statistic) {
 	before = u.mana()
 	after = u.mana() + delta
 	if after < 0 {
@@ -191,7 +209,7 @@ func (u *unit) xotTick() {
 
 // performHealthRegeneration performs health regeneration
 func (u *unit) performHealthRegeneration() {
-	u.addHealth(u.healthRegeneration())
+	u.takeHealing(healing(u.healthRegeneration()))
 	u.publish(message{
 		// TODO pack message
 		t: outHealthReg,
@@ -200,7 +218,7 @@ func (u *unit) performHealthRegeneration() {
 
 // performManaRegeneration performs mana regeneration
 func (u *unit) performManaRegeneration() {
-	u.addMana(u.manaRegeneration())
+	u.modifyMana(u.manaRegeneration())
 	u.publish(message{
 		// TODO pack message
 		t: outManaReg,

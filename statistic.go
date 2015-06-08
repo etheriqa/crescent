@@ -5,6 +5,8 @@ import (
 )
 
 type statistic float64
+type damage statistic
+type healing statistic
 
 // reductionFactor calculates a reduction factor
 func reductionFactor(reduction statistic) statistic {
@@ -17,33 +19,33 @@ func diceCritical(performer *unit) bool {
 }
 
 // dicePhysicalDamage calculates amount of physical damage
-func dicePhysicalDamage(performer, receiver *unit, baseDamage statistic) (damage statistic) {
-	damage = diceTrueDamage(performer, receiver, baseDamage)
-	damage *= reductionFactor(receiver.armor())
-	return
+func dicePhysicalDamage(performer, receiver *unit, baseDamage damage) damage {
+	d := diceTrueDamage(performer, receiver, baseDamage)
+	d *= damage(reductionFactor(receiver.armor()))
+	return d
 }
 
 // diceMagicDamage calculates amount of magic damage
-func diceMagicDamage(performer, receiver *unit, baseDamage statistic) (damage statistic) {
-	damage = diceTrueDamage(performer, receiver, baseDamage)
-	damage *= reductionFactor(receiver.armor())
-	return
+func diceMagicDamage(performer, receiver *unit, baseDamage damage) damage {
+	d := diceTrueDamage(performer, receiver, baseDamage)
+	d *= damage(reductionFactor(receiver.armor()))
+	return d
 }
 
 // diceTrueDamage calculates amount of true damage
-func diceTrueDamage(performer, receiver *unit, baseDamage statistic) statistic {
-	damage := baseDamage
+func diceTrueDamage(performer, receiver *unit, baseDamage damage) damage {
 	if diceCritical(performer) {
-		damage += damage * performer.criticalStrikeFactor()
+		return baseDamage * damage(1+performer.criticalStrikeFactor())
+	} else {
+		return baseDamage
 	}
-	return damage
 }
 
 // diceHealing calculates amount of healing
-func diceHealing(performer, receiver *unit, baseHealing statistic) statistic {
-	healing := baseHealing
+func diceHealing(performer, receiver *unit, baseHealing healing) healing {
 	if diceCritical(performer) {
-		healing += healing * performer.criticalStrikeFactor()
+		return baseHealing * healing(1+performer.criticalStrikeFactor())
+	} else {
+		return baseHealing
 	}
-	return healing
 }
