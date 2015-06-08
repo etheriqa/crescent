@@ -24,4 +24,5 @@ type class struct {
 	damageThreatFactor   statistic
 	healingThreatFactor  statistic
 	abilities            []*ability
+	initializer          func(u *unit)
 }
