@@ -8,7 +8,7 @@ type targetType uint8
 
 const (
 	_ targetType = iota
-	targetTypeOneself
+	targetTypeSelf
 	targetTypeFriend
 	targetTypeAllFriends
 	targetTypeEnemy

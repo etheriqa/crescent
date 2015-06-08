@@ -33,7 +33,6 @@ func newClassTank() *class {
 			disableTypeStun,
 		},
 		perform: func(performer, receiver *unit) {
-			// TODO remove duplicate modifiers
 			performer.attachOperator(newModifier(
 				performer,
 				10*time.Second,
@@ -57,7 +56,6 @@ func newClassTank() *class {
 			disableTypeStun,
 		},
 		perform: func(performer, receiver *unit) {
-			// TODO remove duplicate modifiers
 			performer.attachOperator(newModifier(
 				performer,
 				2*time.Second,
@@ -91,7 +89,7 @@ func newClassTank() *class {
 	// Increasing AR & MR
 	r = &ability{
 		name:               "Tetragrammaton",
-		targetType:         targetTypeOneself,
+		targetType:         targetTypeSelf,
 		healthCost:         0,
 		manaCost:           120,
 		activationDuration: 4,
