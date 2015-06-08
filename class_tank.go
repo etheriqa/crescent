@@ -21,9 +21,9 @@ func newClassTank() *class {
 		damageThreatFactor:   defaultDamageThreatFactor,
 		healingThreatFactor:  defaultHealingThreatFactor,
 	}
-	// True / Increasing threat factor
+	// True damage / Increasing threat factor
 	q = &ability{
-		name:               "Mortal Breath",
+		name:               "Tank Q",
 		targetType:         targetTypeEnemy,
 		healthCost:         0,
 		manaCost:           0,
@@ -44,9 +44,9 @@ func newClassTank() *class {
 			newTrueDamage(performer, receiver, 120, q.name).perform(performer.game)
 		},
 	}
-	// Physical / Increasing AR & MR
+	// Physical damage / Increasing AR & MR
 	w = &ability{
-		name:               "Type Unsafe",
+		name:               "Tank W",
 		targetType:         targetTypeEnemy,
 		healthCost:         0,
 		manaCost:           15,
@@ -68,9 +68,9 @@ func newClassTank() *class {
 			newPhysicalDamage(performer, receiver, 200, w.name).perform(performer.game)
 		},
 	}
-	// Physical / Life steal
+	// Physical damage / Life steal
 	e = &ability{
-		name:               "Bloody Mary",
+		name:               "Tank E",
 		targetType:         targetTypeEnemy,
 		healthCost:         0,
 		manaCost:           50,
@@ -88,7 +88,7 @@ func newClassTank() *class {
 	}
 	// Increasing AR & MR
 	r = &ability{
-		name:               "Tetragrammaton",
+		name:               "Tank R",
 		targetType:         targetTypeSelf,
 		healthCost:         0,
 		manaCost:           120,
