@@ -14,6 +14,18 @@ type disable struct {
 	disableType disableType
 }
 
+// newDisable returns a disable operator
+func newDisable(performer, receiver *unit, disableType disableType, expirationTime gameTime) *disable {
+	return &disable{
+		partialOperator: partialOperator{
+			unit:           receiver,
+			performer:      performer,
+			expirationTime: expirationTime,
+		},
+		disableType: disableType,
+	}
+}
+
 // onAttach removes duplicate disables and triggers eventDisable
 func (d *disable) onAttach() {
 	d.addEventHandler(d, eventDead)
