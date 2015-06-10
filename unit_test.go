@@ -24,6 +24,7 @@ func TestUnitUpdateModification(t *testing.T) {
 			damageThreatFactor:   60,
 			healingThreatFactor:  70,
 		},
+		ability: &ability{},
 	}
 	um2 := &modifier{
 		partialOperator: partialOperator{
@@ -38,6 +39,7 @@ func TestUnitUpdateModification(t *testing.T) {
 			damageThreatFactor:   6000,
 			healingThreatFactor:  7000,
 		},
+		ability: &ability{},
 	}
 	assert.EqualValues(0, u.armor())
 	assert.EqualValues(0, u.magicResistance())

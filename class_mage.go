@@ -41,6 +41,8 @@ func newClassMage() *class {
 				unitModification{
 					armor: -10,
 				},
+				q,
+				1,
 			))
 			// TODO handle the error
 			newMagicDamage(performer, receiver, 120, q.name).perform(performer.game)

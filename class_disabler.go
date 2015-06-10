@@ -39,6 +39,8 @@ func newClassDisabler() *class {
 				unitModification{
 					magicResistance: -15,
 				},
+				q,
+				1,
 			))
 			// TODO handle the error
 			newPhysicalDamage(performer, receiver, 110, q.name).perform(performer.game)
@@ -114,6 +116,8 @@ func newClassDisabler() *class {
 						criticalStrikeChance: 0.2,
 						criticalStrikeFactor: 0.5,
 					},
+					r,
+					1,
 				))
 			}
 		},

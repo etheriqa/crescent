@@ -89,10 +89,16 @@ func newClassHealer() *class {
 			disableTypeStun,
 		},
 		perform: func(performer, receiver *unit) {
-			performer.attachOperator(newModifier(performer, 6*time.Second, unitModification{
-				criticalStrikeChance: 0.5,
-				criticalStrikeFactor: 1.5,
-			}))
+			performer.attachOperator(newModifier(
+				performer,
+				6*time.Second,
+				unitModification{
+					criticalStrikeChance: 0.5,
+					criticalStrikeFactor: 1.5,
+				},
+				r,
+				1,
+			))
 			for _, friend := range performer.game.friends(performer) {
 				friend.attachOperator(newHoT(
 					newHealing(performer, friend, 20, r.name),

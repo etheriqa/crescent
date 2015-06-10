@@ -37,8 +37,10 @@ func newClassTank() *class {
 				performer,
 				10*time.Second,
 				unitModification{
-					damageThreatFactor: 4,
+					damageThreatFactor: 1,
 				},
+				q,
+				5,
 			))
 			// TODO handle the error
 			newTrueDamage(performer, receiver, 120, q.name).perform(performer.game)
@@ -63,6 +65,8 @@ func newClassTank() *class {
 					armor:           50,
 					magicResistance: 50,
 				},
+				w,
+				1,
 			))
 			// TODO handle the error
 			newPhysicalDamage(performer, receiver, 200, w.name).perform(performer.game)
@@ -99,10 +103,16 @@ func newClassTank() *class {
 			disableTypeSilence,
 		},
 		perform: func(performer, receiver *unit) {
-			performer.attachOperator(newModifier(performer, 8*time.Second, unitModification{
-				armor:           150,
-				magicResistance: 150,
-			}))
+			performer.attachOperator(newModifier(
+				performer,
+				8*time.Second,
+				unitModification{
+					armor:           150,
+					magicResistance: 150,
+				},
+				r,
+				1,
+			))
 		},
 	}
 	class.abilities = []*ability{q, w, e, r}

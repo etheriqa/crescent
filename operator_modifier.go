@@ -7,10 +7,13 @@ import (
 type modifier struct {
 	partialOperator
 	unitModification
+	*ability
+	maxStack int
+	nowStack int
 }
 
 // newModifier initalizes a modifier
-func newModifier(u *unit, duration time.Duration, m unitModification) *modifier {
+func newModifier(u *unit, duration time.Duration, m unitModification, a *ability, maxStack int) *modifier {
 	return &modifier{
 		partialOperator: partialOperator{
 			unit:           u,
@@ -18,15 +21,32 @@ func newModifier(u *unit, duration time.Duration, m unitModification) *modifier 
 			expirationTime: u.now() + gameTime(duration/gameTick),
 		},
 		unitModification: m,
+		ability:          a,
+		maxStack:         maxStack,
+		nowStack:         1,
 	}
 }
 
 // onAttach updates the modificationStats of the unit
 func (m *modifier) onAttach() {
-	// TODO stack
-	// TODO remove duplicates
 	m.addEventHandler(m, eventDead)
 	m.addEventHandler(m, eventGameTick)
+	for o := range m.operators {
+		switch o := o.(type) {
+		case *modifier:
+			if o == m {
+				continue
+			}
+			if o.ability != m.ability {
+				continue
+			}
+			// TODO check the expiration time
+			m.detachOperator(o)
+			if m.nowStack < m.maxStack {
+				m.nowStack++
+			}
+		}
+	}
 	m.updateModification()
 	m.publish(message{
 		// TODO pack message
