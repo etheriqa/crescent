@@ -12,7 +12,19 @@ func (a *activating) onAttach() {
 	a.addEventHandler(a, eventDisable)
 	a.addEventHandler(a, eventGameTick)
 	a.addEventHandler(a, eventResourceDecreased)
-	a.checkRequirements()
+	for o := range a.operators {
+		switch o.(type) {
+		case *activating:
+			a.detachOperator(a)
+			return
+		}
+	}
+	if err := a.checkRequirements(a.unit, a.receiver); err != nil {
+		a.detachOperator(a)
+	}
+	a.publish(message{
+	// TODO pack message
+	})
 }
 
 // onDetach removes the eventHandlers
@@ -29,33 +41,28 @@ func (a *activating) handleEvent(e event) {
 	case eventDead:
 		a.detachOperator(a)
 	case eventDisable:
-		a.checkRequirements()
+		a.perform()
 	case eventGameTick:
 		a.perform()
 	case eventResourceDecreased:
-		a.checkRequirements()
+		a.perform()
 	}
 }
 
-func (a *activating) checkRequirements() bool {
-	if a.satisfiedRequirements(a.unit) {
-		return true
-	}
-	a.detachOperator(a)
-	a.publish(message{
-		t: outInterrupt,
-		// TODO pack message
-	})
-	return false
-}
-
+// perform performs the ability
 func (a *activating) perform() {
-	if !a.checkRequirements() {
-		return
+	if err := a.checkRequirements(a.unit, a.receiver); err != nil {
+		a.publish(message{
+		// TODO pack message
+		})
+		a.detachOperator(a)
 	}
 	if !a.isExpired() {
 		return
 	}
+	a.publish(message{
+	// TODO pack message
+	})
 	a.ability.perform(a.unit, a.receiver)
 	a.detachOperator(a)
 }
