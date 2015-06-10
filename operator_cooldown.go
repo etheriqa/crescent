@@ -16,15 +16,18 @@ func (c *cooldown) onAttach() {
 // onDetach removes the eventHandler
 func (c *cooldown) onDetach() {
 	c.removeEventHandler(c, eventGameTick)
+	c.expire(c, message{
+		// TODO pack message
+		t: outCooldown,
+	})
 }
 
 // handleEvent handles the event
 func (c *cooldown) handleEvent(e event) {
 	switch e {
 	case eventGameTick:
-		c.expire(c, message{
-			// TODO pack message
-			t: outCooldown,
-		})
+		if c.isExpired() {
+			c.detachOperator(c)
+		}
 	}
 }
