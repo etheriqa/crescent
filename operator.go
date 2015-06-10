@@ -19,7 +19,7 @@ func (p *partialOperator) onDetach() {}
 
 // isExpired returns true iff it is expired
 func (p *partialOperator) isExpired() bool {
-	return p.expirationTime > p.now()
+	return p.expirationTime != 0 && p.expirationTime > p.now()
 }
 
 // expire expires the operator iff it is expired
