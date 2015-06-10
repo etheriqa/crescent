@@ -9,7 +9,7 @@ type activating struct {
 // onAttach checks requirements
 func (a *activating) onAttach() {
 	a.addEventHandler(a, eventDead)
-	a.addEventHandler(a, eventDisable)
+	a.addEventHandler(a, eventDisableInterrupt)
 	a.addEventHandler(a, eventGameTick)
 	a.addEventHandler(a, eventResourceDecreased)
 	for o := range a.operators {
@@ -30,7 +30,7 @@ func (a *activating) onAttach() {
 // onDetach removes the eventHandlers
 func (a *activating) onDetach() {
 	a.removeEventHandler(a, eventDead)
-	a.removeEventHandler(a, eventDisable)
+	a.removeEventHandler(a, eventDisableInterrupt)
 	a.removeEventHandler(a, eventGameTick)
 	a.removeEventHandler(a, eventResourceDecreased)
 }
@@ -40,7 +40,7 @@ func (a *activating) handleEvent(e event) {
 	switch e {
 	case eventDead:
 		a.detachOperator(a)
-	case eventDisable:
+	case eventDisableInterrupt:
 		a.perform()
 	case eventGameTick:
 		a.perform()

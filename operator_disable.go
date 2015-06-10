@@ -25,7 +25,7 @@ func newDisable(receiver *unit, disableType disableType, duration gameDuration) 
 	}
 }
 
-// onAttach removes duplicate disables and triggers eventDisable
+// onAttach removes duplicate disables and triggers eventDisableInterrupt
 func (d *disable) onAttach() {
 	d.addEventHandler(d, eventDead)
 	d.addEventHandler(d, eventGameTick)
@@ -46,7 +46,7 @@ func (d *disable) onAttach() {
 		// TODO pack message
 		t: outDisableBegin,
 	})
-	d.triggerEvent(eventDisable)
+	d.triggerEvent(eventDisableInterrupt)
 }
 
 // onDetach removes the eventHandler
