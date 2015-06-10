@@ -74,7 +74,7 @@ func (u *unit) health() statistic {
 	return u.resource.health
 }
 
-func (u *unit) maxHealth() statistic {
+func (u *unit) healthMax() statistic {
 	return u.class.health
 }
 
@@ -86,7 +86,7 @@ func (u *unit) mana() statistic {
 	return u.resource.mana
 }
 
-func (u *unit) maxMana() statistic {
+func (u *unit) manaMax() statistic {
 	return u.class.mana
 }
 
@@ -140,8 +140,8 @@ func (u *unit) modifyHealth(delta statistic) (before, after statistic, err error
 	if after < 0 {
 		after = 0
 	}
-	if after > u.maxHealth() {
-		after = u.maxHealth()
+	if after > u.healthMax() {
+		after = u.healthMax()
 	}
 	u.resource.health = after
 	if delta < 0 {
@@ -165,8 +165,8 @@ func (u *unit) modifyMana(delta statistic) (before, after statistic, err error) 
 	if after < 0 {
 		after = 0
 	}
-	if after > u.maxMana() {
-		after = u.maxMana()
+	if after > u.manaMax() {
+		after = u.manaMax()
 	}
 	u.resource.mana = after
 	if delta < 0 {
