@@ -30,11 +30,11 @@ func damageReductionFactor(damageReduction statistic) statistic {
 }
 
 // applyCriticalStrike judges whether critical strike happens or not and returns amount of damage / healing that affected by critical strike
-func applyCriticalStrike(base, criticalStrikeChance, criticalStrikeFactor statistic) (amount statistic, critical bool) {
+func applyCriticalStrike(base, chance, factor statistic) (amount statistic, critical bool) {
 	amount = base
-	critical = rand.Float64() < float64(criticalStrikeChance)
+	critical = rand.Float64() < float64(chance)
 	if critical {
-		amount += base * criticalStrikeFactor
+		amount += base * factor
 	}
 	return
 }
