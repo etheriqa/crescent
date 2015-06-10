@@ -1,9 +1,5 @@
 package main
 
-import (
-	"time"
-)
-
 func newClassAssassin() *class {
 	type stack struct {
 		partialOperator
@@ -32,7 +28,7 @@ func newClassAssassin() *class {
 		healthCost:         0,
 		manaCost:           0,
 		activationDuration: 0,
-		cooldownDuration:   2 * time.Second,
+		cooldownDuration:   2 * second,
 		disableTypes: []disableType{
 			disableTypeStun,
 		},
@@ -47,7 +43,7 @@ func newClassAssassin() *class {
 		healthCost:         0,
 		manaCost:           20,
 		activationDuration: 0,
-		cooldownDuration:   8 * time.Second,
+		cooldownDuration:   8 * second,
 		disableTypes: []disableType{
 			disableTypeStun,
 		},
@@ -67,7 +63,7 @@ func newClassAssassin() *class {
 		healthCost:         0,
 		manaCost:           40,
 		activationDuration: 0,
-		cooldownDuration:   20 * time.Second,
+		cooldownDuration:   20 * second,
 		disableTypes: []disableType{
 			disableTypeStun,
 		},
@@ -92,7 +88,7 @@ func newClassAssassin() *class {
 		healthCost:         0,
 		manaCost:           120,
 		activationDuration: 0,
-		cooldownDuration:   60 * time.Second,
+		cooldownDuration:   60 * second,
 		disableTypes: []disableType{
 			disableTypeStun,
 		},

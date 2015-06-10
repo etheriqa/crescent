@@ -1,9 +1,5 @@
 package main
 
-import (
-	"time"
-)
-
 func newClassDisabler() *class {
 	var q, w, e, r *ability
 	class := &class{
@@ -28,7 +24,7 @@ func newClassDisabler() *class {
 		healthCost:         0,
 		manaCost:           0,
 		activationDuration: 0,
-		cooldownDuration:   2 * time.Second,
+		cooldownDuration:   2 * second,
 		disableTypes: []disableType{
 			disableTypeStun,
 		},
@@ -56,8 +52,8 @@ func newClassDisabler() *class {
 		targetType:         targetTypeEnemy,
 		healthCost:         0,
 		manaCost:           40,
-		activationDuration: 2 * time.Second,
-		cooldownDuration:   8 * time.Second,
+		activationDuration: 2 * second,
+		cooldownDuration:   8 * second,
 		disableTypes: []disableType{
 			disableTypeStun,
 			disableTypeSilence,
@@ -78,7 +74,7 @@ func newClassDisabler() *class {
 		healthCost:         0,
 		manaCost:           60,
 		activationDuration: 0,
-		cooldownDuration:   20 * time.Second,
+		cooldownDuration:   20 * second,
 		disableTypes: []disableType{
 			disableTypeStun,
 		},
@@ -98,7 +94,7 @@ func newClassDisabler() *class {
 		healthCost:         0,
 		manaCost:           120,
 		activationDuration: 0,
-		cooldownDuration:   60 * time.Second,
+		cooldownDuration:   60 * second,
 		disableTypes: []disableType{
 			disableTypeStun,
 		},

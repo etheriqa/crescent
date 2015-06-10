@@ -1,9 +1,5 @@
 package main
 
-import (
-	"time"
-)
-
 func newClassTank() *class {
 	var q, w, e, r *ability
 	class := &class{
@@ -28,7 +24,7 @@ func newClassTank() *class {
 		healthCost:         0,
 		manaCost:           0,
 		activationDuration: 0,
-		cooldownDuration:   2 * time.Second,
+		cooldownDuration:   2 * second,
 		disableTypes: []disableType{
 			disableTypeStun,
 		},
@@ -52,8 +48,8 @@ func newClassTank() *class {
 		targetType:         targetTypeEnemy,
 		healthCost:         0,
 		manaCost:           15,
-		activationDuration: 2 * time.Second,
-		cooldownDuration:   8 * time.Second,
+		activationDuration: 2 * second,
+		cooldownDuration:   8 * second,
 		disableTypes: []disableType{
 			disableTypeStun,
 		},
@@ -79,7 +75,7 @@ func newClassTank() *class {
 		healthCost:         0,
 		manaCost:           50,
 		activationDuration: 0,
-		cooldownDuration:   15 * time.Second,
+		cooldownDuration:   15 * second,
 		disableTypes: []disableType{
 			disableTypeStun,
 		},

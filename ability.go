@@ -1,9 +1,5 @@
 package main
 
-import (
-	"time"
-)
-
 type targetType uint8
 
 const (
@@ -18,8 +14,8 @@ type ability struct {
 	targetType         targetType
 	healthCost         statistic
 	manaCost           statistic
-	activationDuration time.Duration
-	cooldownDuration   time.Duration
+	activationDuration gameDuration
+	cooldownDuration   gameDuration
 	disableTypes       []disableType
 	perform            func(performer, receiver *unit)
 }

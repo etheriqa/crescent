@@ -2,7 +2,6 @@ package main
 
 import (
 	"math/rand"
-	"time"
 )
 
 func newClassMage() *class {
@@ -28,7 +27,7 @@ func newClassMage() *class {
 		targetType:         targetTypeEnemy,
 		healthCost:         0,
 		manaCost:           0,
-		activationDuration: 2 * time.Second,
+		activationDuration: 2 * second,
 		cooldownDuration:   0,
 		disableTypes: []disableType{
 			disableTypeSilence,
@@ -64,8 +63,8 @@ func newClassMage() *class {
 		targetType:         targetTypeEnemy,
 		healthCost:         0,
 		manaCost:           20,
-		activationDuration: 2 * time.Second,
-		cooldownDuration:   8 * time.Second,
+		activationDuration: 2 * second,
+		cooldownDuration:   8 * second,
 		disableTypes: []disableType{
 			disableTypeSilence,
 			disableTypeStun,
@@ -94,8 +93,8 @@ func newClassMage() *class {
 		targetType:         targetTypeEnemy,
 		healthCost:         0,
 		manaCost:           60,
-		activationDuration: 2 * time.Second,
-		cooldownDuration:   18 * time.Second,
+		activationDuration: 2 * second,
+		cooldownDuration:   18 * second,
 		disableTypes: []disableType{
 			disableTypeSilence,
 			disableTypeStun,
@@ -111,8 +110,8 @@ func newClassMage() *class {
 		targetType:         targetTypeNone,
 		healthCost:         0,
 		manaCost:           200,
-		activationDuration: 2 * time.Second,
-		cooldownDuration:   60 * time.Second,
+		activationDuration: 2 * second,
+		cooldownDuration:   60 * second,
 		disableTypes: []disableType{
 			disableTypeSilence,
 			disableTypeStun,

@@ -1,9 +1,5 @@
 package main
 
-import (
-	"time"
-)
-
 func newClassHealer() *class {
 	var q, w, e, r *ability
 	class := &class{
@@ -27,8 +23,8 @@ func newClassHealer() *class {
 		targetType:         targetTypeEnemy,
 		healthCost:         0,
 		manaCost:           0,
-		activationDuration: 2 * time.Second,
-		cooldownDuration:   2 * time.Second,
+		activationDuration: 2 * second,
+		cooldownDuration:   2 * second,
 		disableTypes: []disableType{
 			disableTypeSilence,
 			disableTypeStun,
@@ -46,8 +42,8 @@ func newClassHealer() *class {
 		targetType:         targetTypeFriend,
 		healthCost:         0,
 		manaCost:           40,
-		activationDuration: 2 * time.Second,
-		cooldownDuration:   4 * time.Second,
+		activationDuration: 2 * second,
+		cooldownDuration:   4 * second,
 		disableTypes: []disableType{
 			disableTypeSilence,
 			disableTypeStun,
@@ -65,8 +61,8 @@ func newClassHealer() *class {
 		targetType:         targetTypeFriend,
 		healthCost:         0,
 		manaCost:           80,
-		activationDuration: 2 * time.Second,
-		cooldownDuration:   8 * time.Second,
+		activationDuration: 2 * second,
+		cooldownDuration:   8 * second,
 		disableTypes: []disableType{
 			disableTypeSilence,
 			disableTypeStun,
@@ -82,7 +78,7 @@ func newClassHealer() *class {
 		healthCost:         0,
 		manaCost:           200,
 		activationDuration: 0,
-		cooldownDuration:   60 * time.Second,
+		cooldownDuration:   60 * second,
 		disableTypes: []disableType{
 			disableTypeSilence,
 			disableTypeStun,
