@@ -93,7 +93,7 @@ func newClassTank() *class {
 	// Increasing AR & MR
 	r = &ability{
 		name:               "Tank R",
-		targetType:         targetTypeSelf,
+		targetType:         targetTypeNone,
 		healthCost:         0,
 		manaCost:           120,
 		activationDuration: 4,

@@ -99,7 +99,7 @@ func newClassDisabler() *class {
 	// Increasing critical / All
 	r = &ability{
 		name:               "R",
-		targetType:         targetTypeEnemy,
+		targetType:         targetTypeNone,
 		healthCost:         0,
 		manaCost:           120,
 		activationDuration: 0,

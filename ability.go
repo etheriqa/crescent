@@ -8,11 +8,9 @@ type targetType uint8
 
 const (
 	_ targetType = iota
-	targetTypeSelf
+	targetTypeNone
 	targetTypeFriend
-	targetTypeAllFriends
 	targetTypeEnemy
-	targetTypeAllEnemies
 )
 
 type ability struct {

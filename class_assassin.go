@@ -64,7 +64,7 @@ func newClassAssassin() *class {
 	// Increasing stacks / Decreasing armor and magic resistance
 	e = &ability{
 		name:               "E",
-		targetType:         targetTypeSelf,
+		targetType:         targetTypeNone,
 		healthCost:         0,
 		manaCost:           40,
 		activationDuration: 0,

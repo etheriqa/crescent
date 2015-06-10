@@ -79,7 +79,7 @@ func newClassHealer() *class {
 	// HoT / Increasing critical strike chance and critical strike factor
 	r = &ability{
 		name:               "Healer R",
-		targetType:         targetTypeAllFriends,
+		targetType:         targetTypeNone,
 		healthCost:         0,
 		manaCost:           200,
 		activationDuration: 0,

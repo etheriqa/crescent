@@ -109,7 +109,7 @@ func newClassMage() *class {
 	// Magic damage / All / DoT / Stun
 	r = &ability{
 		name:               "R",
-		targetType:         targetTypeEnemy,
+		targetType:         targetTypeNone,
 		healthCost:         0,
 		manaCost:           200,
 		activationDuration: 2 * time.Second,
