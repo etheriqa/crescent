@@ -89,8 +89,12 @@ func newPureDamage(performer, receiver *unit, baseDamage statistic, name string)
 }
 
 // perform subtracts amount the damage from the receiver and attaches a threat operator to the performer and publishes a message
-func (d damage) perform(g *game) (before, after statistic, err error) {
-	amount, _ := applyCriticalStrike(d.amount, d.criticalStrikeChance, d.criticalStrikeFactor)
+func (d damage) perform(g *game) (before, after statistic, crit bool, err error) {
+	amount, crit := applyCriticalStrike(
+		d.amount,
+		d.criticalStrikeChance,
+		d.criticalStrikeFactor,
+	)
 	after, before, err = d.receiver.modifyHealth(-amount)
 	if err != nil {
 		return
@@ -129,8 +133,12 @@ func newPureHealing(performer, receiver *unit, baseHealing statistic, name strin
 }
 
 // perform adds amount of healing to the receiver and attaches a threat operator to the enemies and publish a message
-func (h healing) perform(g *game) (after, before statistic, err error) {
-	amount, _ := applyCriticalStrike(h.amount, h.criticalStrikeChance, h.criticalStrikeFactor)
+func (h healing) perform(g *game) (after, before statistic, crit bool, err error) {
+	amount, crit := applyCriticalStrike(
+		h.amount,
+		h.criticalStrikeChance,
+		h.criticalStrikeFactor,
+	)
 	after, before, err = h.receiver.modifyHealth(amount)
 	if err != nil {
 		return

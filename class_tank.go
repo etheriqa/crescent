@@ -85,7 +85,7 @@ func newClassTank() *class {
 		},
 		perform: func(performer, receiver *unit) {
 			// TODO handle the error
-			before, after, _ := newPhysicalDamage(performer, receiver, 300, e.name).perform(performer.game)
+			before, after, _, _ := newPhysicalDamage(performer, receiver, 300, e.name).perform(performer.game)
 			// TODO handle the error
 			newPureHealing(performer, receiver, (before-after)*0.6, e.name).perform(performer.game)
 		},

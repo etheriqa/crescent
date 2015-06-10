@@ -35,7 +35,7 @@ func newClassHealer() *class {
 		},
 		perform: func(performer, receiver *unit) {
 			// TODO handle the error
-			before, after, _ := newMagicDamage(performer, receiver, 100, q.name).perform(performer.game)
+			before, after, _, _ := newMagicDamage(performer, receiver, 100, q.name).perform(performer.game)
 			// TODO send a message including the ability name
 			performer.performManaModification((before - after) * 0.1)
 		},

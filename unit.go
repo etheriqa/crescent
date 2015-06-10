@@ -222,7 +222,7 @@ func (u *unit) xotTick() {
 
 // performHealthRegeneration performs health regeneration
 func (u *unit) performHealthRegeneration() {
-	_, _, err := newPureHealing(nil, u, u.healthRegeneration(), "").perform(u.game)
+	_, _, _, err := newPureHealing(nil, u, u.healthRegeneration(), "").perform(u.game)
 	if err != nil {
 		log.WithFields(logrus.Fields{
 			"err": err,
