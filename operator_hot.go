@@ -8,12 +8,12 @@ type hot struct {
 }
 
 // newHoT returns a HoT
-func newHoT(h *healing, expirationTime gameTime) *hot {
+func newHoT(h *healing, duration gameDuration) *hot {
 	return &hot{
 		partialOperator: partialOperator{
 			unit:           h.receiver,
 			performer:      h.performer,
-			expirationTime: expirationTime,
+			expirationTime: h.receiver.after(duration),
 		},
 		healing: h,
 	}
@@ -25,20 +25,17 @@ func (h *hot) onAttach() {
 	h.addEventHandler(h, eventGameTick)
 	h.addEventHandler(h, eventXoT)
 	for o := range h.operators {
-		if o == h {
-			continue
+		switch o := o.(type) {
+		case *hot:
+			if o == h || o.performer != h.performer || o.healing.name != h.healing.name {
+				continue
+			}
+			if o.expirationTime > h.expirationTime {
+				h.detachOperator(h)
+				return
+			}
+			h.detachOperator(o)
 		}
-		if _, ok := o.(*hot); !ok {
-			continue
-		}
-		if o.(*hot).healing.name != h.healing.name {
-			continue
-		}
-		if o.(*disable).expirationTime >= h.expirationTime {
-			h.detachOperator(h)
-			return
-		}
-		h.detachOperator(o)
 	}
 	h.publish(message{
 		// TODO pack message
@@ -64,11 +61,6 @@ func (h *hot) handleEvent(e event) {
 			t: outHoTEnd,
 		})
 	case eventXoT:
-		h.perform()
+		h.healing.perform(h.game)
 	}
-}
-
-// perform performs the HoT
-func (h *hot) perform() {
-	h.healing.perform(h.unit.game)
 }

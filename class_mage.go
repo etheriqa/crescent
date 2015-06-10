@@ -37,7 +37,7 @@ func newClassMage() *class {
 		perform: func(performer, receiver *unit) {
 			receiver.attachOperator(newModifier(
 				receiver,
-				8*time.Second,
+				8*second,
 				unitModification{
 					armor: -10,
 				},
@@ -74,8 +74,7 @@ func newClassMage() *class {
 			// TODO handle the error
 			receiver.attachOperator(newDoT(
 				newMagicDamage(performer, receiver, 30, w.name),
-				// TODO converter
-				gameTime(10*time.Second),
+				10*second,
 			))
 			if rand.Float64() > 0.2 {
 				for o := range performer.operators {
@@ -123,15 +122,12 @@ func newClassMage() *class {
 				newMagicDamage(performer, enemy, 400, r.name).perform(performer.game)
 				enemy.attachOperator(newDoT(
 					newMagicDamage(performer, enemy, 40, r.name),
-					// TODO converter
-					gameTime(10*time.Second),
+					10*second,
 				))
 				enemy.attachOperator(newDisable(
-					performer,
 					receiver,
 					disableTypeStun,
-					// TODO converter
-					gameTime(500*time.Millisecond),
+					500*millisecond,
 				))
 			}
 		},

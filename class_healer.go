@@ -55,8 +55,7 @@ func newClassHealer() *class {
 		perform: func(performer, receiver *unit) {
 			receiver.attachOperator(newHoT(
 				newHealing(performer, receiver, 20, w.name),
-				// TODO converter
-				gameTime(12*time.Second),
+				12*second,
 			))
 		},
 	}
@@ -91,7 +90,7 @@ func newClassHealer() *class {
 		perform: func(performer, receiver *unit) {
 			performer.attachOperator(newModifier(
 				performer,
-				6*time.Second,
+				6*second,
 				unitModification{
 					criticalStrikeChance: 0.5,
 					criticalStrikeFactor: 1.5,
@@ -102,8 +101,7 @@ func newClassHealer() *class {
 			for _, friend := range performer.game.friends(performer) {
 				friend.attachOperator(newHoT(
 					newHealing(performer, friend, 20, r.name),
-					// TODO converter
-					gameTime(6*time.Second),
+					6*second,
 				))
 			}
 		},

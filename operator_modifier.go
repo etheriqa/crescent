@@ -1,9 +1,5 @@
 package main
 
-import (
-	"time"
-)
-
 type modifier struct {
 	partialOperator
 	unitModification
@@ -13,12 +9,11 @@ type modifier struct {
 }
 
 // newModifier initalizes a modifier
-func newModifier(u *unit, duration time.Duration, m unitModification, a *ability, maxStack int) *modifier {
+func newModifier(receiver *unit, duration gameDuration, m unitModification, a *ability, maxStack int) *modifier {
 	return &modifier{
 		partialOperator: partialOperator{
-			unit:           u,
-			performer:      nil,
-			expirationTime: u.now() + gameTime(duration/gameTick),
+			unit:           receiver,
+			expirationTime: receiver.after(duration),
 		},
 		unitModification: m,
 		ability:          a,

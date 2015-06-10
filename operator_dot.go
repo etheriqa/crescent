@@ -8,12 +8,12 @@ type dot struct {
 }
 
 // newDoT returns a DoT
-func newDoT(d *damage, expirationTime gameTime) *dot {
+func newDoT(d *damage, duration gameDuration) *dot {
 	return &dot{
 		partialOperator: partialOperator{
 			unit:           d.receiver,
 			performer:      d.performer,
-			expirationTime: expirationTime,
+			expirationTime: d.receiver.after(duration),
 		},
 		damage: d,
 	}
@@ -25,20 +25,17 @@ func (d *dot) onAttach() {
 	d.addEventHandler(d, eventGameTick)
 	d.addEventHandler(d, eventXoT)
 	for o := range d.operators {
-		if o == d {
-			continue
+		switch o := o.(type) {
+		case *dot:
+			if o == d || o.performer != d.performer || o.damage.name != d.damage.name {
+				continue
+			}
+			if o.expirationTime > d.expirationTime {
+				d.detachOperator(d)
+				return
+			}
+			d.detachOperator(o)
 		}
-		if _, ok := o.(*dot); !ok {
-			continue
-		}
-		if o.(*dot).damage.name != d.damage.name {
-			continue
-		}
-		if o.(*disable).expirationTime >= d.expirationTime {
-			d.detachOperator(d)
-			return
-		}
-		d.detachOperator(o)
 	}
 	d.publish(message{
 		// TODO pack message
@@ -64,11 +61,6 @@ func (d *dot) handleEvent(e event) {
 			t: outDoTEnd,
 		})
 	case eventXoT:
-		d.perform()
+		d.damage.perform(d.game)
 	}
-}
-
-// perform performs the DoT
-func (d *dot) perform() {
-	d.damage.perform(d.unit.game)
 }

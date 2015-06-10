@@ -56,8 +56,7 @@ func newClassAssassin() *class {
 			newPhysicalDamage(performer, receiver, 80, w.name).perform(performer.game)
 			receiver.attachOperator(newDoT(
 				newPhysicalDamage(performer, receiver, 20, w.name),
-				// TODO converter
-				gameTime(10*time.Second),
+				10*second,
 			))
 		},
 	}
@@ -76,7 +75,7 @@ func newClassAssassin() *class {
 			// TODO increase stack
 			performer.attachOperator(newModifier(
 				performer,
-				8*time.Second,
+				8*second,
 				unitModification{
 					armor:           -25,
 					magicResistance: -25,

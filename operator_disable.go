@@ -15,12 +15,11 @@ type disable struct {
 }
 
 // newDisable returns a disable operator
-func newDisable(performer, receiver *unit, disableType disableType, expirationTime gameTime) *disable {
+func newDisable(receiver *unit, disableType disableType, duration gameDuration) *disable {
 	return &disable{
 		partialOperator: partialOperator{
 			unit:           receiver,
-			performer:      performer,
-			expirationTime: expirationTime,
+			expirationTime: receiver.after(duration),
 		},
 		disableType: disableType,
 	}
@@ -31,20 +30,17 @@ func (d *disable) onAttach() {
 	d.addEventHandler(d, eventDead)
 	d.addEventHandler(d, eventGameTick)
 	for o := range d.operators {
-		if o == d {
-			continue
+		switch o := o.(type) {
+		case *disable:
+			if o == d || o.disableType != d.disableType {
+				continue
+			}
+			if o.expirationTime > d.expirationTime {
+				d.detachOperator(d)
+				return
+			}
+			d.detachOperator(o)
 		}
-		if _, ok := o.(*disable); !ok {
-			continue
-		}
-		if o.(*disable).disableType != d.disableType {
-			continue
-		}
-		if o.(*disable).expirationTime >= d.expirationTime {
-			d.detachOperator(d)
-			return
-		}
-		d.detachOperator(o)
 	}
 	d.publish(message{
 		// TODO pack message

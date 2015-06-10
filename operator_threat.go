@@ -30,17 +30,14 @@ func newHealingThreat(performer, receiver *unit, h statistic) *threat {
 func (t *threat) onAttach() {
 	t.addEventHandler(t, eventDead)
 	for o := range t.operators {
-		if o == t {
-			continue
+		switch o := o.(type) {
+		case *threat:
+			if o == t || o.performer != t.performer {
+				continue
+			}
+			t.threat += o.threat
+			t.detachOperator(o)
 		}
-		if _, ok := o.(*threat); !ok {
-			continue
-		}
-		if o.(*threat).performer != t.performer {
-			continue
-		}
-		t.threat += o.(*threat).threat
-		t.detachOperator(o)
 	}
 }
 

@@ -1,7 +1,16 @@
 package main
 
+import (
+	"time"
+)
+
 type gameTime int64
 type gameDuration int64
+
+const (
+	millisecond = gameDuration(time.Millisecond / gameTick)
+	second      = gameDuration(time.Second / gameTick)
+)
 
 type game struct {
 	time  gameTime
@@ -25,8 +34,14 @@ func newGame(inc chan message, out chan message) *game {
 	}
 }
 
+// now returns the game time
 func (g *game) now() gameTime {
 	return g.time
+}
+
+// after returns the game time after the duration
+func (g *game) after(d gameDuration) gameTime {
+	return g.time + gameTime(d)
 }
 
 // friends returns given unit's friend units **including itself**

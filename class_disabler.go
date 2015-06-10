@@ -35,7 +35,7 @@ func newClassDisabler() *class {
 		perform: func(performer, receiver *unit) {
 			receiver.attachOperator(newModifier(
 				receiver,
-				12*time.Second,
+				12*second,
 				unitModification{
 					magicResistance: -15,
 				},
@@ -46,8 +46,7 @@ func newClassDisabler() *class {
 			newPhysicalDamage(performer, receiver, 110, q.name).perform(performer.game)
 			receiver.attachOperator(newDoT(
 				newPhysicalDamage(performer, receiver, 25, q.name),
-				// TODO converter
-				gameTime(4*time.Second),
+				4*second,
 			))
 		},
 	}
@@ -66,11 +65,9 @@ func newClassDisabler() *class {
 		perform: func(performer, receiver *unit) {
 			newMagicDamage(performer, receiver, 220, w.name).perform(performer.game)
 			receiver.attachOperator(newDisable(
-				performer,
 				receiver,
 				disableTypeSilence,
-				// TODO converter
-				gameTime(500*time.Millisecond),
+				500*millisecond,
 			))
 		},
 	}
@@ -88,11 +85,9 @@ func newClassDisabler() *class {
 		perform: func(performer, receiver *unit) {
 			newPhysicalDamage(performer, receiver, 280, e.name).perform(performer.game)
 			receiver.attachOperator(newDisable(
-				performer,
 				receiver,
 				disableTypeStun,
-				// TODO converter
-				gameTime(2*time.Second),
+				2*second,
 			))
 		},
 	}
@@ -111,7 +106,7 @@ func newClassDisabler() *class {
 			for _, friend := range performer.game.friends(performer) {
 				friend.attachOperator(newModifier(
 					friend,
-					10*time.Second,
+					10*second,
 					unitModification{
 						criticalStrikeChance: 0.2,
 						criticalStrikeFactor: 0.5,

@@ -58,6 +58,10 @@ func (u *unit) now() gameTime {
 	return u.game.now()
 }
 
+func (u *unit) after(d gameDuration) gameTime {
+	return u.game.after(d)
+}
+
 func (u *unit) publish(m message) {
 	u.game.publish(m)
 }

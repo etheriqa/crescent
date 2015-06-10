@@ -35,7 +35,7 @@ func newClassTank() *class {
 		perform: func(performer, receiver *unit) {
 			performer.attachOperator(newModifier(
 				performer,
-				10*time.Second,
+				10*second,
 				unitModification{
 					damageThreatFactor: 1,
 				},
@@ -60,7 +60,7 @@ func newClassTank() *class {
 		perform: func(performer, receiver *unit) {
 			performer.attachOperator(newModifier(
 				performer,
-				2*time.Second,
+				2*second,
 				unitModification{
 					armor:           50,
 					magicResistance: 50,
@@ -105,7 +105,7 @@ func newClassTank() *class {
 		perform: func(performer, receiver *unit) {
 			performer.attachOperator(newModifier(
 				performer,
-				8*time.Second,
+				8*second,
 				unitModification{
 					armor:           150,
 					magicResistance: 150,
