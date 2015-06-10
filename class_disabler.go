@@ -31,12 +31,12 @@ func newClassDisabler() *class {
 		perform: func(performer, receiver *unit) {
 			receiver.attachOperator(newModifier(
 				receiver,
-				12*second,
 				unitModification{
 					magicResistance: -15,
 				},
 				q,
 				1,
+				12*second,
 			))
 			// TODO handle the error
 			newPhysicalDamage(performer, receiver, 110, q.name).perform(performer.game)
@@ -102,13 +102,13 @@ func newClassDisabler() *class {
 			for _, friend := range performer.game.friends(performer) {
 				friend.attachOperator(newModifier(
 					friend,
-					10*second,
 					unitModification{
 						criticalStrikeChance: 0.2,
 						criticalStrikeFactor: 0.5,
 					},
 					r,
 					1,
+					10*second,
 				))
 			}
 		},

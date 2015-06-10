@@ -31,12 +31,12 @@ func newClassTank() *class {
 		perform: func(performer, receiver *unit) {
 			performer.attachOperator(newModifier(
 				performer,
-				10*second,
 				unitModification{
 					damageThreatFactor: 1,
 				},
 				q,
 				5,
+				10*second,
 			))
 			// TODO handle the error
 			newTrueDamage(performer, receiver, 120, q.name).perform(performer.game)
@@ -56,13 +56,13 @@ func newClassTank() *class {
 		perform: func(performer, receiver *unit) {
 			performer.attachOperator(newModifier(
 				performer,
-				2*second,
 				unitModification{
 					armor:           50,
 					magicResistance: 50,
 				},
 				w,
 				1,
+				2*second,
 			))
 			// TODO handle the error
 			newPhysicalDamage(performer, receiver, 200, w.name).perform(performer.game)
@@ -101,13 +101,13 @@ func newClassTank() *class {
 		perform: func(performer, receiver *unit) {
 			performer.attachOperator(newModifier(
 				performer,
-				8*second,
 				unitModification{
 					armor:           150,
 					magicResistance: 150,
 				},
 				r,
 				1,
+				8*second,
 			))
 		},
 	}

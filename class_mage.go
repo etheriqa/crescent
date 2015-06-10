@@ -36,12 +36,12 @@ func newClassMage() *class {
 		perform: func(performer, receiver *unit) {
 			receiver.attachOperator(newModifier(
 				receiver,
-				8*second,
 				unitModification{
 					armor: -10,
 				},
 				q,
 				1,
+				8*second,
 			))
 			// TODO handle the error
 			newMagicDamage(performer, receiver, 120, q.name).perform(performer.game)

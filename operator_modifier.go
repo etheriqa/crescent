@@ -9,7 +9,7 @@ type modifier struct {
 }
 
 // newModifier initalizes a modifier
-func newModifier(receiver *unit, duration gameDuration, m unitModification, a *ability, maxStack int) *modifier {
+func newModifier(receiver *unit, m unitModification, a *ability, maxStack int, duration gameDuration) *modifier {
 	return &modifier{
 		partialOperator: partialOperator{
 			unit:           receiver,
@@ -29,17 +29,17 @@ func (m *modifier) onAttach() {
 	for o := range m.operators {
 		switch o := o.(type) {
 		case *modifier:
-			if o == m {
+			if o == m || o.ability != m.ability {
 				continue
 			}
-			if o.ability != m.ability {
-				continue
+			if o.expirationTime > m.expirationTime {
+				m.expirationTime = o.expirationTime
 			}
-			// TODO check the expiration time
+			m.nowStack += o.nowStack
+			if m.nowStack > m.maxStack {
+				m.nowStack = m.maxStack
+			}
 			m.detachOperator(o)
-			if m.nowStack < m.maxStack {
-				m.nowStack++
-			}
 		}
 	}
 	m.updateModification()

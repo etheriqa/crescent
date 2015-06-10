@@ -86,13 +86,13 @@ func newClassHealer() *class {
 		perform: func(performer, receiver *unit) {
 			performer.attachOperator(newModifier(
 				performer,
-				6*second,
 				unitModification{
 					criticalStrikeChance: 0.5,
 					criticalStrikeFactor: 1.5,
 				},
 				r,
 				1,
+				6*second,
 			))
 			for _, friend := range performer.game.friends(performer) {
 				friend.attachOperator(newHoT(

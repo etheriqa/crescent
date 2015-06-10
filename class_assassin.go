@@ -71,13 +71,13 @@ func newClassAssassin() *class {
 			// TODO increase stack
 			performer.attachOperator(newModifier(
 				performer,
-				8*second,
 				unitModification{
 					armor:           -25,
 					magicResistance: -25,
 				},
 				e,
 				1,
+				8*second,
 			))
 		},
 	}
