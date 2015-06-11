@@ -22,7 +22,7 @@ func (d *DoT) OnAttach() {
 	d.Object().AddEventHandler(d, EventDead)
 	d.Object().AddEventHandler(d, EventGameTick)
 	d.Object().AddEventHandler(d, EventXoT)
-	ok := d.Container().AllObjectHandler(d.Object(), func(ha Handler) bool {
+	ok := d.Container().EveryObjectHandler(d.Object(), func(ha Handler) bool {
 		switch ha := ha.(type) {
 		case *DoT:
 			if ha == d || ha.Subject() != d.Subject() || ha.ability != d.ability {

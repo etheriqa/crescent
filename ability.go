@@ -58,7 +58,7 @@ func (a *ability) checkobject(subject, object *unit) error {
 
 // checkCooldown checks the subject does not have to wait the cooldown time expiration
 func (a *ability) checkCooldown(subject *unit) error {
-	ok := subject.AllSubjectHandler(subject, func(ha Handler) bool {
+	ok := subject.EverySubjectHandler(subject, func(ha Handler) bool {
 		switch ha := ha.(type) {
 		case *Cooldown:
 			if ha.ability == a {
@@ -75,7 +75,7 @@ func (a *ability) checkCooldown(subject *unit) error {
 
 // checkDisable checks the subject is not interrupted by the disables
 func (a *ability) checkDisable(subject *unit) error {
-	ok := subject.AllSubjectHandler(subject, func(ha Handler) bool {
+	ok := subject.EverySubjectHandler(subject, func(ha Handler) bool {
 		switch ha := ha.(type) {
 		case *Disable:
 			for dt := range a.disableTypes {

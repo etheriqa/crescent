@@ -22,7 +22,7 @@ func (h *HoT) OnAttach() {
 	h.Object().AddEventHandler(h, EventDead)
 	h.Object().AddEventHandler(h, EventGameTick)
 	h.Object().AddEventHandler(h, EventXoT)
-	ok := h.Container().AllObjectHandler(h.Object(), func(ha Handler) bool {
+	ok := h.Container().EveryObjectHandler(h.Object(), func(ha Handler) bool {
 		switch ha := ha.(type) {
 		case *HoT:
 			if ha == h || ha.Subject() != h.Subject() || ha.ability != h.ability {

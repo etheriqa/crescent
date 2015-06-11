@@ -22,7 +22,7 @@ func (a *Activating) OnAttach() {
 	if a.Object() != nil {
 		a.Object().AddEventHandler(a, EventDead)
 	}
-	ok := a.Container().AllSubjectHandler(a.Subject(), func(ha Handler) bool {
+	ok := a.Container().EverySubjectHandler(a.Subject(), func(ha Handler) bool {
 		switch ha.(type) {
 		case *Activating:
 			return false

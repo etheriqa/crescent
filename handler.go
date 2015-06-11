@@ -13,8 +13,8 @@ type HandlerContainer interface {
 	DetachHandler(Handler)
 	ForSubjectHandler(*unit, func(Handler))
 	ForObjectHandler(*unit, func(Handler))
-	AllSubjectHandler(*unit, func(Handler) bool) bool
-	AllObjectHandler(*unit, func(Handler) bool) bool
+	EverySubjectHandler(*unit, func(Handler) bool) bool
+	EveryObjectHandler(*unit, func(Handler) bool) bool
 }
 
 type implHandlerContainer struct {
@@ -64,8 +64,8 @@ func (hc *implHandlerContainer) ForObjectHandler(object *unit, callback func(Han
 	}
 }
 
-// AllSubjectHandler
-func (hc *implHandlerContainer) AllSubjectHandler(subject *unit, callback func(Handler) bool) bool {
+// EverySubjectHandler returns true if all of callback results are true
+func (hc *implHandlerContainer) EverySubjectHandler(subject *unit, callback func(Handler) bool) bool {
 	for ha := range hc.handlers {
 		if ha.Subject() != subject {
 			continue
@@ -77,8 +77,8 @@ func (hc *implHandlerContainer) AllSubjectHandler(subject *unit, callback func(H
 	return true
 }
 
-// AllObjectHandler
-func (hc *implHandlerContainer) AllObjectHandler(object *unit, callback func(Handler) bool) bool {
+// EveryObjectHandler returns true if all of callback results are true
+func (hc *implHandlerContainer) EveryObjectHandler(object *unit, callback func(Handler) bool) bool {
 	for ha := range hc.handlers {
 		if ha.Object() != object {
 			continue
@@ -88,4 +88,30 @@ func (hc *implHandlerContainer) AllObjectHandler(object *unit, callback func(Han
 		}
 	}
 	return true
+}
+
+// SomeSubjectHandler returns true if any of callback results are true
+func (hc *implHandlerContainer) SomeSubjectHandler(subject *unit, callback func(Handler) bool) bool {
+	for ha := range hc.handlers {
+		if ha.Subject() != subject {
+			continue
+		}
+		if callback(ha) {
+			return true
+		}
+	}
+	return false
+}
+
+// SomeObjectHandler returns true if any of callback results are true
+func (hc *implHandlerContainer) SomeObjectHandler(object *unit, callback func(Handler) bool) bool {
+	for ha := range hc.handlers {
+		if ha.Object() != object {
+			continue
+		}
+		if callback(ha) {
+			return true
+		}
+	}
+	return false
 }
