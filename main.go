@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	GameTick = time.Millisecond
-	XoTTick  = time.Second
+	GameTick   = time.Millisecond
+	TickerTick = time.Second
 )
 
 var addr = flag.String("addr", ":25200", "service address")

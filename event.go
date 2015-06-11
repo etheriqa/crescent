@@ -8,7 +8,7 @@ const (
 	EventDisableInterrupt
 	EventGameTick
 	EventResourceDecreased
-	EventXoT
+	EventTicker
 )
 
 type EventDispatcher struct {

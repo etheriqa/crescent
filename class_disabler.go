@@ -40,7 +40,7 @@ func newClassDisabler() *class {
 			))
 			// TODO handle the error
 			NewPhysicalDamage(subject, object, 110).Perform()
-			object.AttachHandler(NewDoT(
+			object.AttachHandler(NewTicker(
 				NewPhysicalDamage(subject, object, 25),
 				q,
 				4*Second,

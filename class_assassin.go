@@ -60,7 +60,7 @@ func newClassAssassin() *class {
 		},
 		Perform: func(subject, object *Unit) {
 			NewPhysicalDamage(subject, object, 80).Perform()
-			object.AttachHandler(NewDoT(
+			object.AttachHandler(NewTicker(
 				NewPhysicalDamage(subject, object, 20),
 				w,
 				10*Second,

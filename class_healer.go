@@ -49,7 +49,7 @@ func newClassHealer() *class {
 			DisableTypeStun,
 		},
 		Perform: func(subject, object *Unit) {
-			object.AttachHandler(NewHoT(
+			object.AttachHandler(NewTicker(
 				NewHealing(subject, object, 20),
 				w,
 				12*Second,
@@ -96,7 +96,7 @@ func newClassHealer() *class {
 				6*Second,
 			))
 			for _, friend := range subject.Friends() {
-				friend.AttachHandler(NewHoT(
+				friend.AttachHandler(NewTicker(
 					NewHealing(subject, friend, 20),
 					r,
 					6*Second,

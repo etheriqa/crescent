@@ -183,14 +183,14 @@ func (u *Unit) GameTick() {
 	u.TriggerEvent(EventGameTick)
 }
 
-// XoTTick performs regeneration and triggers evnentXoT
-func (u *Unit) XoTTick() {
+// TickerTick performs regeneration and triggers eventTicker
+func (u *Unit) TickerTick() {
 	if u.isDead() {
 		return
 	}
 	u.performHealthRegeneration()
 	u.performManaRegeneration()
-	u.TriggerEvent(EventXoT)
+	u.TriggerEvent(EventTicker)
 }
 
 // performHealthRegeneration performs health regeneration

@@ -71,7 +71,7 @@ func newClassMage() *class {
 		},
 		Perform: func(subject, object *Unit) {
 			// TODO handle the error
-			object.AttachHandler(NewDoT(
+			object.AttachHandler(NewTicker(
 				NewMagicDamage(subject, object, 30),
 				w,
 				10*Second,
@@ -120,7 +120,7 @@ func newClassMage() *class {
 		Perform: func(subject, object *Unit) {
 			for _, enemy := range subject.Enemies() {
 				NewMagicDamage(subject, enemy, 400).Perform()
-				enemy.AttachHandler(NewDoT(
+				enemy.AttachHandler(NewTicker(
 					NewMagicDamage(subject, enemy, 40),
 					r,
 					10*Second,

@@ -110,11 +110,11 @@ func (g *Game) tick(m *message) {
 	for _, u := range g.uids {
 		u.GameTick()
 	}
-	if int64(g.time)*int64(GameTick)%int64(XoTTick) != 0 {
+	if int64(g.time)*int64(GameTick)%int64(TickerTick) != 0 {
 		return
 	}
 	for _, u := range g.uids {
-		u.XoTTick()
+		u.TickerTick()
 	}
 }
 
