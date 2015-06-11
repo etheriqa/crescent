@@ -4,15 +4,15 @@ type dotType string
 
 type DoT struct {
 	*PartialHandler
-	*damage
-	*ability
+	*Damage
+	ability *ability
 }
 
 // NewDoT returns a DoT handler
-func NewDoT(d *damage, a *ability, duration GameDuration) *DoT {
+func NewDoT(d *Damage, a *ability, duration GameDuration) *DoT {
 	return &DoT{
 		PartialHandler: NewPartialHandler(d.subject, d.object, duration),
-		damage:         d,
+		Damage:         d,
 		ability:        a,
 	}
 }
@@ -61,7 +61,7 @@ func (d *DoT) HandleEvent(e Event) {
 			d.Up()
 		}
 	case EventXoT:
-		d.damage.Perform()
+		d.Perform()
 	}
 }
 

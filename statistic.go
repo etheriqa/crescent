@@ -6,7 +6,7 @@ import (
 
 type Statistic float64
 
-type damage struct {
+type Damage struct {
 	subject              *Unit
 	object               *Unit
 	amount               Statistic
@@ -14,7 +14,7 @@ type damage struct {
 	criticalStrikeFactor Statistic
 }
 
-type healing struct {
+type Healing struct {
 	subject              *Unit
 	object               *Unit
 	amount               Statistic
@@ -37,13 +37,8 @@ func applyCriticalStrike(base, chance, factor Statistic) (amount Statistic, crit
 	return
 }
 
-// diceCritical dices whether critical strike is happening or not
-func diceCritical(subject *Unit) bool {
-	return rand.Float64() < float64(subject.criticalStrikeChance())
-}
-
 // NewPhysicalDamage returns a damage affected by armor of the object
-func NewPhysicalDamage(subject, object *Unit, baseDamage Statistic) *damage {
+func NewPhysicalDamage(subject, object *Unit, baseDamage Statistic) *Damage {
 	return NewTrueDamage(
 		subject,
 		object,
@@ -52,7 +47,7 @@ func NewPhysicalDamage(subject, object *Unit, baseDamage Statistic) *damage {
 }
 
 // NewMagicDamage returns a damage affected by magic resistance of the object
-func NewMagicDamage(subject, object *Unit, baseDamage Statistic) *damage {
+func NewMagicDamage(subject, object *Unit, baseDamage Statistic) *Damage {
 	return NewTrueDamage(
 		subject,
 		object,
@@ -61,8 +56,8 @@ func NewMagicDamage(subject, object *Unit, baseDamage Statistic) *damage {
 }
 
 // NewTrueDamage returns a damage that ignores damage reduction
-func NewTrueDamage(subject, object *Unit, baseDamage Statistic) *damage {
-	return &damage{
+func NewTrueDamage(subject, object *Unit, baseDamage Statistic) *Damage {
+	return &Damage{
 		subject:              subject,
 		object:               object,
 		amount:               baseDamage,
@@ -72,8 +67,8 @@ func NewTrueDamage(subject, object *Unit, baseDamage Statistic) *damage {
 }
 
 // NewPureDamage returns a damage that ignores both damage reduction and critical strike
-func NewPureDamage(subject, object *Unit, baseDamage Statistic) *damage {
-	return &damage{
+func NewPureDamage(subject, object *Unit, baseDamage Statistic) *Damage {
+	return &Damage{
 		subject:              subject,
 		object:               object,
 		amount:               baseDamage,
@@ -83,7 +78,7 @@ func NewPureDamage(subject, object *Unit, baseDamage Statistic) *damage {
 }
 
 // Perform subtracts amount the damage from the object and attaches a threat handler to the subject and publishes a message
-func (d damage) Perform() (before, after Statistic, crit bool, err error) {
+func (d *Damage) Perform() (before, after Statistic, crit bool, err error) {
 	amount, crit := applyCriticalStrike(
 		d.amount,
 		d.criticalStrikeChance,
@@ -103,8 +98,8 @@ func (d damage) Perform() (before, after Statistic, crit bool, err error) {
 }
 
 // NewHealing returns a healing
-func NewHealing(subject, object *Unit, baseHealing Statistic) *healing {
-	return &healing{
+func NewHealing(subject, object *Unit, baseHealing Statistic) *Healing {
+	return &Healing{
 		subject:              subject,
 		object:               object,
 		amount:               baseHealing,
@@ -114,8 +109,8 @@ func NewHealing(subject, object *Unit, baseHealing Statistic) *healing {
 }
 
 // NewPureHealing returns a healing that ignores critical strike
-func NewPureHealing(subject, object *Unit, baseHealing Statistic) *healing {
-	return &healing{
+func NewPureHealing(subject, object *Unit, baseHealing Statistic) *Healing {
+	return &Healing{
 		subject:              subject,
 		object:               object,
 		amount:               baseHealing,
@@ -125,7 +120,7 @@ func NewPureHealing(subject, object *Unit, baseHealing Statistic) *healing {
 }
 
 // Perform adds amount of healing to the object and attaches a threat handler to the enemies and publish a message
-func (h healing) Perform() (after, before Statistic, crit bool, err error) {
+func (h *Healing) Perform() (after, before Statistic, crit bool, err error) {
 	amount, crit := applyCriticalStrike(
 		h.amount,
 		h.criticalStrikeChance,
