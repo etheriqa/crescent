@@ -44,6 +44,10 @@ func (a *ability) CheckRequirements(subject *Unit, object *Unit) error {
 // CheckObject checks the object is valid
 func (a *ability) CheckObject(subject, object *Unit) error {
 	switch a.TargetType {
+	case TargetTypeNone:
+		if object != nil {
+			return errors.New("The object must be nil")
+		}
 	case TargetTypeFriend:
 		if object == nil || subject.group != object.group {
 			return errors.New("The object must be friend")
