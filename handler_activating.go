@@ -80,6 +80,8 @@ func (a *Activating) perform() {
 	a.publish(message{
 	// TODO pack message
 	})
+	// TODO consume health
+	// TODO consume mana
 	a.ability.perform(a.unit, a.receiver)
 	a.detachHandler(a)
 }
