@@ -10,7 +10,6 @@ type damage struct {
 	performer            *unit
 	receiver             *unit
 	amount               statistic
-	name                 string
 	criticalStrikeChance statistic
 	criticalStrikeFactor statistic
 }
@@ -19,7 +18,6 @@ type healing struct {
 	performer            *unit
 	receiver             *unit
 	amount               statistic
-	name                 string
 	criticalStrikeChance statistic
 	criticalStrikeFactor statistic
 }
@@ -45,44 +43,40 @@ func diceCritical(performer *unit) bool {
 }
 
 // newPhysicalDamage returns a damage affected by armor of the receiver
-func newPhysicalDamage(performer, receiver *unit, baseDamage statistic, name string) *damage {
+func newPhysicalDamage(performer, receiver *unit, baseDamage statistic) *damage {
 	return newTrueDamage(
 		performer,
 		receiver,
 		baseDamage*receiver.physicalDamageReductionFactor(),
-		name,
 	)
 }
 
 // newMagicDamage returns a damage affected by magic resistance of the receiver
-func newMagicDamage(performer, receiver *unit, baseDamage statistic, name string) *damage {
+func newMagicDamage(performer, receiver *unit, baseDamage statistic) *damage {
 	return newTrueDamage(
 		performer,
 		receiver,
 		baseDamage*receiver.magicDamageReductionFactor(),
-		name,
 	)
 }
 
 // newTrueDamage returns a damage that ignores damage reduction
-func newTrueDamage(performer, receiver *unit, baseDamage statistic, name string) *damage {
+func newTrueDamage(performer, receiver *unit, baseDamage statistic) *damage {
 	return &damage{
 		performer:            performer,
 		receiver:             receiver,
 		amount:               baseDamage,
-		name:                 name,
 		criticalStrikeChance: performer.criticalStrikeChance(),
 		criticalStrikeFactor: performer.criticalStrikeFactor(),
 	}
 }
 
 // newPureDamage returns a damage that ignores both damage reduction and critical strike
-func newPureDamage(performer, receiver *unit, baseDamage statistic, name string) *damage {
+func newPureDamage(performer, receiver *unit, baseDamage statistic) *damage {
 	return &damage{
 		performer:            performer,
 		receiver:             receiver,
 		amount:               baseDamage,
-		name:                 name,
 		criticalStrikeChance: 0,
 		criticalStrikeFactor: 0,
 	}
@@ -109,11 +103,10 @@ func (d damage) perform(g *game) (before, after statistic, crit bool, err error)
 }
 
 // newHealing returns a healing
-func newHealing(performer, receiver *unit, baseHealing statistic, name string) *healing {
+func newHealing(performer, receiver *unit, baseHealing statistic) *healing {
 	return &healing{
 		performer:            performer,
 		receiver:             receiver,
-		name:                 name,
 		amount:               baseHealing,
 		criticalStrikeChance: performer.criticalStrikeChance(),
 		criticalStrikeFactor: performer.criticalStrikeFactor(),
@@ -121,11 +114,10 @@ func newHealing(performer, receiver *unit, baseHealing statistic, name string) *
 }
 
 // newPureHealing returns a healing that ignores critical strike
-func newPureHealing(performer, receiver *unit, baseHealing statistic, name string) *healing {
+func newPureHealing(performer, receiver *unit, baseHealing statistic) *healing {
 	return &healing{
 		performer:            performer,
 		receiver:             receiver,
-		name:                 name,
 		amount:               baseHealing,
 		criticalStrikeChance: 0,
 		criticalStrikeFactor: 0,

@@ -39,7 +39,7 @@ func newClassTank() *class {
 				10*second,
 			))
 			// TODO handle the error
-			newTrueDamage(performer, receiver, 120, q.name).perform(performer.game)
+			newTrueDamage(performer, receiver, 120).perform(performer.game)
 		},
 	}
 	// Physical damage / Increasing AR & MR
@@ -65,7 +65,7 @@ func newClassTank() *class {
 				2*second,
 			))
 			// TODO handle the error
-			newPhysicalDamage(performer, receiver, 200, w.name).perform(performer.game)
+			newPhysicalDamage(performer, receiver, 200).perform(performer.game)
 		},
 	}
 	// Physical damage / Life steal
@@ -81,9 +81,9 @@ func newClassTank() *class {
 		},
 		perform: func(performer, receiver *unit) {
 			// TODO handle the error
-			before, after, _, _ := newPhysicalDamage(performer, receiver, 300, e.name).perform(performer.game)
+			before, after, _, _ := newPhysicalDamage(performer, receiver, 300).perform(performer.game)
 			// TODO handle the error
-			newPureHealing(performer, receiver, (before-after)*0.6, e.name).perform(performer.game)
+			newPureHealing(performer, receiver, (before-after)*0.6).perform(performer.game)
 		},
 	}
 	// Increasing AR & MR

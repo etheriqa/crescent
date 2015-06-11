@@ -5,10 +5,11 @@ type hotType string
 type hot struct {
 	partialOperator
 	healing *healing
+	ability *ability
 }
 
 // newHoT returns a HoT
-func newHoT(h *healing, duration gameDuration) *hot {
+func newHoT(h *healing, a *ability, duration gameDuration) *hot {
 	return &hot{
 		partialOperator: partialOperator{
 			unit:           h.receiver,
@@ -16,6 +17,7 @@ func newHoT(h *healing, duration gameDuration) *hot {
 			expirationTime: h.receiver.after(duration),
 		},
 		healing: h,
+		ability: a,
 	}
 }
 
@@ -27,7 +29,7 @@ func (h *hot) onAttach() {
 	for o := range h.operators {
 		switch o := o.(type) {
 		case *hot:
-			if o == h || o.performer != h.performer || o.healing.name != h.healing.name {
+			if o == h || o.performer != h.performer || o.ability != h.ability {
 				continue
 			}
 			if o.expirationTime > h.expirationTime {

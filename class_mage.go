@@ -44,7 +44,7 @@ func newClassMage() *class {
 				8*second,
 			))
 			// TODO handle the error
-			newMagicDamage(performer, receiver, 120, q.name).perform(performer.game)
+			newMagicDamage(performer, receiver, 120).perform(performer.game)
 			if rand.Float64() > 0.1 {
 				for o := range performer.operators {
 					switch o := o.(type) {
@@ -72,7 +72,8 @@ func newClassMage() *class {
 		perform: func(performer, receiver *unit) {
 			// TODO handle the error
 			receiver.attachOperator(newDoT(
-				newMagicDamage(performer, receiver, 30, w.name),
+				newMagicDamage(performer, receiver, 30),
+				w,
 				10*second,
 			))
 			if rand.Float64() > 0.2 {
@@ -101,7 +102,7 @@ func newClassMage() *class {
 		},
 		perform: func(performer, receiver *unit) {
 			// TODO handle the error
-			newMagicDamage(performer, receiver, 400, e.name).perform(performer.game)
+			newMagicDamage(performer, receiver, 400).perform(performer.game)
 		},
 	}
 	// Magic damage / All / DoT / Stun
@@ -118,9 +119,10 @@ func newClassMage() *class {
 		},
 		perform: func(performer, receiver *unit) {
 			for _, enemy := range performer.game.enemies(performer) {
-				newMagicDamage(performer, enemy, 400, r.name).perform(performer.game)
+				newMagicDamage(performer, enemy, 400).perform(performer.game)
 				enemy.attachOperator(newDoT(
-					newMagicDamage(performer, enemy, 40, r.name),
+					newMagicDamage(performer, enemy, 40),
+					r,
 					10*second,
 				))
 				enemy.attachOperator(newDisable(
@@ -131,5 +133,6 @@ func newClassMage() *class {
 			}
 		},
 	}
+	class.abilities = []*ability{q, w, e, r}
 	return class
 }

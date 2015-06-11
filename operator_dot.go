@@ -4,18 +4,20 @@ type dotType string
 
 type dot struct {
 	partialOperator
-	damage *damage
+	damage  *damage
+	ability *ability
 }
 
 // newDoT returns a DoT
-func newDoT(d *damage, duration gameDuration) *dot {
+func newDoT(d *damage, a *ability, duration gameDuration) *dot {
 	return &dot{
 		partialOperator: partialOperator{
 			unit:           d.receiver,
 			performer:      d.performer,
 			expirationTime: d.receiver.after(duration),
 		},
-		damage: d,
+		damage:  d,
+		ability: a,
 	}
 }
 
@@ -27,7 +29,7 @@ func (d *dot) onAttach() {
 	for o := range d.operators {
 		switch o := o.(type) {
 		case *dot:
-			if o == d || o.performer != d.performer || o.damage.name != d.damage.name {
+			if o == d || o.performer != d.performer || o.ability != d.ability {
 				continue
 			}
 			if o.expirationTime > d.expirationTime {

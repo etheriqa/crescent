@@ -39,9 +39,10 @@ func newClassDisabler() *class {
 				12*second,
 			))
 			// TODO handle the error
-			newPhysicalDamage(performer, receiver, 110, q.name).perform(performer.game)
+			newPhysicalDamage(performer, receiver, 110).perform(performer.game)
 			receiver.attachOperator(newDoT(
-				newPhysicalDamage(performer, receiver, 25, q.name),
+				newPhysicalDamage(performer, receiver, 25),
+				q,
 				4*second,
 			))
 		},
@@ -59,7 +60,7 @@ func newClassDisabler() *class {
 			disableTypeSilence,
 		},
 		perform: func(performer, receiver *unit) {
-			newMagicDamage(performer, receiver, 220, w.name).perform(performer.game)
+			newMagicDamage(performer, receiver, 220).perform(performer.game)
 			receiver.attachOperator(newDisable(
 				receiver,
 				disableTypeSilence,
@@ -79,7 +80,7 @@ func newClassDisabler() *class {
 			disableTypeStun,
 		},
 		perform: func(performer, receiver *unit) {
-			newPhysicalDamage(performer, receiver, 280, e.name).perform(performer.game)
+			newPhysicalDamage(performer, receiver, 280).perform(performer.game)
 			receiver.attachOperator(newDisable(
 				receiver,
 				disableTypeStun,

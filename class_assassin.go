@@ -33,7 +33,7 @@ func newClassAssassin() *class {
 			disableTypeStun,
 		},
 		perform: func(performer, receiver *unit) {
-			newPhysicalDamage(performer, receiver, 140, q.name).perform(performer.game)
+			newPhysicalDamage(performer, receiver, 140).perform(performer.game)
 		},
 	}
 	// Physical damage / DoT / Increasing stacks
@@ -49,9 +49,10 @@ func newClassAssassin() *class {
 		},
 		perform: func(performer, receiver *unit) {
 			// TODO check crits and increase stack
-			newPhysicalDamage(performer, receiver, 80, w.name).perform(performer.game)
+			newPhysicalDamage(performer, receiver, 80).perform(performer.game)
 			receiver.attachOperator(newDoT(
-				newPhysicalDamage(performer, receiver, 20, w.name),
+				newPhysicalDamage(performer, receiver, 20),
+				w,
 				10*second,
 			))
 		},
@@ -93,7 +94,7 @@ func newClassAssassin() *class {
 			disableTypeStun,
 		},
 		perform: func(performer, receiver *unit) {
-			newPhysicalDamage(performer, receiver, 600, r.name).perform(performer.game)
+			newPhysicalDamage(performer, receiver, 600).perform(performer.game)
 			// TODO consume all stacks
 		},
 	}

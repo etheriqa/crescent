@@ -31,7 +31,7 @@ func newClassHealer() *class {
 		},
 		perform: func(performer, receiver *unit) {
 			// TODO handle the error
-			before, after, _, _ := newMagicDamage(performer, receiver, 100, q.name).perform(performer.game)
+			before, after, _, _ := newMagicDamage(performer, receiver, 100).perform(performer.game)
 			// TODO send a message including the ability name
 			performer.performManaModification((before - after) * 0.1)
 		},
@@ -50,7 +50,8 @@ func newClassHealer() *class {
 		},
 		perform: func(performer, receiver *unit) {
 			receiver.attachOperator(newHoT(
-				newHealing(performer, receiver, 20, w.name),
+				newHealing(performer, receiver, 20),
+				w,
 				12*second,
 			))
 		},
@@ -68,7 +69,7 @@ func newClassHealer() *class {
 			disableTypeStun,
 		},
 		perform: func(performer, receiver *unit) {
-			newHealing(performer, receiver, 400, e.name).perform(performer.game)
+			newHealing(performer, receiver, 400).perform(performer.game)
 		},
 	}
 	// HoT / Increasing critical strike chance and critical strike factor
@@ -96,11 +97,13 @@ func newClassHealer() *class {
 			))
 			for _, friend := range performer.game.friends(performer) {
 				friend.attachOperator(newHoT(
-					newHealing(performer, friend, 20, r.name),
+					newHealing(performer, friend, 20),
+					r,
 					6*second,
 				))
 			}
 		},
 	}
+	class.abilities = []*ability{q, w, e, r}
 	return class
 }
