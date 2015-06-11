@@ -12,3 +12,6 @@ test $(COVER): $(SRCS)
 
 cover: $(COVER)
 	go tool cover -html=$(COVER)
+
+watch:
+	fswatch -o $(SRCS) | while read line; do clear; date; echo; make test; done
