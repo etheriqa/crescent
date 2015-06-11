@@ -21,76 +21,84 @@ type ability struct {
 	activationDuration gameDuration
 	cooldownDuration   gameDuration
 	disableTypes       []disableType
-	perform            func(performer, receiver *unit)
+	perform            func(subject, object *unit)
 }
 
 // checkRequirements checks the ability requirements are satisfied
-func (a *ability) checkRequirements(performer *unit, receiver *unit) error {
-	if err := a.checkReceiver(performer, receiver); err != nil {
+func (a *ability) checkRequirements(subject *unit, object *unit) error {
+	if err := a.checkobject(subject, object); err != nil {
 		return err
 	}
-	if err := a.checkCooldown(performer); err != nil {
+	if err := a.checkCooldown(subject); err != nil {
 		return err
 	}
-	if err := a.checkDisable(performer); err != nil {
+	if err := a.checkDisable(subject); err != nil {
 		return err
 	}
-	if err := a.checkCost(performer); err != nil {
+	if err := a.checkCost(subject); err != nil {
 		return err
 	}
 	return nil
 }
 
-// checkReceiver checks the receiver is valid
-func (a *ability) checkReceiver(performer, receiver *unit) error {
+// checkobject checks the object is valid
+func (a *ability) checkobject(subject, object *unit) error {
 	switch a.targetType {
 	case targetTypeFriend:
-		if receiver == nil || performer.group != receiver.group {
-			return errors.New("The receiver must be friend")
+		if object == nil || subject.group != object.group {
+			return errors.New("The object must be friend")
 		}
 	case targetTypeEnemy:
-		if receiver == nil || performer.group == receiver.group {
-			return errors.New("The receiver must be enemy")
+		if object == nil || subject.group == object.group {
+			return errors.New("The object must be enemy")
 		}
 	}
 	return nil
 }
 
-// checkCooldown checks the performer does not have to wait the cooldown time expiration
-func (a *ability) checkCooldown(performer *unit) error {
-	for o := range performer.handlers {
-		switch o := o.(type) {
+// checkCooldown checks the subject does not have to wait the cooldown time expiration
+func (a *ability) checkCooldown(subject *unit) error {
+	ok := subject.AllSubjectHandler(subject, func(ha Handler) bool {
+		switch ha := ha.(type) {
 		case *Cooldown:
-			if o.ability != a {
-				return errors.New("The performer has to wait the cooldown time expiration")
+			if ha.ability == a {
+				return false
 			}
 		}
+		return true
+	})
+	if ok {
+		return nil
 	}
-	return nil
+	return errors.New("The subject has to wait the cooldown time expiration")
 }
 
-// checkDisable checks the performer is not interrupted by the disables
-func (a *ability) checkDisable(performer *unit) error {
-	for o := range performer.handlers {
-		switch o := o.(type) {
+// checkDisable checks the subject is not interrupted by the disables
+func (a *ability) checkDisable(subject *unit) error {
+	ok := subject.AllSubjectHandler(subject, func(ha Handler) bool {
+		switch ha := ha.(type) {
 		case *Disable:
-			for d := range a.disableTypes {
-				if disableType(d) == o.disableType {
-					return errors.New("The performer is interrupted by the disable")
+			for dt := range a.disableTypes {
+				if disableType(dt) == ha.disableType {
+					return false
 				}
 			}
 		}
+		return true
+	})
+	if ok {
+		return nil
 	}
-	return nil
+	return errors.New("The subject is interrupted by the disable")
 }
 
-// checkCost checks the performer satisfies the ability cost
-func (a *ability) checkCost(performer *unit) error {
-	if performer.health() < a.healthCost {
-		return errors.New("The performer does not have enough health")
+// checkCost checks the subject satisfies the ability cost
+func (a *ability) checkCost(subject *unit) error {
+	if subject.health() < a.healthCost {
+		return errors.New("The subject does not have enough health")
 	}
-	if performer.mana() < a.manaCost {
-		return errors.New("The performer does not have enough mana")
+	if subject.mana() < a.manaCost {
+		return errors.New("The subject does not have enough mana")
 	}
 	return nil
 }

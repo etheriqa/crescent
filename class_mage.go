@@ -33,9 +33,9 @@ func newClassMage() *class {
 			disableTypeSilence,
 			disableTypeStun,
 		},
-		perform: func(performer, receiver *unit) {
-			receiver.attachHandler(NewModifier(
-				receiver,
+		perform: func(subject, object *unit) {
+			object.AttachHandler(NewModifier(
+				object,
 				unitModification{
 					armor: -10,
 				},
@@ -44,16 +44,16 @@ func newClassMage() *class {
 				8*second,
 			))
 			// TODO handle the error
-			newMagicDamage(performer, receiver, 120).perform(performer.game)
+			newMagicDamage(subject, object, 120).perform(subject.game)
 			if rand.Float64() > 0.1 {
-				for ha := range performer.handlers {
+				subject.ForSubjectHandler(subject, func(ha Handler) {
 					switch ha := ha.(type) {
 					case *Cooldown:
 						if ha.ability == w {
-							performer.detachHandler(ha)
+							subject.DetachHandler(ha)
 						}
 					}
-				}
+				})
 			}
 		},
 	}
@@ -69,22 +69,22 @@ func newClassMage() *class {
 			disableTypeSilence,
 			disableTypeStun,
 		},
-		perform: func(performer, receiver *unit) {
+		perform: func(subject, object *unit) {
 			// TODO handle the error
-			receiver.attachHandler(NewDoT(
-				newMagicDamage(performer, receiver, 30),
+			object.AttachHandler(NewDoT(
+				newMagicDamage(subject, object, 30),
 				w,
 				10*second,
 			))
 			if rand.Float64() > 0.2 {
-				for ha := range performer.handlers {
+				subject.ForSubjectHandler(subject, func(ha Handler) {
 					switch ha := ha.(type) {
 					case *Cooldown:
 						if ha.ability == e {
-							performer.detachHandler(ha)
+							subject.DetachHandler(ha)
 						}
 					}
-				}
+				})
 			}
 		},
 	}
@@ -100,9 +100,9 @@ func newClassMage() *class {
 			disableTypeSilence,
 			disableTypeStun,
 		},
-		perform: func(performer, receiver *unit) {
+		perform: func(subject, object *unit) {
 			// TODO handle the error
-			newMagicDamage(performer, receiver, 400).perform(performer.game)
+			newMagicDamage(subject, object, 400).perform(subject.game)
 		},
 	}
 	// Magic damage / All / DoT / Stun
@@ -117,16 +117,16 @@ func newClassMage() *class {
 			disableTypeSilence,
 			disableTypeStun,
 		},
-		perform: func(performer, receiver *unit) {
-			for _, enemy := range performer.game.enemies(performer) {
-				newMagicDamage(performer, enemy, 400).perform(performer.game)
-				enemy.attachHandler(NewDoT(
-					newMagicDamage(performer, enemy, 40),
+		perform: func(subject, object *unit) {
+			for _, enemy := range subject.game.enemies(subject) {
+				newMagicDamage(subject, enemy, 400).perform(subject.game)
+				enemy.AttachHandler(NewDoT(
+					newMagicDamage(subject, enemy, 40),
 					r,
 					10*second,
 				))
-				enemy.attachHandler(NewDisable(
-					receiver,
+				enemy.AttachHandler(NewDisable(
+					object,
 					disableTypeStun,
 					500*millisecond,
 				))

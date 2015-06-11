@@ -1,55 +1,54 @@
 package main
 
 type Threat struct {
-	partialHandler
+	*PartialHandler
 	threat statistic
 }
 
-// NewThreat initializes a threat handler
-func NewThreat(performer, receiver *unit, t statistic) *Threat {
+// NewThreat returns a Threat handler
+func NewThreat(subject, object *unit, t statistic) *Threat {
 	return &Threat{
-		partialHandler: partialHandler{
-			unit:      receiver,
-			performer: performer,
-		},
-		threat: t,
+		PartialHandler: NewPermanentPartialHandler(subject, object),
+		threat:         t,
 	}
 }
 
 // newDamageThreat initializes a threat handler with damage
-func newDamageThreat(performer, receiver *unit, d statistic) *Threat {
-	return NewThreat(performer, receiver, d*performer.damageThreatFactor())
+func newDamageThreat(subject, object *unit, d statistic) *Threat {
+	return NewThreat(subject, object, d*object.damageThreatFactor())
 }
 
 // newHealingThreat initializes a threat handler with healing
-func newHealingThreat(performer, receiver *unit, h statistic) *Threat {
-	return NewThreat(performer, receiver, h*performer.healingThreatFactor())
+func newHealingThreat(subject, object *unit, h statistic) *Threat {
+	return NewThreat(subject, object, h*object.healingThreatFactor())
 }
 
-// OnAttach merges threat handlers they have same performer
+// OnAttach merges threat handlers they have same subject
 func (t *Threat) OnAttach() {
-	t.AddEventHandler(t, EventDead)
-	for ha := range t.handlers {
+	t.Subject().AddEventHandler(t, EventDead)
+	t.Object().AddEventHandler(t, EventDead)
+	t.Container().ForSubjectHandler(t.Subject(), func(ha Handler) {
 		switch ha := ha.(type) {
 		case *Threat:
-			if ha == t || ha.performer != t.performer {
-				continue
+			if ha == t || ha.Object() != t.Object() {
+				return
 			}
 			t.threat += ha.threat
-			t.detachHandler(ha)
+			ha.Stop(ha)
 		}
-	}
+	})
 }
 
 // OnDetach removes the EventHandler
 func (t *Threat) OnDetach() {
-	t.RemoveEventHandler(t, EventDead)
+	t.Subject().RemoveEventHandler(t, EventDead)
+	t.Object().RemoveEventHandler(t, EventDead)
 }
 
 // HandleEvent handles the event
 func (t *Threat) HandleEvent(e Event) {
 	switch e {
 	case EventDead:
-		t.detachHandler(t)
+		t.Stop(t)
 	}
 }

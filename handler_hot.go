@@ -3,66 +3,70 @@ package main
 type hotType string
 
 type HoT struct {
-	partialHandler
+	*PartialHandler
 	healing *healing
 	ability *ability
 }
 
-// NewHoT returns a HoT
+// NewHoT returns a HoT handler
 func NewHoT(h *healing, a *ability, duration gameDuration) *HoT {
 	return &HoT{
-		partialHandler: partialHandler{
-			unit:           h.receiver,
-			performer:      h.performer,
-			expirationTime: h.receiver.after(duration),
-		},
-		healing: h,
-		ability: a,
+		PartialHandler: NewPartialHandler(h.subject, h.object, duration),
+		healing:        h,
+		ability:        a,
 	}
 }
 
 // OnAttach removes duplicate HoTs
 func (h *HoT) OnAttach() {
-	h.AddEventHandler(h, EventDead)
-	h.AddEventHandler(h, EventGameTick)
-	h.AddEventHandler(h, EventXoT)
-	for ha := range h.handlers {
+	h.Object().AddEventHandler(h, EventDead)
+	h.Object().AddEventHandler(h, EventGameTick)
+	h.Object().AddEventHandler(h, EventXoT)
+	ok := h.Container().AllObjectHandler(h.Object(), func(ha Handler) bool {
 		switch ha := ha.(type) {
 		case *HoT:
-			if ha == h || ha.performer != h.performer || ha.ability != h.ability {
-				continue
+			if ha == h || ha.Subject() != h.Subject() || ha.ability != h.ability {
+				return true
 			}
 			if ha.expirationTime > h.expirationTime {
-				h.detachHandler(h)
-				return
+				return false
 			}
-			h.detachHandler(ha)
+			ha.Stop(ha)
 		}
+		return true
+	})
+	if !ok {
+		h.Stop(h)
+		return
 	}
-	h.publish(message{
-		// TODO pack message
-		t: outHoTBegin,
+	h.Publish(message{
+	// TODO pack message
 	})
 }
 
 // OnDetach removes the EventHandlers
 func (h *HoT) OnDetach() {
-	h.RemoveEventHandler(h, EventDead)
-	h.RemoveEventHandler(h, EventGameTick)
-	h.RemoveEventHandler(h, EventXoT)
+	h.Object().RemoveEventHandler(h, EventDead)
+	h.Object().RemoveEventHandler(h, EventGameTick)
+	h.Object().RemoveEventHandler(h, EventXoT)
 }
 
 // HandleEvent handles the event
 func (h *HoT) HandleEvent(e Event) {
 	switch e {
 	case EventDead:
-		h.detachHandler(h)
+		h.Stop(h)
 	case EventGameTick:
-		h.expire(h, message{
-			// TODO pack message
-			t: outHoTEnd,
-		})
+		if h.IsExpired() {
+			h.Up()
+		}
 	case EventXoT:
-		h.healing.perform(h.game)
+		h.healing.perform(h.Object().game) // TODO refactor
 	}
+}
+
+// Up ends the HoT
+func (h *HoT) Up() {
+	h.Stop(h)
+	h.Publish(message{})
 }

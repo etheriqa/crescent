@@ -2,9 +2,9 @@ package main
 
 const assassinStack string = "Assassin Stack"
 
-func newAssassinStack(performer *unit) *Modifier {
+func newAssassinStack(subject *unit) *Modifier {
 	return NewModifier(
-		performer,
+		subject,
 		unitModification{
 			criticalStrikeChance: 0.05,
 			criticalStrikeFactor: 0.1,
@@ -43,8 +43,8 @@ func newClassAssassin() *class {
 		disableTypes: []disableType{
 			disableTypeStun,
 		},
-		perform: func(performer, receiver *unit) {
-			newPhysicalDamage(performer, receiver, 140).perform(performer.game)
+		perform: func(subject, object *unit) {
+			newPhysicalDamage(subject, object, 140).perform(subject.game)
 		},
 	}
 	// Physical damage / DoT / Increasing stacks
@@ -58,10 +58,10 @@ func newClassAssassin() *class {
 		disableTypes: []disableType{
 			disableTypeStun,
 		},
-		perform: func(performer, receiver *unit) {
-			newPhysicalDamage(performer, receiver, 80).perform(performer.game)
-			receiver.attachHandler(NewDoT(
-				newPhysicalDamage(performer, receiver, 20),
+		perform: func(subject, object *unit) {
+			newPhysicalDamage(subject, object, 80).perform(subject.game)
+			object.AttachHandler(NewDoT(
+				newPhysicalDamage(subject, object, 20),
 				w,
 				10*second,
 			))
@@ -78,9 +78,9 @@ func newClassAssassin() *class {
 		disableTypes: []disableType{
 			disableTypeStun,
 		},
-		perform: func(performer, receiver *unit) {
-			performer.attachHandler(NewModifier(
-				performer,
+		perform: func(subject, object *unit) {
+			subject.AttachHandler(NewModifier(
+				subject,
 				unitModification{
 					armor:           -25,
 					magicResistance: -25,
@@ -90,7 +90,7 @@ func newClassAssassin() *class {
 				8*second,
 			))
 			for i := 0; i < 2; i++ {
-				performer.attachHandler(newAssassinStack(performer))
+				subject.AttachHandler(newAssassinStack(subject))
 			}
 		},
 	}
@@ -105,25 +105,25 @@ func newClassAssassin() *class {
 		disableTypes: []disableType{
 			disableTypeStun,
 		},
-		perform: func(performer, receiver *unit) {
+		perform: func(subject, object *unit) {
 			stack := statistic(0)
-			for ha := range performer.handlers {
+			subject.ForSubjectHandler(subject, func(ha Handler) {
 				switch ha := ha.(type) {
 				case *Modifier:
 					if ha.name == assassinStack {
 						stack += statistic(ha.nowStack)
 					}
 				}
-			}
-			newPhysicalDamage(performer, receiver, 400*stack*100).perform(performer.game)
-			for ha := range performer.handlers {
+			})
+			newPhysicalDamage(subject, object, 400*stack*100).perform(subject.game)
+			subject.ForSubjectHandler(subject, func(ha Handler) {
 				switch ha := ha.(type) {
 				case *Modifier:
 					if ha.name == assassinStack {
-						performer.detachHandler(ha)
+						subject.DetachHandler(ha)
 					}
 				}
-			}
+			})
 		},
 	}
 	class.abilities = []*ability{q, w, e, r}

@@ -7,16 +7,16 @@ import (
 type statistic float64
 
 type damage struct {
-	performer            *unit
-	receiver             *unit
+	subject              *unit
+	object               *unit
 	amount               statistic
 	criticalStrikeChance statistic
 	criticalStrikeFactor statistic
 }
 
 type healing struct {
-	performer            *unit
-	receiver             *unit
+	subject              *unit
+	object               *unit
 	amount               statistic
 	criticalStrikeChance statistic
 	criticalStrikeFactor statistic
@@ -38,63 +38,63 @@ func applyCriticalStrike(base, chance, factor statistic) (amount statistic, crit
 }
 
 // diceCritical dices whether critical strike is happening or not
-func diceCritical(performer *unit) bool {
-	return rand.Float64() < float64(performer.criticalStrikeChance())
+func diceCritical(subject *unit) bool {
+	return rand.Float64() < float64(subject.criticalStrikeChance())
 }
 
-// newPhysicalDamage returns a damage affected by armor of the receiver
-func newPhysicalDamage(performer, receiver *unit, baseDamage statistic) *damage {
+// newPhysicalDamage returns a damage affected by armor of the object
+func newPhysicalDamage(subject, object *unit, baseDamage statistic) *damage {
 	return newTrueDamage(
-		performer,
-		receiver,
-		baseDamage*receiver.physicalDamageReductionFactor(),
+		subject,
+		object,
+		baseDamage*object.physicalDamageReductionFactor(),
 	)
 }
 
-// newMagicDamage returns a damage affected by magic resistance of the receiver
-func newMagicDamage(performer, receiver *unit, baseDamage statistic) *damage {
+// newMagicDamage returns a damage affected by magic resistance of the object
+func newMagicDamage(subject, object *unit, baseDamage statistic) *damage {
 	return newTrueDamage(
-		performer,
-		receiver,
-		baseDamage*receiver.magicDamageReductionFactor(),
+		subject,
+		object,
+		baseDamage*object.magicDamageReductionFactor(),
 	)
 }
 
 // newTrueDamage returns a damage that ignores damage reduction
-func newTrueDamage(performer, receiver *unit, baseDamage statistic) *damage {
+func newTrueDamage(subject, object *unit, baseDamage statistic) *damage {
 	return &damage{
-		performer:            performer,
-		receiver:             receiver,
+		subject:              subject,
+		object:               object,
 		amount:               baseDamage,
-		criticalStrikeChance: performer.criticalStrikeChance(),
-		criticalStrikeFactor: performer.criticalStrikeFactor(),
+		criticalStrikeChance: subject.criticalStrikeChance(),
+		criticalStrikeFactor: subject.criticalStrikeFactor(),
 	}
 }
 
 // newPureDamage returns a damage that ignores both damage reduction and critical strike
-func newPureDamage(performer, receiver *unit, baseDamage statistic) *damage {
+func newPureDamage(subject, object *unit, baseDamage statistic) *damage {
 	return &damage{
-		performer:            performer,
-		receiver:             receiver,
+		subject:              subject,
+		object:               object,
 		amount:               baseDamage,
 		criticalStrikeChance: 0,
 		criticalStrikeFactor: 0,
 	}
 }
 
-// perform subtracts amount the damage from the receiver and attaches a threat handler to the performer and publishes a message
+// perform subtracts amount the damage from the object and attaches a threat handler to the subject and publishes a message
 func (d damage) perform(g *game) (before, after statistic, crit bool, err error) {
 	amount, crit := applyCriticalStrike(
 		d.amount,
 		d.criticalStrikeChance,
 		d.criticalStrikeFactor,
 	)
-	after, before, err = d.receiver.modifyHealth(-amount)
+	after, before, err = d.object.modifyHealth(-amount)
 	if err != nil {
 		return
 	}
-	if d.performer != nil {
-		d.receiver.attachHandler(newDamageThreat(d.performer, d.receiver, d.amount))
+	if d.subject != nil {
+		d.object.AttachHandler(newDamageThreat(d.subject, d.object, d.amount))
 	}
 	g.publish(message{
 	// TODO pack message
@@ -103,41 +103,41 @@ func (d damage) perform(g *game) (before, after statistic, crit bool, err error)
 }
 
 // newHealing returns a healing
-func newHealing(performer, receiver *unit, baseHealing statistic) *healing {
+func newHealing(subject, object *unit, baseHealing statistic) *healing {
 	return &healing{
-		performer:            performer,
-		receiver:             receiver,
+		subject:              subject,
+		object:               object,
 		amount:               baseHealing,
-		criticalStrikeChance: performer.criticalStrikeChance(),
-		criticalStrikeFactor: performer.criticalStrikeFactor(),
+		criticalStrikeChance: subject.criticalStrikeChance(),
+		criticalStrikeFactor: subject.criticalStrikeFactor(),
 	}
 }
 
 // newPureHealing returns a healing that ignores critical strike
-func newPureHealing(performer, receiver *unit, baseHealing statistic) *healing {
+func newPureHealing(subject, object *unit, baseHealing statistic) *healing {
 	return &healing{
-		performer:            performer,
-		receiver:             receiver,
+		subject:              subject,
+		object:               object,
 		amount:               baseHealing,
 		criticalStrikeChance: 0,
 		criticalStrikeFactor: 0,
 	}
 }
 
-// perform adds amount of healing to the receiver and attaches a threat handler to the enemies and publish a message
+// perform adds amount of healing to the object and attaches a threat handler to the enemies and publish a message
 func (h healing) perform(g *game) (after, before statistic, crit bool, err error) {
 	amount, crit := applyCriticalStrike(
 		h.amount,
 		h.criticalStrikeChance,
 		h.criticalStrikeFactor,
 	)
-	after, before, err = h.receiver.modifyHealth(amount)
+	after, before, err = h.object.modifyHealth(amount)
 	if err != nil {
 		return
 	}
-	if h.performer != nil {
-		for _, enemy := range g.enemies(h.performer) {
-			enemy.attachHandler(newHealingThreat(h.performer, enemy, h.amount))
+	if h.subject != nil {
+		for _, enemy := range g.enemies(h.subject) {
+			enemy.AttachHandler(newHealingThreat(h.subject, enemy, h.amount))
 		}
 	}
 	g.publish(message{

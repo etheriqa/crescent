@@ -22,9 +22,8 @@ type unit struct {
 	class        *class
 	resource     unitResource
 	modification unitModification
-	handlers     map[Handler]bool
 	*EventDispatcher
-	game *game
+	*game
 }
 
 type unitResource struct {
@@ -48,7 +47,6 @@ func newUnit(g *game, c *class) *unit {
 		class:           c,
 		resource:        unitResource{},
 		modification:    unitModification{},
-		handlers:        make(map[Handler]bool),
 		EventDispatcher: NewEventDispatcher(),
 		game:            g,
 	}
@@ -179,18 +177,6 @@ func (u *unit) modifyMana(delta statistic) (before, after statistic, err error) 
 	return
 }
 
-// attachHandler adds the handler
-func (u *unit) attachHandler(ha Handler) {
-	u.handlers[ha] = true
-	ha.OnAttach()
-}
-
-// detachHandler removes the handler
-func (u *unit) detachHandler(ha Handler) {
-	delete(u.handlers, ha)
-	ha.OnDetach()
-}
-
 // gameTick triggers onComplete iff the handler is completed
 func (u *unit) gameTick() {
 	if u.isDead() {
@@ -244,16 +230,19 @@ func (u *unit) performManaModification(delta statistic) error {
 // updateModification updates the unitModification
 func (u *unit) updateModification() {
 	u.modification = unitModification{}
-	for o := range u.handlers {
-		switch o := o.(type) {
+	u.ForSubjectHandler(u, func(ha Handler) {
+		switch ha := ha.(type) {
 		case *Modifier:
-			u.modification.armor += o.armor
-			u.modification.magicResistance += o.magicResistance
-			u.modification.criticalStrikeChance += o.criticalStrikeChance
-			u.modification.criticalStrikeFactor += o.criticalStrikeFactor
-			u.modification.cooldownReduction += o.cooldownReduction
-			u.modification.damageThreatFactor += o.damageThreatFactor
-			u.modification.healingThreatFactor += o.healingThreatFactor
+			u.modification.armor += ha.armor
+			u.modification.magicResistance += ha.magicResistance
+			u.modification.criticalStrikeChance += ha.criticalStrikeChance
+			u.modification.criticalStrikeFactor += ha.criticalStrikeFactor
+			u.modification.cooldownReduction += ha.cooldownReduction
+			u.modification.damageThreatFactor += ha.damageThreatFactor
+			u.modification.healingThreatFactor += ha.healingThreatFactor
 		}
-	}
+	})
+	u.publish(message{
+	// TODO pack message
+	})
 }

@@ -1,20 +1,17 @@
 package main
 
 type Modifier struct {
-	partialHandler
+	*PartialHandler
 	unitModification
 	name     string
 	maxStack int
 	nowStack int
 }
 
-// NewModifier initalizes a modifier
-func NewModifier(receiver *unit, m unitModification, name string, maxStack int, duration gameDuration) *Modifier {
+// NewModifier returns a Modifier handler
+func NewModifier(object *unit, m unitModification, name string, maxStack int, duration gameDuration) *Modifier {
 	return &Modifier{
-		partialHandler: partialHandler{
-			unit:           receiver,
-			expirationTime: receiver.after(duration),
-		},
+		PartialHandler:   NewPartialHandler(nil, object, duration),
 		unitModification: m,
 		name:             name,
 		maxStack:         maxStack,
@@ -24,13 +21,13 @@ func NewModifier(receiver *unit, m unitModification, name string, maxStack int, 
 
 // OnAttach updates the modificationStats of the unit
 func (m *Modifier) OnAttach() {
-	m.AddEventHandler(m, EventDead)
-	m.AddEventHandler(m, EventGameTick)
-	for ha := range m.handlers {
+	m.Object().AddEventHandler(m, EventDead)
+	m.Object().AddEventHandler(m, EventGameTick)
+	m.Container().ForObjectHandler(m.Object(), func(ha Handler) {
 		switch ha := ha.(type) {
 		case *Modifier:
 			if ha == m || ha.name != m.name {
-				continue
+				return
 			}
 			if ha.expirationTime > m.expirationTime {
 				m.expirationTime = ha.expirationTime
@@ -39,35 +36,35 @@ func (m *Modifier) OnAttach() {
 			if m.nowStack > m.maxStack {
 				m.nowStack = m.maxStack
 			}
-			m.detachHandler(ha)
+			ha.Stop(ha)
 		}
-	}
-	m.updateModification()
-	m.publish(message{
-		// TODO pack message
-		t: outModifierBegin,
 	})
+	m.Object().updateModification()
 }
 
 // OnDetach updates the modificationStats of the unit
 func (m *Modifier) OnDetach() {
-	m.RemoveEventHandler(m, EventDead)
-	m.RemoveEventHandler(m, EventGameTick)
-	m.updateModification()
-	m.publish(message{
-		// TODO pack message
-		t: outModifierEnd,
-	})
+	m.Object().RemoveEventHandler(m, EventDead)
+	m.Object().RemoveEventHandler(m, EventGameTick)
+	m.Object().updateModification()
 }
 
 // HandleEvent handles the event
 func (m *Modifier) HandleEvent(e Event) {
 	switch e {
 	case EventDead:
-		m.detachHandler(m)
+		m.Stop(m)
 	case EventGameTick:
-		if m.isExpired() {
-			m.detachHandler(m)
+		if m.IsExpired() {
+			m.Up()
 		}
 	}
+}
+
+// Up ends the Modifier
+func (m *Modifier) Up() {
+	m.Stop(m)
+	m.Publish(message{
+	// TODO pack message
+	})
 }

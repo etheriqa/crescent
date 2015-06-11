@@ -1,62 +1,67 @@
 package main
 
 type Activating struct {
-	partialHandler
+	*PartialHandler
 	*ability
-	receiver *unit
 }
 
-// NewActivating returns a activating handler
-func NewActivating(performer, receiver *unit, ability *ability) *Activating {
+// NewActivating returns a Activating handler
+func NewActivating(subject, object *unit, ability *ability) *Activating {
 	return &Activating{
-		partialHandler: partialHandler{
-			unit:           performer,
-			expirationTime: performer.after(ability.activationDuration),
-		},
-		ability:  ability,
-		receiver: receiver,
+		PartialHandler: NewPartialHandler(subject, object, ability.activationDuration),
+		ability:        ability,
 	}
 }
 
 // OnAttach checks requirements
 func (a *Activating) OnAttach() {
-	a.AddEventHandler(a, EventDead)
-	a.AddEventHandler(a, EventDisableInterrupt)
-	a.AddEventHandler(a, EventGameTick)
-	a.AddEventHandler(a, EventResourceDecreased)
-	for ha := range a.handlers {
+	a.Subject().AddEventHandler(a, EventDead)
+	a.Subject().AddEventHandler(a, EventDisableInterrupt)
+	a.Subject().AddEventHandler(a, EventGameTick)
+	a.Subject().AddEventHandler(a, EventResourceDecreased)
+	if a.Object() != nil {
+		a.Object().AddEventHandler(a, EventDead)
+	}
+	ok := a.Container().AllSubjectHandler(a.Subject(), func(ha Handler) bool {
 		switch ha.(type) {
 		case *Activating:
-			a.detachHandler(a)
-			return
+			return false
 		}
-	}
-	if err := a.checkRequirements(a.unit, a.receiver); err != nil {
-		a.detachHandler(a)
+		return true
+	})
+	if !ok {
+		a.Stop(a)
 		return
 	}
-	if a.isExpired() {
+	if err := a.checkRequirements(a.Subject(), a.Object()); err != nil {
+		a.Stop(a)
+		return
+	}
+	if a.IsExpired() {
 		a.perform()
 		return
 	}
-	a.publish(message{
+	a.Publish(message{
 	// TODO pack message
 	})
 }
 
 // OnDetach removes the EventHandlers
 func (a *Activating) OnDetach() {
-	a.RemoveEventHandler(a, EventDead)
-	a.RemoveEventHandler(a, EventDisableInterrupt)
-	a.RemoveEventHandler(a, EventGameTick)
-	a.RemoveEventHandler(a, EventResourceDecreased)
+	a.Subject().RemoveEventHandler(a, EventDead)
+	a.Subject().RemoveEventHandler(a, EventDisableInterrupt)
+	a.Subject().RemoveEventHandler(a, EventGameTick)
+	a.Subject().RemoveEventHandler(a, EventResourceDecreased)
+	if a.Object() != nil {
+		a.Object().RemoveEventHandler(a, EventDead)
+	}
 }
 
 // HandleEvent handles the event
 func (a *Activating) HandleEvent(e Event) {
 	switch e {
 	case EventDead:
-		a.detachHandler(a)
+		a.Stop(a)
 	case EventDisableInterrupt:
 		a.perform()
 	case EventGameTick:
@@ -68,20 +73,20 @@ func (a *Activating) HandleEvent(e Event) {
 
 // perform performs the ability
 func (a *Activating) perform() {
-	if err := a.checkRequirements(a.unit, a.receiver); err != nil {
-		a.publish(message{
+	if err := a.checkRequirements(a.Subject(), a.Object()); err != nil {
+		a.Publish(message{
 		// TODO pack message
 		})
-		a.detachHandler(a)
+		a.Stop(a)
 	}
-	if !a.isExpired() {
+	if !a.IsExpired() {
 		return
 	}
-	a.publish(message{
+	a.Publish(message{
 	// TODO pack message
 	})
 	// TODO consume health
 	// TODO consume mana
-	a.ability.perform(a.unit, a.receiver)
-	a.detachHandler(a)
+	a.ability.perform(a.Subject(), a.Object())
+	a.Stop(a)
 }

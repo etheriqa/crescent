@@ -28,9 +28,9 @@ func newClassTank() *class {
 		disableTypes: []disableType{
 			disableTypeStun,
 		},
-		perform: func(performer, receiver *unit) {
-			performer.attachHandler(NewModifier(
-				performer,
+		perform: func(subject, object *unit) {
+			subject.AttachHandler(NewModifier(
+				subject,
 				unitModification{
 					damageThreatFactor: 1,
 				},
@@ -39,7 +39,7 @@ func newClassTank() *class {
 				10*second,
 			))
 			// TODO handle the error
-			newTrueDamage(performer, receiver, 120).perform(performer.game)
+			newTrueDamage(subject, object, 120).perform(subject.game)
 		},
 	}
 	// Physical damage / Increasing AR & MR
@@ -53,9 +53,9 @@ func newClassTank() *class {
 		disableTypes: []disableType{
 			disableTypeStun,
 		},
-		perform: func(performer, receiver *unit) {
-			performer.attachHandler(NewModifier(
-				performer,
+		perform: func(subject, object *unit) {
+			subject.AttachHandler(NewModifier(
+				subject,
 				unitModification{
 					armor:           50,
 					magicResistance: 50,
@@ -65,7 +65,7 @@ func newClassTank() *class {
 				2*second,
 			))
 			// TODO handle the error
-			newPhysicalDamage(performer, receiver, 200).perform(performer.game)
+			newPhysicalDamage(subject, object, 200).perform(subject.game)
 		},
 	}
 	// Physical damage / Life steal
@@ -79,11 +79,11 @@ func newClassTank() *class {
 		disableTypes: []disableType{
 			disableTypeStun,
 		},
-		perform: func(performer, receiver *unit) {
+		perform: func(subject, object *unit) {
 			// TODO handle the error
-			before, after, _, _ := newPhysicalDamage(performer, receiver, 300).perform(performer.game)
+			before, after, _, _ := newPhysicalDamage(subject, object, 300).perform(subject.game)
 			// TODO handle the error
-			newPureHealing(performer, receiver, (before-after)*0.6).perform(performer.game)
+			newPureHealing(subject, object, (before-after)*0.6).perform(subject.game)
 		},
 	}
 	// Increasing AR & MR
@@ -98,9 +98,9 @@ func newClassTank() *class {
 			disableTypeStun,
 			disableTypeSilence,
 		},
-		perform: func(performer, receiver *unit) {
-			performer.attachHandler(NewModifier(
-				performer,
+		perform: func(subject, object *unit) {
+			subject.AttachHandler(NewModifier(
+				subject,
 				unitModification{
 					armor:           150,
 					magicResistance: 150,

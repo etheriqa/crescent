@@ -1,40 +1,41 @@
 package main
 
 type Cooldown struct {
-	partialHandler
+	*PartialHandler
 	*ability
 }
 
 // OnAttach adds the EventHandler
 func (c *Cooldown) OnAttach() {
-	c.AddEventHandler(c, EventDead)
-	c.AddEventHandler(c, EventGameTick)
-	c.publish(message{
-		// TODO pack message
-		t: outCooldown,
+	c.Object().AddEventHandler(c, EventDead)
+	c.Object().AddEventHandler(c, EventGameTick)
+	c.Publish(message{
+	// TODO pack message
 	})
 }
 
 // OnDetach removes the EventHandler
 func (c *Cooldown) OnDetach() {
-	c.RemoveEventHandler(c, EventDead)
-	c.RemoveEventHandler(c, EventGameTick)
+	c.Object().RemoveEventHandler(c, EventDead)
+	c.Object().RemoveEventHandler(c, EventGameTick)
 }
 
-// HandleEvent handles the event
+// HandleEvent handles the Event
 func (c *Cooldown) HandleEvent(e Event) {
 	switch e {
 	case EventDead:
-		c.detachHandler(c)
+		c.Stop(c)
 	case EventGameTick:
-		c.up()
+		if c.IsExpired() {
+			c.Up()
+		}
 	}
 }
 
-// up ends the cooldown time
-func (c *Cooldown) up() {
-	c.expire(c, message{
-		// TODO pack message
-		t: outCooldown,
+// Up ends the cooldown time
+func (c *Cooldown) Up() {
+	c.Stop(c)
+	c.Publish(message{
+	// TODO pack message
 	})
 }

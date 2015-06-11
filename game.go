@@ -13,6 +13,7 @@ const (
 )
 
 type game struct {
+	HandlerContainer
 	time  gameTime
 	names map[string]*unit
 	uid   unitID
@@ -24,13 +25,14 @@ type game struct {
 
 func newGame(inc chan message, out chan message) *game {
 	return &game{
-		time:  0,
-		names: make(map[string]*unit),
-		uid:   0,
-		uids:  make(map[unitID]*unit),
-		seats: make(map[uint8]*unit),
-		inc:   inc,
-		out:   out,
+		HandlerContainer: NewHandlerContainer(),
+		time:             0,
+		names:            make(map[string]*unit),
+		uid:              0,
+		uids:             make(map[unitID]*unit),
+		seats:            make(map[uint8]*unit),
+		inc:              inc,
+		out:              out,
 	}
 }
 
@@ -216,17 +218,17 @@ func (g *game) activate(m *message) {
 		return
 	}
 	target := g.uids[m.d["uid"].(unitID)]
-	unit.attachHandler(NewActivating(unit, target, a))
+	g.AttachHandler(NewActivating(unit, target, a))
 }
 
 func (g *game) interrupt(m *message) {
 	unit := g.names[m.name]
-	for o := range unit.handlers {
-		switch o.(type) {
+	g.ForSubjectHandler(unit, func(ha Handler) {
+		switch ha.(type) {
 		case *Activating:
-			unit.detachHandler(o)
+			g.DetachHandler(ha)
 		}
-	}
+	})
 }
 
 func (g *game) chat(m *message) {

@@ -28,9 +28,9 @@ func newClassDisabler() *class {
 		disableTypes: []disableType{
 			disableTypeStun,
 		},
-		perform: func(performer, receiver *unit) {
-			receiver.attachHandler(NewModifier(
-				receiver,
+		perform: func(subject, object *unit) {
+			object.AttachHandler(NewModifier(
+				object,
 				unitModification{
 					magicResistance: -15,
 				},
@@ -39,9 +39,9 @@ func newClassDisabler() *class {
 				12*second,
 			))
 			// TODO handle the error
-			newPhysicalDamage(performer, receiver, 110).perform(performer.game)
-			receiver.attachHandler(NewDoT(
-				newPhysicalDamage(performer, receiver, 25),
+			newPhysicalDamage(subject, object, 110).perform(subject.game)
+			object.AttachHandler(NewDoT(
+				newPhysicalDamage(subject, object, 25),
 				q,
 				4*second,
 			))
@@ -59,10 +59,10 @@ func newClassDisabler() *class {
 			disableTypeStun,
 			disableTypeSilence,
 		},
-		perform: func(performer, receiver *unit) {
-			newMagicDamage(performer, receiver, 220).perform(performer.game)
-			receiver.attachHandler(NewDisable(
-				receiver,
+		perform: func(subject, object *unit) {
+			newMagicDamage(subject, object, 220).perform(subject.game)
+			object.AttachHandler(NewDisable(
+				object,
 				disableTypeSilence,
 				500*millisecond,
 			))
@@ -79,10 +79,10 @@ func newClassDisabler() *class {
 		disableTypes: []disableType{
 			disableTypeStun,
 		},
-		perform: func(performer, receiver *unit) {
-			newPhysicalDamage(performer, receiver, 280).perform(performer.game)
-			receiver.attachHandler(NewDisable(
-				receiver,
+		perform: func(subject, object *unit) {
+			newPhysicalDamage(subject, object, 280).perform(subject.game)
+			object.AttachHandler(NewDisable(
+				object,
 				disableTypeStun,
 				2*second,
 			))
@@ -99,9 +99,9 @@ func newClassDisabler() *class {
 		disableTypes: []disableType{
 			disableTypeStun,
 		},
-		perform: func(performer, receiver *unit) {
-			for _, friend := range performer.game.friends(performer) {
-				friend.attachHandler(NewModifier(
+		perform: func(subject, object *unit) {
+			for _, friend := range subject.game.friends(subject) {
+				friend.AttachHandler(NewModifier(
 					friend,
 					unitModification{
 						criticalStrikeChance: 0.2,

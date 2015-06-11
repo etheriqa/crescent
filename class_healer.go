@@ -29,11 +29,11 @@ func newClassHealer() *class {
 			disableTypeSilence,
 			disableTypeStun,
 		},
-		perform: func(performer, receiver *unit) {
+		perform: func(subject, object *unit) {
 			// TODO handle the error
-			before, after, _, _ := newMagicDamage(performer, receiver, 100).perform(performer.game)
+			before, after, _, _ := newMagicDamage(subject, object, 100).perform(subject.game)
 			// TODO send a message including the ability name
-			performer.performManaModification((before - after) * 0.1)
+			subject.performManaModification((before - after) * 0.1)
 		},
 	}
 	// HoT
@@ -48,9 +48,9 @@ func newClassHealer() *class {
 			disableTypeSilence,
 			disableTypeStun,
 		},
-		perform: func(performer, receiver *unit) {
-			receiver.attachHandler(NewHoT(
-				newHealing(performer, receiver, 20),
+		perform: func(subject, object *unit) {
+			object.AttachHandler(NewHoT(
+				newHealing(subject, object, 20),
 				w,
 				12*second,
 			))
@@ -68,8 +68,8 @@ func newClassHealer() *class {
 			disableTypeSilence,
 			disableTypeStun,
 		},
-		perform: func(performer, receiver *unit) {
-			newHealing(performer, receiver, 400).perform(performer.game)
+		perform: func(subject, object *unit) {
+			newHealing(subject, object, 400).perform(subject.game)
 		},
 	}
 	// HoT / Increasing critical strike chance and critical strike factor
@@ -84,9 +84,9 @@ func newClassHealer() *class {
 			disableTypeSilence,
 			disableTypeStun,
 		},
-		perform: func(performer, receiver *unit) {
-			performer.attachHandler(NewModifier(
-				performer,
+		perform: func(subject, object *unit) {
+			subject.AttachHandler(NewModifier(
+				subject,
 				unitModification{
 					criticalStrikeChance: 0.5,
 					criticalStrikeFactor: 1.5,
@@ -95,9 +95,9 @@ func newClassHealer() *class {
 				1,
 				6*second,
 			))
-			for _, friend := range performer.game.friends(performer) {
-				friend.attachHandler(NewHoT(
-					newHealing(performer, friend, 20),
+			for _, friend := range subject.game.friends(subject) {
+				friend.AttachHandler(NewHoT(
+					newHealing(subject, friend, 20),
 					r,
 					6*second,
 				))

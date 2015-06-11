@@ -3,66 +3,72 @@ package main
 type dotType string
 
 type DoT struct {
-	partialHandler
-	damage  *damage
-	ability *ability
+	*PartialHandler
+	*damage
+	*ability
 }
 
-// NewDoT returns a DoT
+// NewDoT returns a DoT handler
 func NewDoT(d *damage, a *ability, duration gameDuration) *DoT {
 	return &DoT{
-		partialHandler: partialHandler{
-			unit:           d.receiver,
-			performer:      d.performer,
-			expirationTime: d.receiver.after(duration),
-		},
-		damage:  d,
-		ability: a,
+		PartialHandler: NewPartialHandler(d.subject, d.object, duration),
+		damage:         d,
+		ability:        a,
 	}
 }
 
 // OnAttach removes duplicate DoTs
 func (d *DoT) OnAttach() {
-	d.AddEventHandler(d, EventDead)
-	d.AddEventHandler(d, EventGameTick)
-	d.AddEventHandler(d, EventXoT)
-	for ha := range d.handlers {
+	d.Object().AddEventHandler(d, EventDead)
+	d.Object().AddEventHandler(d, EventGameTick)
+	d.Object().AddEventHandler(d, EventXoT)
+	ok := d.Container().AllObjectHandler(d.Object(), func(ha Handler) bool {
 		switch ha := ha.(type) {
 		case *DoT:
-			if ha == d || ha.performer != d.performer || ha.ability != d.ability {
-				continue
+			if ha == d || ha.Subject() != d.Subject() || ha.ability != d.ability {
+				return true
 			}
 			if ha.expirationTime > d.expirationTime {
-				d.detachHandler(d)
-				return
+				return false
 			}
-			d.detachHandler(ha)
+			ha.Stop(ha)
 		}
+		return true
+	})
+	if !ok {
+		d.Stop(d)
+		return
 	}
-	d.publish(message{
-		// TODO pack message
-		t: outDoTBegin,
+	d.Publish(message{
+	// TODO pack message
 	})
 }
 
 // OnDetach removes the EventHandlers
 func (d *DoT) OnDetach() {
-	d.RemoveEventHandler(d, EventDead)
-	d.RemoveEventHandler(d, EventGameTick)
-	d.RemoveEventHandler(d, EventXoT)
+	d.Object().RemoveEventHandler(d, EventDead)
+	d.Object().RemoveEventHandler(d, EventGameTick)
+	d.Object().RemoveEventHandler(d, EventXoT)
 }
 
 // HandleEvent handles the event
 func (d *DoT) HandleEvent(e Event) {
 	switch e {
 	case EventDead:
-		d.detachHandler(d)
+		d.Stop(d)
 	case EventGameTick:
-		d.expire(d, message{
-			// TODO pack message
-			t: outDoTEnd,
-		})
+		if d.IsExpired() {
+			d.Up()
+		}
 	case EventXoT:
-		d.damage.perform(d.game)
+		d.damage.perform(d.Object().game) // TODO refactor
 	}
+}
+
+// Up ends the DoT
+func (d *DoT) Up() {
+	d.Stop(d)
+	d.Publish(message{
+	// TODO pack message
+	})
 }

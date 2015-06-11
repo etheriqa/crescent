@@ -10,60 +10,67 @@ const (
 )
 
 type Disable struct {
-	partialHandler
-	disableType disableType
+	*PartialHandler
+	disableType
 }
 
-// NewDisable returns a disable handler
-func NewDisable(receiver *unit, disableType disableType, duration gameDuration) *Disable {
+// NewDisable returns a Disable handler
+func NewDisable(object *unit, disableType disableType, duration gameDuration) *Disable {
 	return &Disable{
-		partialHandler: partialHandler{
-			unit:           receiver,
-			expirationTime: receiver.after(duration),
-		},
-		disableType: disableType,
+		PartialHandler: NewPartialHandler(nil, object, duration),
+		disableType:    disableType,
 	}
 }
 
 // OnAttach removes duplicate disables and triggers EventDisableInterrupt
 func (d *Disable) OnAttach() {
-	d.AddEventHandler(d, EventDead)
-	d.AddEventHandler(d, EventGameTick)
-	for ha := range d.handlers {
+	d.Object().AddEventHandler(d, EventDead)
+	d.Object().AddEventHandler(d, EventGameTick)
+	ok := d.Container().AllObjectHandler(d.Object(), func(ha Handler) bool {
 		switch ha := ha.(type) {
 		case *Disable:
 			if ha == d || ha.disableType != d.disableType {
-				continue
+				return true
 			}
 			if ha.expirationTime > d.expirationTime {
-				d.detachHandler(d)
-				return
+				return false
 			}
-			d.detachHandler(ha)
+			ha.Stop(ha)
 		}
-	}
-	d.publish(message{
-		// TODO pack message
-		t: outDisableBegin,
+		return true
 	})
-	d.TriggerEvent(EventDisableInterrupt)
+	if !ok {
+		d.Stop(d)
+		return
+	}
+	d.Publish(message{
+	// TODO pack message
+	})
+	d.Object().TriggerEvent(EventDisableInterrupt)
 }
 
 // OnDetach removes the EventHandler
 func (d *Disable) OnDetach() {
-	d.RemoveEventHandler(d, EventDead)
-	d.RemoveEventHandler(d, EventGameTick)
+	d.Object().RemoveEventHandler(d, EventDead)
+	d.Object().RemoveEventHandler(d, EventGameTick)
 }
 
-// HandleEvent handles the event
+// HandleEvent handles the Event
 func (d *Disable) HandleEvent(e Event) {
 	switch e {
 	case EventDead:
-		d.detachHandler(d)
+		d.Stop(d)
 	case EventGameTick:
-		d.expire(d, message{
-			// TODO pack message
-			t: outDisableEnd,
-		})
+		if d.IsExpired() {
+			d.Up()
+		}
 	}
+}
+
+// Up ends the disable
+func (d *Disable) Up() {
+	d.Stop(d)
+	d.Publish(message{
+	// TODO pack message
+	})
 }
