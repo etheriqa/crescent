@@ -16,6 +16,7 @@ func newClassHealer() *class {
 		cooldownReduction:    DefaultCooldownReduction,
 		damageThreatFactor:   DefaultDamageThreatFactor,
 		healingThreatFactor:  DefaultHealingThreatFactor,
+		abilities:            []*ability{q, w, e, r},
 	}
 	// Magic damage / Mana restore
 	q = &ability{
@@ -29,11 +30,11 @@ func newClassHealer() *class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		Perform: func(subject, object *Unit) {
+		Perform: func(up UnitPair) {
 			// TODO handle the error
-			before, after, _, _ := NewMagicDamage(subject, object, 100).Perform()
+			before, after, _, _ := NewMagicDamage(up, 100).Perform()
 			// TODO send a message including the ability name
-			subject.performManaModification((before - after) * 0.1)
+			up.Subject().performManaModification((before - after) * 0.1)
 		},
 	}
 	// HoT
@@ -48,9 +49,9 @@ func newClassHealer() *class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		Perform: func(subject, object *Unit) {
-			object.AttachHandler(NewTicker(
-				NewHealing(subject, object, 20),
+		Perform: func(up UnitPair) {
+			up.AttachHandler(NewTicker(
+				NewHealing(up, 20),
 				w,
 				12*Second,
 			))
@@ -68,8 +69,8 @@ func newClassHealer() *class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		Perform: func(subject, object *Unit) {
-			NewHealing(subject, object, 400).Perform()
+		Perform: func(up UnitPair) {
+			NewHealing(up, 400).Perform()
 		},
 	}
 	// HoT / Increasing critical strike chance and critical strike factor
@@ -84,9 +85,9 @@ func newClassHealer() *class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		Perform: func(subject, object *Unit) {
-			subject.AttachHandler(NewCorrector(
-				subject,
+		Perform: func(up UnitPair) {
+			up.AttachHandler(NewCorrector(
+				up.Subject(),
 				UnitCorrection{
 					CriticalStrikeChance: 0.5,
 					CriticalStrikeFactor: 1.5,
@@ -95,15 +96,14 @@ func newClassHealer() *class {
 				1,
 				6*Second,
 			))
-			for _, friend := range subject.Friends() {
-				friend.AttachHandler(NewTicker(
-					NewHealing(subject, friend, 20),
+			for _, friend := range up.Subject().Friends() {
+				up.AttachHandler(NewTicker(
+					NewHealing(MakeUnitPair(up.Subject(), friend), 20),
 					r,
 					6*Second,
 				))
 			}
 		},
 	}
-	class.abilities = []*ability{q, w, e, r}
 	return class
 }

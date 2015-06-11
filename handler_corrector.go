@@ -1,7 +1,7 @@
 package main
 
 type Corrector struct {
-	*PartialHandler
+	PartialHandler
 	correction UnitCorrection
 	name       string
 	maxStack   Statistic
@@ -11,7 +11,7 @@ type Corrector struct {
 // NewCorrector returns a Corrector handler
 func NewCorrector(object *Unit, c UnitCorrection, name string, maxStack Statistic, duration GameDuration) *Corrector {
 	return &Corrector{
-		PartialHandler: NewPartialHandler(nil, object, duration),
+		PartialHandler: MakePartialHandler(MakeObject(object), duration),
 		correction:     c,
 		name:           name,
 		maxStack:       maxStack,
@@ -63,7 +63,7 @@ func (m *Corrector) HealingThreatFactor() Statistic {
 func (m *Corrector) OnAttach() {
 	m.Object().AddEventHandler(m, EventDead)
 	m.Object().AddEventHandler(m, EventGameTick)
-	m.Container().ForObjectHandler(m.Object(), func(ha Handler) {
+	m.ForObjectHandler(m.Object(), func(ha Handler) {
 		switch ha := ha.(type) {
 		case *Corrector:
 			if ha == m || ha.name != m.name {

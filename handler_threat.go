@@ -1,33 +1,33 @@
 package main
 
 type Threat struct {
-	*PartialHandler
+	PartialHandler
 	threat Statistic
 }
 
 // NewThreat returns a Threat handler
-func NewThreat(subject, object *Unit, t Statistic) *Threat {
+func NewThreat(up UnitPair, t Statistic) *Threat {
 	return &Threat{
-		PartialHandler: NewPermanentPartialHandler(subject, object),
+		PartialHandler: MakePermanentPartialHandler(up),
 		threat:         t,
 	}
 }
 
-// newDamageThreat initializes a threat handler with damage
-func newDamageThreat(subject, object *Unit, d Statistic) *Threat {
-	return NewThreat(subject, object, d*object.damageThreatFactor())
+// NewDamageThreat initializes a threat handler with damage
+func NewDamageThreat(up UnitPair, d Statistic) *Threat {
+	return NewThreat(up, d*up.Object().damageThreatFactor())
 }
 
 // NewHealingThreat initializes a threat handler with healing
-func NewHealingThreat(subject, object *Unit, h Statistic) *Threat {
-	return NewThreat(subject, object, h*object.healingThreatFactor())
+func NewHealingThreat(up UnitPair, h Statistic) *Threat {
+	return NewThreat(up, h*up.Object().healingThreatFactor())
 }
 
 // OnAttach merges threat handlers they have same subject
 func (t *Threat) OnAttach() {
 	t.Subject().AddEventHandler(t, EventDead)
 	t.Object().AddEventHandler(t, EventDead)
-	t.Container().ForSubjectHandler(t.Subject(), func(ha Handler) {
+	t.ForSubjectHandler(t.Subject(), func(ha Handler) {
 		switch ha := ha.(type) {
 		case *Threat:
 			if ha == t || ha.Object() != t.Object() {

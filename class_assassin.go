@@ -31,6 +31,7 @@ func newClassAssassin() *class {
 		cooldownReduction:    DefaultCooldownReduction,
 		damageThreatFactor:   DefaultDamageThreatFactor,
 		healingThreatFactor:  DefaultHealingThreatFactor,
+		abilities:            []*ability{q, w, e, r},
 	}
 	// Physical damage
 	q = &ability{
@@ -43,8 +44,8 @@ func newClassAssassin() *class {
 		disableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(subject, object *Unit) {
-			NewPhysicalDamage(subject, object, 140).Perform()
+		Perform: func(up UnitPair) {
+			NewPhysicalDamage(up, 140).Perform()
 		},
 	}
 	// Physical damage / DoT / Increasing stacks
@@ -58,10 +59,10 @@ func newClassAssassin() *class {
 		disableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(subject, object *Unit) {
-			NewPhysicalDamage(subject, object, 80).Perform()
-			object.AttachHandler(NewTicker(
-				NewPhysicalDamage(subject, object, 20),
+		Perform: func(up UnitPair) {
+			NewPhysicalDamage(up, 80).Perform()
+			up.AttachHandler(NewTicker(
+				NewPhysicalDamage(up, 20),
 				w,
 				10*Second,
 			))
@@ -78,9 +79,9 @@ func newClassAssassin() *class {
 		disableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(subject, object *Unit) {
-			subject.AttachHandler(NewCorrector(
-				subject,
+		Perform: func(up UnitPair) {
+			up.AttachHandler(NewCorrector(
+				up.Subject(),
 				UnitCorrection{
 					Armor:           -25,
 					MagicResistance: -25,
@@ -90,7 +91,7 @@ func newClassAssassin() *class {
 				8*Second,
 			))
 			for i := 0; i < 2; i++ {
-				subject.AttachHandler(newAssassinStack(subject))
+				up.AttachHandler(newAssassinStack(up.Subject()))
 			}
 		},
 	}
@@ -105,9 +106,9 @@ func newClassAssassin() *class {
 		disableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(subject, object *Unit) {
+		Perform: func(up UnitPair) {
 			stack := Statistic(0)
-			subject.ForSubjectHandler(subject, func(ha Handler) {
+			up.ForSubjectHandler(up.Subject(), func(ha Handler) {
 				switch ha := ha.(type) {
 				case *Corrector:
 					if ha.name == assassinStack {
@@ -115,17 +116,16 @@ func newClassAssassin() *class {
 					}
 				}
 			})
-			NewPhysicalDamage(subject, object, 400*stack*100).Perform()
-			subject.ForSubjectHandler(subject, func(ha Handler) {
+			NewPhysicalDamage(up, 400*stack*100).Perform()
+			up.ForSubjectHandler(up.Subject(), func(ha Handler) {
 				switch ha := ha.(type) {
 				case *Corrector:
 					if ha.name == assassinStack {
-						subject.DetachHandler(ha)
+						up.DetachHandler(ha)
 					}
 				}
 			})
 		},
 	}
-	class.abilities = []*ability{q, w, e, r}
 	return class
 }

@@ -16,6 +16,7 @@ func newClassDisabler() *class {
 		cooldownReduction:    DefaultCooldownReduction,
 		damageThreatFactor:   DefaultDamageThreatFactor,
 		healingThreatFactor:  DefaultHealingThreatFactor,
+		abilities:            []*ability{q, w, e, r},
 	}
 	// Physical damage / DoT / Magic resistance reduction
 	q = &ability{
@@ -28,9 +29,9 @@ func newClassDisabler() *class {
 		disableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(subject, object *Unit) {
-			object.AttachHandler(NewCorrector(
-				object,
+		Perform: func(up UnitPair) {
+			up.AttachHandler(NewCorrector(
+				up.Object(),
 				UnitCorrection{
 					MagicResistance: -15,
 				},
@@ -39,9 +40,9 @@ func newClassDisabler() *class {
 				12*Second,
 			))
 			// TODO handle the error
-			NewPhysicalDamage(subject, object, 110).Perform()
-			object.AttachHandler(NewTicker(
-				NewPhysicalDamage(subject, object, 25),
+			NewPhysicalDamage(up, 110).Perform()
+			up.AttachHandler(NewTicker(
+				NewPhysicalDamage(up, 25),
 				q,
 				4*Second,
 			))
@@ -59,10 +60,10 @@ func newClassDisabler() *class {
 			DisableTypeStun,
 			DisableTypeSilence,
 		},
-		Perform: func(subject, object *Unit) {
-			NewMagicDamage(subject, object, 220).Perform()
-			object.AttachHandler(NewDisable(
-				object,
+		Perform: func(up UnitPair) {
+			NewMagicDamage(up, 220).Perform()
+			up.AttachHandler(NewDisable(
+				up.Object(),
 				DisableTypeSilence,
 				500*Millisecond,
 			))
@@ -79,10 +80,10 @@ func newClassDisabler() *class {
 		disableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(subject, object *Unit) {
-			NewPhysicalDamage(subject, object, 280).Perform()
-			object.AttachHandler(NewDisable(
-				object,
+		Perform: func(up UnitPair) {
+			NewPhysicalDamage(up, 280).Perform()
+			up.AttachHandler(NewDisable(
+				up.Object(),
 				DisableTypeStun,
 				2*Second,
 			))
@@ -99,8 +100,8 @@ func newClassDisabler() *class {
 		disableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(subject, object *Unit) {
-			for _, friend := range subject.Friends() {
+		Perform: func(up UnitPair) {
+			for _, friend := range up.Subject().Friends() {
 				friend.AttachHandler(NewCorrector(
 					friend,
 					UnitCorrection{
@@ -114,6 +115,5 @@ func newClassDisabler() *class {
 			}
 		},
 	}
-	class.abilities = []*ability{q, w, e, r}
 	return class
 }

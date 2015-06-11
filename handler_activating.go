@@ -1,14 +1,14 @@
 package main
 
 type Activating struct {
-	*PartialHandler
+	PartialHandler
 	*ability
 }
 
 // NewActivating returns a Activating handler
-func NewActivating(subject, object *Unit, ability *ability) *Activating {
+func NewActivating(up UnitPair, ability *ability) *Activating {
 	return &Activating{
-		PartialHandler: NewPartialHandler(subject, object, ability.activationDuration),
+		PartialHandler: MakePartialHandler(up, ability.activationDuration),
 		ability:        ability,
 	}
 }
@@ -22,7 +22,7 @@ func (a *Activating) OnAttach() {
 	if a.Object() != nil {
 		a.Object().AddEventHandler(a, EventDead)
 	}
-	ok := a.Container().EverySubjectHandler(a.Subject(), func(ha Handler) bool {
+	ok := a.EverySubjectHandler(a.Subject(), func(ha Handler) bool {
 		switch ha.(type) {
 		case *Activating:
 			return false
@@ -87,6 +87,6 @@ func (a *Activating) perform() {
 	})
 	// TODO consume health
 	// TODO consume mana
-	a.ability.Perform(a.Subject(), a.Object())
+	a.ability.Perform(a.UnitPair)
 	a.Stop(a)
 }

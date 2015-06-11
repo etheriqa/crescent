@@ -1,61 +1,40 @@
 package main
 
 type Damage struct {
-	subject              *Unit
-	object               *Unit
+	UnitPair
 	amount               Statistic
 	criticalStrikeChance Statistic
 	criticalStrikeFactor Statistic
 }
 
 // NewPhysicalDamage returns a damage affected by armor of the object
-func NewPhysicalDamage(subject, object *Unit, baseDamage Statistic) *Damage {
-	return NewTrueDamage(
-		subject,
-		object,
-		baseDamage*object.physicalDamageReductionFactor(),
-	)
+func NewPhysicalDamage(up UnitPair, baseDamage Statistic) *Damage {
+	return NewTrueDamage(up, baseDamage*up.Object().physicalDamageReductionFactor())
 }
 
 // NewMagicDamage returns a damage affected by magic resistance of the object
-func NewMagicDamage(subject, object *Unit, baseDamage Statistic) *Damage {
-	return NewTrueDamage(
-		subject,
-		object,
-		baseDamage*object.magicDamageReductionFactor(),
-	)
+func NewMagicDamage(up UnitPair, baseDamage Statistic) *Damage {
+	return NewTrueDamage(up, baseDamage*up.Object().magicDamageReductionFactor())
 }
 
 // NewTrueDamage returns a damage that ignores damage reduction
-func NewTrueDamage(subject, object *Unit, baseDamage Statistic) *Damage {
+func NewTrueDamage(up UnitPair, baseDamage Statistic) *Damage {
 	return &Damage{
-		subject:              subject,
-		object:               object,
+		UnitPair:             up,
 		amount:               baseDamage,
-		criticalStrikeChance: subject.criticalStrikeChance(),
-		criticalStrikeFactor: subject.criticalStrikeFactor(),
+		criticalStrikeChance: up.Subject().criticalStrikeChance(),
+		criticalStrikeFactor: up.Subject().criticalStrikeFactor(),
 	}
 }
 
 // NewPureDamage returns a damage that ignores both damage reduction and critical strike
-func NewPureDamage(subject, object *Unit, baseDamage Statistic) *Damage {
+func NewPureDamage(up UnitPair, baseDamage Statistic) *Damage {
 	return &Damage{
-		subject:              subject,
-		object:               object,
+		UnitPair:             up,
 		amount:               baseDamage,
 		criticalStrikeChance: 0,
 		criticalStrikeFactor: 0,
 	}
-}
-
-// Subject returns the subject
-func (d *Damage) Subject() *Unit {
-	return d.subject
-}
-
-// Object returns the object
-func (d *Damage) Object() *Unit {
-	return d.object
 }
 
 // Perform subtracts amount the damage from the object and attaches a threat handler to the subject and publishes a message
@@ -65,14 +44,15 @@ func (d *Damage) Perform() (before, after Statistic, crit bool, err error) {
 		d.criticalStrikeChance,
 		d.criticalStrikeFactor,
 	)
-	after, before, err = d.object.modifyHealth(-amount)
+	after, before, err = d.Object().modifyHealth(-amount)
 	if err != nil {
 		return
 	}
-	if d.subject != nil {
-		d.object.AttachHandler(newDamageThreat(d.subject, d.object, d.amount))
+	if d.Subject() != nil {
+		threat := NewDamageThreat(MakeUnitPair(d.Subject(), d.Object()), d.amount)
+		d.AttachHandler(threat)
 	}
-	d.object.Publish(message{
+	d.Publish(message{
 	// TODO pack message
 	})
 	return

@@ -1,7 +1,7 @@
 package main
 
 type Ticker struct {
-	*PartialHandler
+	PartialHandler
 	operator Operator
 	ability  *ability
 }
@@ -9,7 +9,7 @@ type Ticker struct {
 // NewTicker
 func NewTicker(op Operator, a *ability, duration GameDuration) *Ticker {
 	return &Ticker{
-		PartialHandler: NewPartialHandler(op.Subject(), op.Object(), duration),
+		PartialHandler: MakePartialHandler(MakeUnitPair(op.Subject(), op.Object()), duration), // TODO refactor
 		operator:       op,
 		ability:        a,
 	}
@@ -20,7 +20,7 @@ func (t *Ticker) OnAttach() {
 	t.Object().AddEventHandler(t, EventDead)
 	t.Object().AddEventHandler(t, EventGameTick)
 	t.Object().AddEventHandler(t, EventTicker)
-	ok := t.Container().EveryObjectHandler(t.Object(), func(ha Handler) bool {
+	ok := t.EveryObjectHandler(t.Object(), func(ha Handler) bool {
 		switch ha := ha.(type) {
 		case *Ticker:
 			if ha == t || ha.Subject() != t.Subject() || ha.ability != t.ability {

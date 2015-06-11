@@ -21,7 +21,7 @@ type ability struct {
 	activationDuration GameDuration
 	cooldownDuration   GameDuration
 	disableTypes       []DisableType
-	Perform            func(subject, object *Unit)
+	Perform            func(up UnitPair)
 }
 
 // CheckRequirements checks the ability requirements are satisfied

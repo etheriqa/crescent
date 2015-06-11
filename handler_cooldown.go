@@ -1,7 +1,7 @@
 package main
 
 type Cooldown struct {
-	*PartialHandler
+	PartialHandler
 	*ability
 }
 

@@ -12,6 +12,11 @@ const (
 	Second      = GameDuration(time.Second / GameTick)
 )
 
+type GameClock interface {
+	Now() GameTime
+	After(GameDuration) GameTime
+}
+
 type Game struct {
 	HandlerContainer
 	time  GameTime
@@ -218,7 +223,7 @@ func (g *Game) activate(m *message) {
 		return
 	}
 	target := g.uids[m.d["uid"].(unitID)]
-	g.AttachHandler(NewActivating(unit, target, a))
+	g.AttachHandler(NewActivating(MakeUnitPair(unit, target), a))
 }
 
 func (g *Game) interrupt(m *message) {

@@ -16,6 +16,7 @@ func newClassTank() *class {
 		cooldownReduction:    DefaultCooldownReduction,
 		damageThreatFactor:   DefaultDamageThreatFactor,
 		healingThreatFactor:  DefaultHealingThreatFactor,
+		abilities:            []*ability{q, w, e, r},
 	}
 	// True damage / Increasing threat factor
 	q = &ability{
@@ -28,9 +29,9 @@ func newClassTank() *class {
 		disableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(subject, object *Unit) {
-			subject.AttachHandler(NewCorrector(
-				subject,
+		Perform: func(up UnitPair) {
+			up.AttachHandler(NewCorrector(
+				up.Subject(),
 				UnitCorrection{
 					DamageThreatFactor: 1,
 				},
@@ -39,7 +40,7 @@ func newClassTank() *class {
 				10*Second,
 			))
 			// TODO handle the error
-			NewTrueDamage(subject, object, 120).Perform()
+			NewTrueDamage(up, 120).Perform()
 		},
 	}
 	// Physical damage / Increasing AR & MR
@@ -53,9 +54,9 @@ func newClassTank() *class {
 		disableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(subject, object *Unit) {
-			subject.AttachHandler(NewCorrector(
-				subject,
+		Perform: func(up UnitPair) {
+			up.AttachHandler(NewCorrector(
+				up.Subject(),
 				UnitCorrection{
 					Armor:           50,
 					MagicResistance: 50,
@@ -65,7 +66,7 @@ func newClassTank() *class {
 				2*Second,
 			))
 			// TODO handle the error
-			NewPhysicalDamage(subject, object, 200).Perform()
+			NewPhysicalDamage(up, 200).Perform()
 		},
 	}
 	// Physical damage / Life steal
@@ -79,11 +80,11 @@ func newClassTank() *class {
 		disableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(subject, object *Unit) {
+		Perform: func(up UnitPair) {
 			// TODO handle the error
-			before, after, _, _ := NewPhysicalDamage(subject, object, 300).Perform()
+			before, after, _, _ := NewPhysicalDamage(up, 300).Perform()
 			// TODO handle the error
-			NewPureHealing(subject, object, (before-after)*0.6).Perform()
+			NewPureHealing(MakeUnitPair(up.Subject(), up.Subject()), (before-after)*0.6).Perform()
 		},
 	}
 	// Increasing AR & MR
@@ -98,9 +99,9 @@ func newClassTank() *class {
 			DisableTypeStun,
 			DisableTypeSilence,
 		},
-		Perform: func(subject, object *Unit) {
-			subject.AttachHandler(NewCorrector(
-				subject,
+		Perform: func(up UnitPair) {
+			up.AttachHandler(NewCorrector(
+				up.Subject(),
 				UnitCorrection{
 					Armor:           150,
 					MagicResistance: 150,
@@ -111,6 +112,5 @@ func newClassTank() *class {
 			))
 		},
 	}
-	class.abilities = []*ability{q, w, e, r}
 	return class
 }

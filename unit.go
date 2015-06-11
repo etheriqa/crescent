@@ -195,7 +195,7 @@ func (u *Unit) TickerTick() {
 
 // performHealthRegeneration performs health regeneration
 func (u *Unit) performHealthRegeneration() {
-	_, _, _, err := NewPureHealing(nil, u, u.healthRegeneration()).Perform()
+	_, _, _, err := NewPureHealing(MakeObject(u), u.healthRegeneration()).Perform()
 	if err != nil {
 		log.WithFields(logrus.Fields{
 			"err": err,

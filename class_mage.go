@@ -20,6 +20,7 @@ func newClassMage() *class {
 		cooldownReduction:    DefaultCooldownReduction,
 		damageThreatFactor:   DefaultDamageThreatFactor,
 		healingThreatFactor:  DefaultHealingThreatFactor,
+		abilities:            []*ability{q, w, e, r},
 	}
 	// Magic damage / Armor reduction / Proc 10% W
 	q = &ability{
@@ -33,9 +34,9 @@ func newClassMage() *class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		Perform: func(subject, object *Unit) {
-			object.AttachHandler(NewCorrector(
-				object,
+		Perform: func(up UnitPair) {
+			up.AttachHandler(NewCorrector(
+				up.Object(),
 				UnitCorrection{
 					Armor: -10,
 				},
@@ -44,13 +45,13 @@ func newClassMage() *class {
 				8*Second,
 			))
 			// TODO handle the error
-			NewMagicDamage(subject, object, 120).Perform()
+			NewMagicDamage(up, 120).Perform()
 			if rand.Float64() > 0.1 {
-				subject.ForSubjectHandler(subject, func(ha Handler) {
+				up.ForSubjectHandler(up.Subject(), func(ha Handler) {
 					switch ha := ha.(type) {
 					case *Cooldown:
 						if ha.ability == w {
-							subject.DetachHandler(ha)
+							up.DetachHandler(ha)
 						}
 					}
 				})
@@ -69,19 +70,19 @@ func newClassMage() *class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		Perform: func(subject, object *Unit) {
+		Perform: func(up UnitPair) {
 			// TODO handle the error
-			object.AttachHandler(NewTicker(
-				NewMagicDamage(subject, object, 30),
+			up.AttachHandler(NewTicker(
+				NewMagicDamage(up, 30),
 				w,
 				10*Second,
 			))
 			if rand.Float64() > 0.2 {
-				subject.ForSubjectHandler(subject, func(ha Handler) {
+				up.ForSubjectHandler(up.Subject(), func(ha Handler) {
 					switch ha := ha.(type) {
 					case *Cooldown:
 						if ha.ability == e {
-							subject.DetachHandler(ha)
+							up.DetachHandler(ha)
 						}
 					}
 				})
@@ -100,9 +101,9 @@ func newClassMage() *class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		Perform: func(subject, object *Unit) {
+		Perform: func(up UnitPair) {
 			// TODO handle the error
-			NewMagicDamage(subject, object, 400).Perform()
+			NewMagicDamage(up, 400).Perform()
 		},
 	}
 	// Magic damage / All / DoT / Stun
@@ -117,22 +118,21 @@ func newClassMage() *class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		Perform: func(subject, object *Unit) {
-			for _, enemy := range subject.Enemies() {
-				NewMagicDamage(subject, enemy, 400).Perform()
-				enemy.AttachHandler(NewTicker(
-					NewMagicDamage(subject, enemy, 40),
+		Perform: func(up UnitPair) {
+			for _, enemy := range up.Subject().Enemies() {
+				NewMagicDamage(MakeUnitPair(up.Subject(), enemy), 400).Perform()
+				up.AttachHandler(NewTicker(
+					NewMagicDamage(MakeUnitPair(up.Subject(), enemy), 40),
 					r,
 					10*Second,
 				))
-				enemy.AttachHandler(NewDisable(
-					object,
+				up.AttachHandler(NewDisable(
+					enemy,
 					DisableTypeStun,
 					500*Millisecond,
 				))
 			}
 		},
 	}
-	class.abilities = []*ability{q, w, e, r}
 	return class
 }
