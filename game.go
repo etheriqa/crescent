@@ -141,7 +141,6 @@ func (g *game) unregister(m *message) {
 }
 
 func (g *game) stage(m *message) {
-	// TODO change stage
 }
 
 func (g *game) seat(m *message) {
@@ -150,13 +149,22 @@ func (g *game) seat(m *message) {
 	if _, ok := g.seats[seat]; ok {
 		return
 	}
-	var u *unit
+	var c *class
 	switch unitName {
-	// TODO
+	case "Assassin":
+		c = newClassAssassin()
+	case "Disabler":
+		c = newClassDisabler()
+	case "Healer":
+		c = newClassHealer()
+	case "Mage":
+		c = newClassMage()
+	case "Tank":
+		c = newClassTank()
 	default:
-		g.terminate(m.name)
 		return
 	}
+	u := newUnit(g, c)
 	g.names[m.name] = u
 	g.uids[u.id] = u
 	g.seats[seat] = u
