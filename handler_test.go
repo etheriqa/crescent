@@ -14,14 +14,14 @@ type MockedHandler struct {
 
 func (m *MockedHandler) HandleEvent(Event) {}
 
-func (m *MockedHandler) Subject() *unit {
+func (m *MockedHandler) Subject() *Unit {
 	args := m.Called()
-	return args.Get(0).(*unit)
+	return args.Get(0).(*Unit)
 }
 
-func (m *MockedHandler) Object() *unit {
+func (m *MockedHandler) Object() *Unit {
 	args := m.Called()
-	return args.Get(0).(*unit)
+	return args.Get(0).(*Unit)
 }
 
 func (m *MockedHandler) OnAttach() {
@@ -68,9 +68,9 @@ func TestHandlerContainerForSubjectHandlerAndForObjectHandler(t *testing.T) {
 	ha1 := &MockedHandler{id: "ha1"}
 	ha2 := &MockedHandler{id: "ha2"}
 	ha3 := &MockedHandler{id: "ha3"}
-	u1 := new(unit)
-	u2 := new(unit)
-	u3 := new(unit)
+	u1 := new(Unit)
+	u2 := new(Unit)
+	u3 := new(Unit)
 
 	ha1.On("OnAttach").Return()
 	ha1.On("Subject").Return(u1)

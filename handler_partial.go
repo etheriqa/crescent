@@ -1,13 +1,13 @@
 package main
 
 type PartialHandler struct {
-	subject        *unit
-	object         *unit
-	expirationTime gameTime
+	subject        *Unit
+	object         *Unit
+	expirationTime GameTime
 }
 
 // NewPartialHandler returns a PartialHandler
-func NewPartialHandler(subject, object *unit, duration gameDuration) *PartialHandler {
+func NewPartialHandler(subject, object *Unit, duration GameDuration) *PartialHandler {
 	ha := NewPermanentPartialHandler(subject, object)
 	if subject != nil {
 		ha.expirationTime = subject.after(duration)
@@ -19,7 +19,7 @@ func NewPartialHandler(subject, object *unit, duration gameDuration) *PartialHan
 }
 
 // NewPermanentPartialHandler returns a permanent PartialHandler
-func NewPermanentPartialHandler(subject, object *unit) *PartialHandler {
+func NewPermanentPartialHandler(subject, object *Unit) *PartialHandler {
 	return &PartialHandler{
 		subject:        subject,
 		object:         object,
@@ -41,17 +41,17 @@ func (p *PartialHandler) Container() HandlerContainer {
 }
 
 // Subject returns the subject unit
-func (p *PartialHandler) Subject() *unit {
+func (p *PartialHandler) Subject() *Unit {
 	return p.subject
 }
 
 // Object returns the object unit
-func (p *PartialHandler) Object() *unit {
+func (p *PartialHandler) Object() *Unit {
 	return p.object
 }
 
 // Now returns the current game time
-func (p *PartialHandler) Now() gameTime {
+func (p *PartialHandler) Now() GameTime {
 	if p.subject != nil {
 		return p.subject.now()
 	}
@@ -60,7 +60,7 @@ func (p *PartialHandler) Now() gameTime {
 	}
 	// TODO return error
 	log.Fatal("")
-	return gameTime(0)
+	return GameTime(0)
 }
 
 // IsExpired returns whether the handler is expired or not
@@ -76,11 +76,11 @@ func (p *PartialHandler) Stop(ha Handler) {
 // Publish sends the message
 func (p *PartialHandler) Publish(m message) {
 	if p.subject != nil {
-		p.subject.publish(m)
+		p.subject.Publish(m)
 		return
 	}
 	if p.object != nil {
-		p.object.publish(m)
+		p.object.Publish(m)
 		return
 	}
 }

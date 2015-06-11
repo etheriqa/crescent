@@ -4,50 +4,50 @@ import (
 	"time"
 )
 
-type gameTime int64
-type gameDuration int64
+type GameTime int64
+type GameDuration int64
 
 const (
-	millisecond = gameDuration(time.Millisecond / gameTick)
-	second      = gameDuration(time.Second / gameTick)
+	Millisecond = GameDuration(time.Millisecond / GameTick)
+	Second      = GameDuration(time.Second / GameTick)
 )
 
-type game struct {
+type Game struct {
 	HandlerContainer
-	time  gameTime
-	names map[string]*unit
+	time  GameTime
+	names map[string]*Unit
 	uid   unitID
-	uids  map[unitID]*unit
-	seats map[uint8]*unit
+	uids  map[unitID]*Unit
+	seats map[uint8]*Unit
 	inc   chan message
 	out   chan message
 }
 
-func newGame(inc chan message, out chan message) *game {
-	return &game{
+func NewGame(inc chan message, out chan message) *Game {
+	return &Game{
 		HandlerContainer: NewHandlerContainer(),
 		time:             0,
-		names:            make(map[string]*unit),
+		names:            make(map[string]*Unit),
 		uid:              0,
-		uids:             make(map[unitID]*unit),
-		seats:            make(map[uint8]*unit),
+		uids:             make(map[unitID]*Unit),
+		seats:            make(map[uint8]*Unit),
 		inc:              inc,
 		out:              out,
 	}
 }
 
 // now returns the game time
-func (g *game) now() gameTime {
+func (g *Game) now() GameTime {
 	return g.time
 }
 
 // after returns the game time after the duration
-func (g *game) after(d gameDuration) gameTime {
-	return g.time + gameTime(d)
+func (g *Game) after(d GameDuration) GameTime {
+	return g.time + GameTime(d)
 }
 
 // friends returns given unit's friend units **including itself**
-func (g *game) friends(u *unit) (us []*unit) {
+func (g *Game) friends(u *Unit) (us []*Unit) {
 	for _, unit := range g.uids {
 		if unit.group == u.group {
 			us = append(us, unit)
@@ -57,7 +57,7 @@ func (g *game) friends(u *unit) (us []*unit) {
 }
 
 // enemies returns given unit's enemy units
-func (g *game) enemies(u *unit) (us []*unit) {
+func (g *Game) enemies(u *Unit) (us []*Unit) {
 	for _, unit := range g.uids {
 		if unit.group != u.group {
 			us = append(us, unit)
@@ -66,16 +66,16 @@ func (g *game) enemies(u *unit) (us []*unit) {
 	return
 }
 
-func (g *game) publish(m message) {
+func (g *Game) Publish(m message) {
 	g.out <- m
 }
 
-func (g *game) nextUnitID() unitID {
+func (g *Game) nextUnitID() unitID {
 	g.uid++
 	return g.uid
 }
 
-func (g *game) run() {
+func (g *Game) Run() {
 	for {
 		select {
 		case m := <-g.inc:
@@ -105,22 +105,22 @@ func (g *game) run() {
 	}
 }
 
-func (g *game) tick(m *message) {
+func (g *Game) tick(m *message) {
 	g.time++
 	for _, u := range g.uids {
-		u.gameTick()
+		u.GameTick()
 	}
-	if int64(g.time)*int64(gameTick)%int64(xotTick) != 0 {
+	if int64(g.time)*int64(GameTick)%int64(XoTTick) != 0 {
 		return
 	}
 	for _, u := range g.uids {
-		u.xotTick()
+		u.XoTTick()
 	}
 }
 
-func (g *game) register(m *message) {
+func (g *Game) register(m *message) {
 	g.names[m.name] = nil
-	g.publish(message{
+	g.Publish(message{
 		t: outConnect,
 		d: map[string]interface{}{
 			"name": m.name,
@@ -128,13 +128,13 @@ func (g *game) register(m *message) {
 	})
 }
 
-func (g *game) unregister(m *message) {
+func (g *Game) unregister(m *message) {
 	if u, _ := g.names[m.name]; u != nil {
 		delete(g.uids, u.id)
 		delete(g.seats, u.seat)
 	}
 	delete(g.names, m.name)
-	g.publish(message{
+	g.Publish(message{
 		t: outDisconnect,
 		d: map[string]interface{}{
 			"name": m.name,
@@ -142,15 +142,15 @@ func (g *game) unregister(m *message) {
 	})
 }
 
-func (g *game) stage(m *message) {
-	g.uids = make(map[unitID]*unit)
-	g.seats = make(map[uint8]*unit)
-	g.publish(message{
+func (g *Game) stage(m *message) {
+	g.uids = make(map[unitID]*Unit)
+	g.seats = make(map[uint8]*Unit)
+	g.Publish(message{
 	// TODO pack message
 	})
 }
 
-func (g *game) seat(m *message) {
+func (g *Game) seat(m *message) {
 	seat := uint8(m.d["seat"].(float64))
 	unitName := m.d["unit"].(string)
 	if _, ok := g.seats[seat]; ok {
@@ -171,11 +171,11 @@ func (g *game) seat(m *message) {
 	default:
 		return
 	}
-	u := newUnit(g, c)
+	u := NewUnit(g, c)
 	g.names[m.name] = u
 	g.uids[u.id] = u
 	g.seats[seat] = u
-	g.publish(message{
+	g.Publish(message{
 		t: outSeat,
 		d: map[string]interface{}{
 			"name": m.name,
@@ -185,7 +185,7 @@ func (g *game) seat(m *message) {
 	})
 }
 
-func (g *game) leave(m *message) {
+func (g *Game) leave(m *message) {
 	u, ok := g.names[m.name]
 	if !ok || u == nil {
 		return
@@ -193,7 +193,7 @@ func (g *game) leave(m *message) {
 	delete(g.uids, u.id)
 	delete(g.seats, u.seat)
 	g.names[m.name] = nil
-	g.publish(message{
+	g.Publish(message{
 		t: outLeave,
 		d: map[string]interface{}{
 			"seat": u.seat,
@@ -201,7 +201,7 @@ func (g *game) leave(m *message) {
 	})
 }
 
-func (g *game) activate(m *message) {
+func (g *Game) activate(m *message) {
 	key := m.d["key"].(string)
 	unit := g.names[m.name]
 	var a *ability
@@ -221,7 +221,7 @@ func (g *game) activate(m *message) {
 	g.AttachHandler(NewActivating(unit, target, a))
 }
 
-func (g *game) interrupt(m *message) {
+func (g *Game) interrupt(m *message) {
 	unit := g.names[m.name]
 	g.ForSubjectHandler(unit, func(ha Handler) {
 		switch ha.(type) {
@@ -231,9 +231,9 @@ func (g *game) interrupt(m *message) {
 	})
 }
 
-func (g *game) chat(m *message) {
+func (g *Game) chat(m *message) {
 	body := m.d["body"].(string)
-	g.publish(message{
+	g.Publish(message{
 		t: outChat,
 		d: map[string]interface{}{
 			"name": m.name,
@@ -243,8 +243,8 @@ func (g *game) chat(m *message) {
 	log.Infof("@%s: %s", m.name, body)
 }
 
-func (g *game) terminate(name string) {
-	g.publish(message{
+func (g *Game) terminate(name string) {
+	g.Publish(message{
 		name: name,
 		t:    gameTerminate,
 	})

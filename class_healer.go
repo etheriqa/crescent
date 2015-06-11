@@ -9,29 +9,29 @@ func newClassHealer() *class {
 		healthRegeneration:   2,
 		mana:                 400,
 		manaRegeneration:     6,
-		armor:                defaultArmor,
-		magicResistance:      defaultMagicResistance,
-		criticalStrikeChance: defaultCriticalStrikeChance,
-		criticalStrikeFactor: defaultCriticalStrikeFactor,
-		cooldownReduction:    defaultCooldownReduction,
-		damageThreatFactor:   defaultDamageThreatFactor,
-		healingThreatFactor:  defaultHealingThreatFactor,
+		armor:                DefaultArmor,
+		magicResistance:      DefaultMagicResistance,
+		criticalStrikeChance: DefaultCriticalStrikeChance,
+		criticalStrikeFactor: DefaultCriticalStrikeFactor,
+		cooldownReduction:    DefaultCooldownReduction,
+		damageThreatFactor:   DefaultDamageThreatFactor,
+		healingThreatFactor:  DefaultHealingThreatFactor,
 	}
 	// Magic damage / Mana restore
 	q = &ability{
 		name:               "Healer Q",
-		targetType:         targetTypeEnemy,
+		TargetType:         TargetTypeEnemy,
 		healthCost:         0,
 		manaCost:           0,
-		activationDuration: 2 * second,
-		cooldownDuration:   2 * second,
-		disableTypes: []disableType{
-			disableTypeSilence,
-			disableTypeStun,
+		activationDuration: 2 * Second,
+		cooldownDuration:   2 * Second,
+		disableTypes: []DisableType{
+			DisableTypeSilence,
+			DisableTypeStun,
 		},
-		perform: func(subject, object *unit) {
+		perform: func(subject, object *Unit) {
 			// TODO handle the error
-			before, after, _, _ := newMagicDamage(subject, object, 100).perform(subject.game)
+			before, after, _, _ := NewMagicDamage(subject, object, 100).Perform()
 			// TODO send a message including the ability name
 			subject.performManaModification((before - after) * 0.1)
 		},
@@ -39,52 +39,52 @@ func newClassHealer() *class {
 	// HoT
 	w = &ability{
 		name:               "Healer W",
-		targetType:         targetTypeFriend,
+		TargetType:         TargetTypeFriend,
 		healthCost:         0,
 		manaCost:           40,
-		activationDuration: 2 * second,
-		cooldownDuration:   4 * second,
-		disableTypes: []disableType{
-			disableTypeSilence,
-			disableTypeStun,
+		activationDuration: 2 * Second,
+		cooldownDuration:   4 * Second,
+		disableTypes: []DisableType{
+			DisableTypeSilence,
+			DisableTypeStun,
 		},
-		perform: func(subject, object *unit) {
+		perform: func(subject, object *Unit) {
 			object.AttachHandler(NewHoT(
-				newHealing(subject, object, 20),
+				NewHealing(subject, object, 20),
 				w,
-				12*second,
+				12*Second,
 			))
 		},
 	}
 	// Healing
 	e = &ability{
 		name:               "Healer E",
-		targetType:         targetTypeFriend,
+		TargetType:         TargetTypeFriend,
 		healthCost:         0,
 		manaCost:           80,
-		activationDuration: 2 * second,
-		cooldownDuration:   8 * second,
-		disableTypes: []disableType{
-			disableTypeSilence,
-			disableTypeStun,
+		activationDuration: 2 * Second,
+		cooldownDuration:   8 * Second,
+		disableTypes: []DisableType{
+			DisableTypeSilence,
+			DisableTypeStun,
 		},
-		perform: func(subject, object *unit) {
-			newHealing(subject, object, 400).perform(subject.game)
+		perform: func(subject, object *Unit) {
+			NewHealing(subject, object, 400).Perform()
 		},
 	}
 	// HoT / Increasing critical strike chance and critical strike factor
 	r = &ability{
 		name:               "Healer R",
-		targetType:         targetTypeNone,
+		TargetType:         TargetTypeNone,
 		healthCost:         0,
 		manaCost:           200,
 		activationDuration: 0,
-		cooldownDuration:   60 * second,
-		disableTypes: []disableType{
-			disableTypeSilence,
-			disableTypeStun,
+		cooldownDuration:   60 * Second,
+		disableTypes: []DisableType{
+			DisableTypeSilence,
+			DisableTypeStun,
 		},
-		perform: func(subject, object *unit) {
+		perform: func(subject, object *Unit) {
 			subject.AttachHandler(NewModifier(
 				subject,
 				unitModification{
@@ -93,13 +93,13 @@ func newClassHealer() *class {
 				},
 				r.name,
 				1,
-				6*second,
+				6*Second,
 			))
-			for _, friend := range subject.game.friends(subject) {
+			for _, friend := range subject.friends(subject) {
 				friend.AttachHandler(NewHoT(
-					newHealing(subject, friend, 20),
+					NewHealing(subject, friend, 20),
 					r,
-					6*second,
+					6*Second,
 				))
 			}
 		},

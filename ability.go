@@ -4,28 +4,28 @@ import (
 	"errors"
 )
 
-type targetType uint8
+type TargetType uint8
 
 const (
-	_ targetType = iota
-	targetTypeNone
-	targetTypeFriend
-	targetTypeEnemy
+	_ TargetType = iota
+	TargetTypeNone
+	TargetTypeFriend
+	TargetTypeEnemy
 )
 
 type ability struct {
 	name               string
-	targetType         targetType
-	healthCost         statistic
-	manaCost           statistic
-	activationDuration gameDuration
-	cooldownDuration   gameDuration
-	disableTypes       []disableType
-	perform            func(subject, object *unit)
+	TargetType         TargetType
+	healthCost         Statistic
+	manaCost           Statistic
+	activationDuration GameDuration
+	cooldownDuration   GameDuration
+	disableTypes       []DisableType
+	perform            func(subject, object *Unit)
 }
 
 // checkRequirements checks the ability requirements are satisfied
-func (a *ability) checkRequirements(subject *unit, object *unit) error {
+func (a *ability) checkRequirements(subject *Unit, object *Unit) error {
 	if err := a.checkobject(subject, object); err != nil {
 		return err
 	}
@@ -42,13 +42,13 @@ func (a *ability) checkRequirements(subject *unit, object *unit) error {
 }
 
 // checkobject checks the object is valid
-func (a *ability) checkobject(subject, object *unit) error {
-	switch a.targetType {
-	case targetTypeFriend:
+func (a *ability) checkobject(subject, object *Unit) error {
+	switch a.TargetType {
+	case TargetTypeFriend:
 		if object == nil || subject.group != object.group {
 			return errors.New("The object must be friend")
 		}
-	case targetTypeEnemy:
+	case TargetTypeEnemy:
 		if object == nil || subject.group == object.group {
 			return errors.New("The object must be enemy")
 		}
@@ -57,7 +57,7 @@ func (a *ability) checkobject(subject, object *unit) error {
 }
 
 // checkCooldown checks the subject does not have to wait the cooldown time expiration
-func (a *ability) checkCooldown(subject *unit) error {
+func (a *ability) checkCooldown(subject *Unit) error {
 	ok := subject.EverySubjectHandler(subject, func(ha Handler) bool {
 		switch ha := ha.(type) {
 		case *Cooldown:
@@ -74,12 +74,12 @@ func (a *ability) checkCooldown(subject *unit) error {
 }
 
 // checkDisable checks the subject is not interrupted by the disables
-func (a *ability) checkDisable(subject *unit) error {
+func (a *ability) checkDisable(subject *Unit) error {
 	ok := subject.EverySubjectHandler(subject, func(ha Handler) bool {
 		switch ha := ha.(type) {
 		case *Disable:
 			for dt := range a.disableTypes {
-				if disableType(dt) == ha.disableType {
+				if DisableType(dt) == ha.DisableType {
 					return false
 				}
 			}
@@ -93,7 +93,7 @@ func (a *ability) checkDisable(subject *unit) error {
 }
 
 // checkCost checks the subject satisfies the ability cost
-func (a *ability) checkCost(subject *unit) error {
+func (a *ability) checkCost(subject *Unit) error {
 	if subject.health() < a.healthCost {
 		return errors.New("The subject does not have enough health")
 	}

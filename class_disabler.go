@@ -9,26 +9,26 @@ func newClassDisabler() *class {
 		healthRegeneration:   2,
 		mana:                 300,
 		manaRegeneration:     4,
-		armor:                defaultArmor,
-		magicResistance:      defaultMagicResistance,
-		criticalStrikeChance: defaultCriticalStrikeChance,
-		criticalStrikeFactor: defaultCriticalStrikeFactor,
-		cooldownReduction:    defaultCooldownReduction,
-		damageThreatFactor:   defaultDamageThreatFactor,
-		healingThreatFactor:  defaultHealingThreatFactor,
+		armor:                DefaultArmor,
+		magicResistance:      DefaultMagicResistance,
+		criticalStrikeChance: DefaultCriticalStrikeChance,
+		criticalStrikeFactor: DefaultCriticalStrikeFactor,
+		cooldownReduction:    DefaultCooldownReduction,
+		damageThreatFactor:   DefaultDamageThreatFactor,
+		healingThreatFactor:  DefaultHealingThreatFactor,
 	}
 	// Physical damage / DoT / Magic resistance reduction
 	q = &ability{
 		name:               "Q",
-		targetType:         targetTypeEnemy,
+		TargetType:         TargetTypeEnemy,
 		healthCost:         0,
 		manaCost:           0,
 		activationDuration: 0,
-		cooldownDuration:   2 * second,
-		disableTypes: []disableType{
-			disableTypeStun,
+		cooldownDuration:   2 * Second,
+		disableTypes: []DisableType{
+			DisableTypeStun,
 		},
-		perform: func(subject, object *unit) {
+		perform: func(subject, object *Unit) {
 			object.AttachHandler(NewModifier(
 				object,
 				unitModification{
@@ -36,71 +36,71 @@ func newClassDisabler() *class {
 				},
 				q.name,
 				1,
-				12*second,
+				12*Second,
 			))
 			// TODO handle the error
-			newPhysicalDamage(subject, object, 110).perform(subject.game)
+			NewPhysicalDamage(subject, object, 110).Perform()
 			object.AttachHandler(NewDoT(
-				newPhysicalDamage(subject, object, 25),
+				NewPhysicalDamage(subject, object, 25),
 				q,
-				4*second,
+				4*Second,
 			))
 		},
 	}
 	// Magic damage / Silence
 	w = &ability{
 		name:               "W",
-		targetType:         targetTypeEnemy,
+		TargetType:         TargetTypeEnemy,
 		healthCost:         0,
 		manaCost:           40,
-		activationDuration: 2 * second,
-		cooldownDuration:   8 * second,
-		disableTypes: []disableType{
-			disableTypeStun,
-			disableTypeSilence,
+		activationDuration: 2 * Second,
+		cooldownDuration:   8 * Second,
+		disableTypes: []DisableType{
+			DisableTypeStun,
+			DisableTypeSilence,
 		},
-		perform: func(subject, object *unit) {
-			newMagicDamage(subject, object, 220).perform(subject.game)
+		perform: func(subject, object *Unit) {
+			NewMagicDamage(subject, object, 220).Perform()
 			object.AttachHandler(NewDisable(
 				object,
-				disableTypeSilence,
-				500*millisecond,
+				DisableTypeSilence,
+				500*Millisecond,
 			))
 		},
 	}
 	// Physical damage / Stun
 	e = &ability{
 		name:               "E",
-		targetType:         targetTypeEnemy,
+		TargetType:         TargetTypeEnemy,
 		healthCost:         0,
 		manaCost:           60,
 		activationDuration: 0,
-		cooldownDuration:   20 * second,
-		disableTypes: []disableType{
-			disableTypeStun,
+		cooldownDuration:   20 * Second,
+		disableTypes: []DisableType{
+			DisableTypeStun,
 		},
-		perform: func(subject, object *unit) {
-			newPhysicalDamage(subject, object, 280).perform(subject.game)
+		perform: func(subject, object *Unit) {
+			NewPhysicalDamage(subject, object, 280).Perform()
 			object.AttachHandler(NewDisable(
 				object,
-				disableTypeStun,
-				2*second,
+				DisableTypeStun,
+				2*Second,
 			))
 		},
 	}
 	// Increasing critical / All
 	r = &ability{
 		name:               "R",
-		targetType:         targetTypeNone,
+		TargetType:         TargetTypeNone,
 		healthCost:         0,
 		manaCost:           120,
 		activationDuration: 0,
-		cooldownDuration:   60 * second,
-		disableTypes: []disableType{
-			disableTypeStun,
+		cooldownDuration:   60 * Second,
+		disableTypes: []DisableType{
+			DisableTypeStun,
 		},
-		perform: func(subject, object *unit) {
-			for _, friend := range subject.game.friends(subject) {
+		perform: func(subject, object *Unit) {
+			for _, friend := range subject.friends(subject) {
 				friend.AttachHandler(NewModifier(
 					friend,
 					unitModification{
@@ -109,7 +109,7 @@ func newClassDisabler() *class {
 					},
 					r.name,
 					1,
-					10*second,
+					10*Second,
 				))
 			}
 		},

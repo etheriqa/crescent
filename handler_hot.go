@@ -9,7 +9,7 @@ type HoT struct {
 }
 
 // NewHoT returns a HoT handler
-func NewHoT(h *healing, a *ability, duration gameDuration) *HoT {
+func NewHoT(h *healing, a *ability, duration GameDuration) *HoT {
 	return &HoT{
 		PartialHandler: NewPartialHandler(h.subject, h.object, duration),
 		healing:        h,
@@ -61,7 +61,7 @@ func (h *HoT) HandleEvent(e Event) {
 			h.Up()
 		}
 	case EventXoT:
-		h.healing.perform(h.Object().game) // TODO refactor
+		h.healing.Perform()
 	}
 }
 

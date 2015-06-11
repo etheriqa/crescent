@@ -2,8 +2,8 @@ package main
 
 type Handler interface {
 	EventHandler
-	Subject() *unit
-	Object() *unit
+	Subject() *Unit
+	Object() *Unit
 	OnAttach()
 	OnDetach()
 }
@@ -11,10 +11,10 @@ type Handler interface {
 type HandlerContainer interface {
 	AttachHandler(Handler)
 	DetachHandler(Handler)
-	ForSubjectHandler(*unit, func(Handler))
-	ForObjectHandler(*unit, func(Handler))
-	EverySubjectHandler(*unit, func(Handler) bool) bool
-	EveryObjectHandler(*unit, func(Handler) bool) bool
+	ForSubjectHandler(*Unit, func(Handler))
+	ForObjectHandler(*Unit, func(Handler))
+	EverySubjectHandler(*Unit, func(Handler) bool) bool
+	EveryObjectHandler(*Unit, func(Handler) bool) bool
 }
 
 type implHandlerContainer struct {
@@ -47,7 +47,7 @@ func (hc *implHandlerContainer) DetachHandler(ha Handler) {
 }
 
 // ForSubjectHandler calls the callback with the handler has given the subject
-func (hc *implHandlerContainer) ForSubjectHandler(subject *unit, callback func(Handler)) {
+func (hc *implHandlerContainer) ForSubjectHandler(subject *Unit, callback func(Handler)) {
 	for ha := range hc.handlers {
 		if ha.Subject() == subject {
 			callback(ha)
@@ -56,7 +56,7 @@ func (hc *implHandlerContainer) ForSubjectHandler(subject *unit, callback func(H
 }
 
 // ForObjectHandler calls the callback with the handler has given the object
-func (hc *implHandlerContainer) ForObjectHandler(object *unit, callback func(Handler)) {
+func (hc *implHandlerContainer) ForObjectHandler(object *Unit, callback func(Handler)) {
 	for ha := range hc.handlers {
 		if ha.Object() == object {
 			callback(ha)
@@ -65,7 +65,7 @@ func (hc *implHandlerContainer) ForObjectHandler(object *unit, callback func(Han
 }
 
 // EverySubjectHandler returns true if all of callback results are true
-func (hc *implHandlerContainer) EverySubjectHandler(subject *unit, callback func(Handler) bool) bool {
+func (hc *implHandlerContainer) EverySubjectHandler(subject *Unit, callback func(Handler) bool) bool {
 	for ha := range hc.handlers {
 		if ha.Subject() != subject {
 			continue
@@ -78,7 +78,7 @@ func (hc *implHandlerContainer) EverySubjectHandler(subject *unit, callback func
 }
 
 // EveryObjectHandler returns true if all of callback results are true
-func (hc *implHandlerContainer) EveryObjectHandler(object *unit, callback func(Handler) bool) bool {
+func (hc *implHandlerContainer) EveryObjectHandler(object *Unit, callback func(Handler) bool) bool {
 	for ha := range hc.handlers {
 		if ha.Object() != object {
 			continue
@@ -91,7 +91,7 @@ func (hc *implHandlerContainer) EveryObjectHandler(object *unit, callback func(H
 }
 
 // SomeSubjectHandler returns true if any of callback results are true
-func (hc *implHandlerContainer) SomeSubjectHandler(subject *unit, callback func(Handler) bool) bool {
+func (hc *implHandlerContainer) SomeSubjectHandler(subject *Unit, callback func(Handler) bool) bool {
 	for ha := range hc.handlers {
 		if ha.Subject() != subject {
 			continue
@@ -104,7 +104,7 @@ func (hc *implHandlerContainer) SomeSubjectHandler(subject *unit, callback func(
 }
 
 // SomeObjectHandler returns true if any of callback results are true
-func (hc *implHandlerContainer) SomeObjectHandler(object *unit, callback func(Handler) bool) bool {
+func (hc *implHandlerContainer) SomeObjectHandler(object *Unit, callback func(Handler) bool) bool {
 	for ha := range hc.handlers {
 		if ha.Object() != object {
 			continue

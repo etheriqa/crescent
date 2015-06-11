@@ -1,28 +1,28 @@
 package main
 
 const (
-	defaultArmor                statistic = 25
-	defaultMagicResistance      statistic = 0
-	defaultCriticalStrikeChance statistic = 0.05
-	defaultCriticalStrikeFactor statistic = 0.5
-	defaultCooldownReduction    statistic = 0.0
-	defaultDamageThreatFactor   statistic = 1.0
-	defaultHealingThreatFactor  statistic = 0.4
+	DefaultArmor                Statistic = 25
+	DefaultMagicResistance      Statistic = 0
+	DefaultCriticalStrikeChance Statistic = 0.05
+	DefaultCriticalStrikeFactor Statistic = 0.5
+	DefaultCooldownReduction    Statistic = 0.0
+	DefaultDamageThreatFactor   Statistic = 1.0
+	DefaultHealingThreatFactor  Statistic = 0.4
 )
 
 type class struct {
 	name                 string
-	health               statistic
-	healthRegeneration   statistic
-	mana                 statistic
-	manaRegeneration     statistic
-	armor                statistic
-	magicResistance      statistic
-	criticalStrikeChance statistic
-	criticalStrikeFactor statistic
-	cooldownReduction    statistic
-	damageThreatFactor   statistic
-	healingThreatFactor  statistic
+	health               Statistic
+	healthRegeneration   Statistic
+	mana                 Statistic
+	manaRegeneration     Statistic
+	armor                Statistic
+	magicResistance      Statistic
+	criticalStrikeChance Statistic
+	criticalStrikeFactor Statistic
+	cooldownReduction    Statistic
+	damageThreatFactor   Statistic
+	healingThreatFactor  Statistic
 	abilities            []*ability
-	initializer          func(u *unit)
+	initializer          func(u *Unit)
 }

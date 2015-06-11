@@ -9,26 +9,26 @@ func newClassTank() *class {
 		healthRegeneration:   5,
 		mana:                 200,
 		manaRegeneration:     3,
-		armor:                defaultArmor,
-		magicResistance:      defaultMagicResistance,
-		criticalStrikeChance: defaultCriticalStrikeChance,
-		criticalStrikeFactor: defaultCriticalStrikeFactor,
-		cooldownReduction:    defaultCooldownReduction,
-		damageThreatFactor:   defaultDamageThreatFactor,
-		healingThreatFactor:  defaultHealingThreatFactor,
+		armor:                DefaultArmor,
+		magicResistance:      DefaultMagicResistance,
+		criticalStrikeChance: DefaultCriticalStrikeChance,
+		criticalStrikeFactor: DefaultCriticalStrikeFactor,
+		cooldownReduction:    DefaultCooldownReduction,
+		damageThreatFactor:   DefaultDamageThreatFactor,
+		healingThreatFactor:  DefaultHealingThreatFactor,
 	}
 	// True damage / Increasing threat factor
 	q = &ability{
 		name:               "Tank Q",
-		targetType:         targetTypeEnemy,
+		TargetType:         TargetTypeEnemy,
 		healthCost:         0,
 		manaCost:           0,
 		activationDuration: 0,
-		cooldownDuration:   2 * second,
-		disableTypes: []disableType{
-			disableTypeStun,
+		cooldownDuration:   2 * Second,
+		disableTypes: []DisableType{
+			DisableTypeStun,
 		},
-		perform: func(subject, object *unit) {
+		perform: func(subject, object *Unit) {
 			subject.AttachHandler(NewModifier(
 				subject,
 				unitModification{
@@ -36,24 +36,24 @@ func newClassTank() *class {
 				},
 				q.name,
 				5,
-				10*second,
+				10*Second,
 			))
 			// TODO handle the error
-			newTrueDamage(subject, object, 120).perform(subject.game)
+			NewTrueDamage(subject, object, 120).Perform()
 		},
 	}
 	// Physical damage / Increasing AR & MR
 	w = &ability{
 		name:               "Tank W",
-		targetType:         targetTypeEnemy,
+		TargetType:         TargetTypeEnemy,
 		healthCost:         0,
 		manaCost:           15,
-		activationDuration: 2 * second,
-		cooldownDuration:   8 * second,
-		disableTypes: []disableType{
-			disableTypeStun,
+		activationDuration: 2 * Second,
+		cooldownDuration:   8 * Second,
+		disableTypes: []DisableType{
+			DisableTypeStun,
 		},
-		perform: func(subject, object *unit) {
+		perform: func(subject, object *Unit) {
 			subject.AttachHandler(NewModifier(
 				subject,
 				unitModification{
@@ -62,43 +62,43 @@ func newClassTank() *class {
 				},
 				w.name,
 				1,
-				2*second,
+				2*Second,
 			))
 			// TODO handle the error
-			newPhysicalDamage(subject, object, 200).perform(subject.game)
+			NewPhysicalDamage(subject, object, 200).Perform()
 		},
 	}
 	// Physical damage / Life steal
 	e = &ability{
 		name:               "Tank E",
-		targetType:         targetTypeEnemy,
+		TargetType:         TargetTypeEnemy,
 		healthCost:         0,
 		manaCost:           50,
 		activationDuration: 0,
-		cooldownDuration:   15 * second,
-		disableTypes: []disableType{
-			disableTypeStun,
+		cooldownDuration:   15 * Second,
+		disableTypes: []DisableType{
+			DisableTypeStun,
 		},
-		perform: func(subject, object *unit) {
+		perform: func(subject, object *Unit) {
 			// TODO handle the error
-			before, after, _, _ := newPhysicalDamage(subject, object, 300).perform(subject.game)
+			before, after, _, _ := NewPhysicalDamage(subject, object, 300).Perform()
 			// TODO handle the error
-			newPureHealing(subject, object, (before-after)*0.6).perform(subject.game)
+			NewPureHealing(subject, object, (before-after)*0.6).Perform()
 		},
 	}
 	// Increasing AR & MR
 	r = &ability{
 		name:               "Tank R",
-		targetType:         targetTypeNone,
+		TargetType:         TargetTypeNone,
 		healthCost:         0,
 		manaCost:           120,
 		activationDuration: 4,
 		cooldownDuration:   60,
-		disableTypes: []disableType{
-			disableTypeStun,
-			disableTypeSilence,
+		disableTypes: []DisableType{
+			DisableTypeStun,
+			DisableTypeSilence,
 		},
-		perform: func(subject, object *unit) {
+		perform: func(subject, object *Unit) {
 			subject.AttachHandler(NewModifier(
 				subject,
 				unitModification{
@@ -107,7 +107,7 @@ func newClassTank() *class {
 				},
 				r.name,
 				1,
-				8*second,
+				8*Second,
 			))
 		},
 	}

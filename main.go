@@ -8,8 +8,8 @@ import (
 )
 
 const (
-	gameTick = time.Millisecond
-	xotTick  = time.Second
+	GameTick = time.Millisecond
+	XoTTick  = time.Second
 )
 
 var addr = flag.String("addr", ":25200", "service address")
@@ -30,11 +30,11 @@ func main() {
 	}).Info("Start up")
 	i := make(chan message)
 	o := make(chan message)
-	n := newNetwork(i, o)
-	g := newGame(i, o)
-	go n.run(*addr)
-	go g.run()
-	t := time.Tick(gameTick)
+	n := NewNetwork(i, o)
+	g := NewGame(i, o)
+	go n.Run(*addr)
+	go g.Run()
+	t := time.Tick(GameTick)
 	for {
 		select {
 		case <-t:

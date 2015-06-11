@@ -1,24 +1,24 @@
 package main
 
-type disableType uint8
+type DisableType uint8
 
 const (
-	_ disableType = iota
-	disableTypeSilence
-	disableTypeStun
-	disableTypeTaunt
+	_ DisableType = iota
+	DisableTypeSilence
+	DisableTypeStun
+	DisableTypeTaunt
 )
 
 type Disable struct {
 	*PartialHandler
-	disableType
+	DisableType
 }
 
 // NewDisable returns a Disable handler
-func NewDisable(object *unit, disableType disableType, duration gameDuration) *Disable {
+func NewDisable(object *Unit, dt DisableType, duration GameDuration) *Disable {
 	return &Disable{
 		PartialHandler: NewPartialHandler(nil, object, duration),
-		disableType:    disableType,
+		DisableType:    dt,
 	}
 }
 
@@ -29,7 +29,7 @@ func (d *Disable) OnAttach() {
 	ok := d.Container().EveryObjectHandler(d.Object(), func(ha Handler) bool {
 		switch ha := ha.(type) {
 		case *Disable:
-			if ha == d || ha.disableType != d.disableType {
+			if ha == d || ha.DisableType != d.DisableType {
 				return true
 			}
 			if ha.expirationTime > d.expirationTime {

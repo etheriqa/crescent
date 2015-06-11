@@ -6,7 +6,7 @@ type Activating struct {
 }
 
 // NewActivating returns a Activating handler
-func NewActivating(subject, object *unit, ability *ability) *Activating {
+func NewActivating(subject, object *Unit, ability *ability) *Activating {
 	return &Activating{
 		PartialHandler: NewPartialHandler(subject, object, ability.activationDuration),
 		ability:        ability,

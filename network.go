@@ -15,7 +15,7 @@ var wsUpgrader = websocket.Upgrader{
 
 type connectionID uint64
 
-type network struct {
+type Network struct {
 	rw    *sync.RWMutex
 	cid   connectionID
 	cids  map[connectionID]*connection
@@ -37,8 +37,8 @@ type frame struct {
 }
 
 // newNetwork initializes a network
-func newNetwork(inc chan message, out chan message) *network {
-	return &network{
+func NewNetwork(inc chan message, out chan message) *Network {
+	return &Network{
 		rw:    new(sync.RWMutex),
 		cid:   0,
 		cids:  make(map[connectionID]*connection),
@@ -49,13 +49,13 @@ func newNetwork(inc chan message, out chan message) *network {
 }
 
 // nextConnectionID generates a connection ID
-func (n *network) nextConnectionID() connectionID {
+func (n *Network) nextConnectionID() connectionID {
 	n.cid++
 	return n.cid
 }
 
-// run executes the network routine
-func (n *network) run(addr string) {
+// Run executes the network routine
+func (n *Network) Run(addr string) {
 	go n.dispatcher()
 	http.HandleFunc("/", n.wsHandler)
 	err := http.ListenAndServe(addr, nil)
@@ -65,7 +65,7 @@ func (n *network) run(addr string) {
 }
 
 // wsHandler handles a WebSocket connection
-func (n *network) wsHandler(w http.ResponseWriter, r *http.Request) {
+func (n *Network) wsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Method Not Allowed", 405)
 		return
@@ -92,7 +92,7 @@ func (n *network) wsHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 // register registers a connection
-func (n *network) register(c *connection) {
+func (n *Network) register(c *connection) {
 	n.cids[c.id] = c
 	n.names[c.name] = c
 	n.inc <- message{
@@ -107,7 +107,7 @@ func (n *network) register(c *connection) {
 }
 
 // unregister closes the connection and unregisters it
-func (n *network) unregister(c *connection) {
+func (n *Network) unregister(c *connection) {
 	if _, ok := n.cids[c.id]; !ok {
 		return
 	}
@@ -127,7 +127,7 @@ func (n *network) unregister(c *connection) {
 }
 
 // receiver reads frames from the connection then writes messages to the game routine
-func (n *network) receiver(c *connection) {
+func (n *Network) receiver(c *connection) {
 	defer func() {
 		n.rw.Lock()
 		n.unregister(c)
@@ -164,7 +164,7 @@ func (n *network) receiver(c *connection) {
 }
 
 // sender reads frames from the write buffer then writes frames to the connection
-func (n *network) sender(c *connection) {
+func (n *Network) sender(c *connection) {
 	defer func() {
 		n.rw.Lock()
 		n.unregister(c)
@@ -196,7 +196,7 @@ func (n *network) sender(c *connection) {
 }
 
 // dispatcher reads messages from the game routine then writes frames to the write buffer
-func (n *network) dispatcher() {
+func (n *Network) dispatcher() {
 	for {
 		select {
 		case m, ok := <-n.out:

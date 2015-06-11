@@ -4,31 +4,31 @@ import (
 	"math/rand"
 )
 
-type statistic float64
+type Statistic float64
 
 type damage struct {
-	subject              *unit
-	object               *unit
-	amount               statistic
-	criticalStrikeChance statistic
-	criticalStrikeFactor statistic
+	subject              *Unit
+	object               *Unit
+	amount               Statistic
+	criticalStrikeChance Statistic
+	criticalStrikeFactor Statistic
 }
 
 type healing struct {
-	subject              *unit
-	object               *unit
-	amount               statistic
-	criticalStrikeChance statistic
-	criticalStrikeFactor statistic
+	subject              *Unit
+	object               *Unit
+	amount               Statistic
+	criticalStrikeChance Statistic
+	criticalStrikeFactor Statistic
 }
 
 // damageReductionFactor calculates a damage reduction factor on armor or magic resistance
-func damageReductionFactor(damageReduction statistic) statistic {
-	return statistic(1 / (1 + float64(damageReduction)/100))
+func damageReductionFactor(damageReduction Statistic) Statistic {
+	return Statistic(1 / (1 + float64(damageReduction)/100))
 }
 
 // applyCriticalStrike judges whether critical strike happens or not and returns amount of damage / healing that affected by critical strike
-func applyCriticalStrike(base, chance, factor statistic) (amount statistic, critical bool) {
+func applyCriticalStrike(base, chance, factor Statistic) (amount Statistic, critical bool) {
 	amount = base
 	critical = rand.Float64() < float64(chance)
 	if critical {
@@ -38,30 +38,30 @@ func applyCriticalStrike(base, chance, factor statistic) (amount statistic, crit
 }
 
 // diceCritical dices whether critical strike is happening or not
-func diceCritical(subject *unit) bool {
+func diceCritical(subject *Unit) bool {
 	return rand.Float64() < float64(subject.criticalStrikeChance())
 }
 
-// newPhysicalDamage returns a damage affected by armor of the object
-func newPhysicalDamage(subject, object *unit, baseDamage statistic) *damage {
-	return newTrueDamage(
+// NewPhysicalDamage returns a damage affected by armor of the object
+func NewPhysicalDamage(subject, object *Unit, baseDamage Statistic) *damage {
+	return NewTrueDamage(
 		subject,
 		object,
 		baseDamage*object.physicalDamageReductionFactor(),
 	)
 }
 
-// newMagicDamage returns a damage affected by magic resistance of the object
-func newMagicDamage(subject, object *unit, baseDamage statistic) *damage {
-	return newTrueDamage(
+// NewMagicDamage returns a damage affected by magic resistance of the object
+func NewMagicDamage(subject, object *Unit, baseDamage Statistic) *damage {
+	return NewTrueDamage(
 		subject,
 		object,
 		baseDamage*object.magicDamageReductionFactor(),
 	)
 }
 
-// newTrueDamage returns a damage that ignores damage reduction
-func newTrueDamage(subject, object *unit, baseDamage statistic) *damage {
+// NewTrueDamage returns a damage that ignores damage reduction
+func NewTrueDamage(subject, object *Unit, baseDamage Statistic) *damage {
 	return &damage{
 		subject:              subject,
 		object:               object,
@@ -71,8 +71,8 @@ func newTrueDamage(subject, object *unit, baseDamage statistic) *damage {
 	}
 }
 
-// newPureDamage returns a damage that ignores both damage reduction and critical strike
-func newPureDamage(subject, object *unit, baseDamage statistic) *damage {
+// NewPureDamage returns a damage that ignores both damage reduction and critical strike
+func NewPureDamage(subject, object *Unit, baseDamage Statistic) *damage {
 	return &damage{
 		subject:              subject,
 		object:               object,
@@ -82,8 +82,8 @@ func newPureDamage(subject, object *unit, baseDamage statistic) *damage {
 	}
 }
 
-// perform subtracts amount the damage from the object and attaches a threat handler to the subject and publishes a message
-func (d damage) perform(g *game) (before, after statistic, crit bool, err error) {
+// Perform subtracts amount the damage from the object and attaches a threat handler to the subject and publishes a message
+func (d damage) Perform() (before, after Statistic, crit bool, err error) {
 	amount, crit := applyCriticalStrike(
 		d.amount,
 		d.criticalStrikeChance,
@@ -96,14 +96,14 @@ func (d damage) perform(g *game) (before, after statistic, crit bool, err error)
 	if d.subject != nil {
 		d.object.AttachHandler(newDamageThreat(d.subject, d.object, d.amount))
 	}
-	g.publish(message{
+	d.object.Publish(message{
 	// TODO pack message
 	})
 	return
 }
 
-// newHealing returns a healing
-func newHealing(subject, object *unit, baseHealing statistic) *healing {
+// NewHealing returns a healing
+func NewHealing(subject, object *Unit, baseHealing Statistic) *healing {
 	return &healing{
 		subject:              subject,
 		object:               object,
@@ -113,8 +113,8 @@ func newHealing(subject, object *unit, baseHealing statistic) *healing {
 	}
 }
 
-// newPureHealing returns a healing that ignores critical strike
-func newPureHealing(subject, object *unit, baseHealing statistic) *healing {
+// NewPureHealing returns a healing that ignores critical strike
+func NewPureHealing(subject, object *Unit, baseHealing Statistic) *healing {
 	return &healing{
 		subject:              subject,
 		object:               object,
@@ -124,8 +124,8 @@ func newPureHealing(subject, object *unit, baseHealing statistic) *healing {
 	}
 }
 
-// perform adds amount of healing to the object and attaches a threat handler to the enemies and publish a message
-func (h healing) perform(g *game) (after, before statistic, crit bool, err error) {
+// Perform adds amount of healing to the object and attaches a threat handler to the enemies and publish a message
+func (h healing) Perform() (after, before Statistic, crit bool, err error) {
 	amount, crit := applyCriticalStrike(
 		h.amount,
 		h.criticalStrikeChance,
@@ -136,11 +136,11 @@ func (h healing) perform(g *game) (after, before statistic, crit bool, err error
 		return
 	}
 	if h.subject != nil {
-		for _, enemy := range g.enemies(h.subject) {
-			enemy.AttachHandler(newHealingThreat(h.subject, enemy, h.amount))
+		for _, enemy := range h.subject.enemies(h.subject) {
+			enemy.AttachHandler(NewHealingThreat(h.subject, enemy, h.amount))
 		}
 	}
-	g.publish(message{
+	h.object.Publish(message{
 	// TODO pack message
 	})
 	return

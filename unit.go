@@ -13,7 +13,7 @@ const (
 
 type unitID uint64
 
-type unit struct {
+type Unit struct {
 	id           unitID
 	playerName   string
 	unitName     string
@@ -22,118 +22,106 @@ type unit struct {
 	class        *class
 	resource     unitResource
 	modification unitModification
+	*Game
 	*EventDispatcher
-	*game
 }
 
 type unitResource struct {
-	health statistic
-	mana   statistic
+	health Statistic
+	mana   Statistic
 }
 
 type unitModification struct {
-	armor                statistic
-	magicResistance      statistic
-	criticalStrikeChance statistic
-	criticalStrikeFactor statistic
-	cooldownReduction    statistic
-	damageThreatFactor   statistic
-	healingThreatFactor  statistic
+	armor                Statistic
+	magicResistance      Statistic
+	criticalStrikeChance Statistic
+	criticalStrikeFactor Statistic
+	cooldownReduction    Statistic
+	damageThreatFactor   Statistic
+	healingThreatFactor  Statistic
 }
 
 // newUnit initializes a unit
-func newUnit(g *game, c *class) *unit {
-	return &unit{
+func NewUnit(g *Game, c *class) *Unit {
+	return &Unit{
 		class:           c,
 		resource:        unitResource{},
 		modification:    unitModification{},
+		Game:            g,
 		EventDispatcher: NewEventDispatcher(),
-		game:            g,
 	}
 }
 
-func (u *unit) now() gameTime {
-	return u.game.now()
-}
-
-func (u *unit) after(d gameDuration) gameTime {
-	return u.game.after(d)
-}
-
-func (u *unit) publish(m message) {
-	u.game.publish(m)
-}
-
-func (u *unit) isAlive() bool {
+func (u *Unit) isAlive() bool {
 	return u.resource.health > 0
 }
 
-func (u *unit) isDead() bool {
+func (u *Unit) isDead() bool {
 	return u.resource.health <= 0
 }
 
-func (u *unit) health() statistic {
+func (u *Unit) health() Statistic {
 	return u.resource.health
 }
 
-func (u *unit) healthMax() statistic {
+func (u *Unit) healthMax() Statistic {
 	return u.class.health
 }
 
-func (u *unit) healthRegeneration() statistic {
+func (u *Unit) healthRegeneration() Statistic {
 	return u.class.healthRegeneration
 }
 
-func (u *unit) mana() statistic {
+func (u *Unit) mana() Statistic {
 	return u.resource.mana
 }
 
-func (u *unit) manaMax() statistic {
+func (u *Unit) manaMax() Statistic {
 	return u.class.mana
 }
 
-func (u *unit) manaRegeneration() statistic {
+func (u *Unit) manaRegeneration() Statistic {
 	return u.class.manaRegeneration
 }
 
-func (u *unit) armor() statistic {
+func (u *Unit) armor() Statistic {
 	return u.class.armor + u.modification.armor
 }
 
-func (u *unit) magicResistance() statistic {
+func (u *Unit) magicResistance() Statistic {
 	return u.class.magicResistance + u.modification.magicResistance
 }
 
-func (u *unit) physicalDamageReductionFactor() statistic {
+func (u *Unit) physicalDamageReductionFactor() Statistic {
 	return damageReductionFactor(u.armor())
 }
 
-func (u *unit) magicDamageReductionFactor() statistic {
+func (u *Unit) magicDamageReductionFactor() Statistic {
 	return damageReductionFactor(u.magicResistance())
 }
 
-func (u *unit) criticalStrikeChance() statistic {
+func (u *Unit) criticalStrikeChance() Statistic {
 	return u.class.criticalStrikeChance + u.modification.criticalStrikeChance
 }
 
-func (u *unit) criticalStrikeFactor() statistic {
+func (u *Unit) criticalStrikeFactor() Statistic {
 	return u.class.criticalStrikeFactor + u.modification.criticalStrikeFactor
 }
 
-func (u *unit) cooldownReduction() statistic {
+func (u *Unit) cooldownReduction() Statistic {
 	return u.class.cooldownReduction + u.modification.cooldownReduction
 }
 
-func (u *unit) damageThreatFactor() statistic {
+func (u *Unit) damageThreatFactor() Statistic {
 	return u.class.damageThreatFactor + u.modification.damageThreatFactor
 }
 
-func (u *unit) healingThreatFactor() statistic {
+func (u *Unit) healingThreatFactor() Statistic {
 	return u.class.healingThreatFactor + u.modification.healingThreatFactor
 }
 
 // modifyHealth modifies the unit health and returns before/after health
-func (u *unit) modifyHealth(delta statistic) (before, after statistic, err error) {
+func (u *Unit) modifyHealth(delta Statistic) (before, after Statistic, err error) {
 	if u.isDead() {
 		return u.health(), u.health(), errors.New("Cannot modify the health of dead unit")
 	}
@@ -158,7 +146,7 @@ func (u *unit) modifyHealth(delta statistic) (before, after statistic, err error
 }
 
 // modifyMana modifies the unit mana and returns before/after mana
-func (u *unit) modifyMana(delta statistic) (before, after statistic, err error) {
+func (u *Unit) modifyMana(delta Statistic) (before, after Statistic, err error) {
 	if u.isDead() {
 		return u.health(), u.health(), errors.New("Cannot modify the mana of dead unit")
 	}
@@ -177,16 +165,16 @@ func (u *unit) modifyMana(delta statistic) (before, after statistic, err error) 
 	return
 }
 
-// gameTick triggers onComplete iff the handler is completed
-func (u *unit) gameTick() {
+// GameTick triggers onComplete iff the handler is completed
+func (u *Unit) GameTick() {
 	if u.isDead() {
 		return
 	}
 	u.TriggerEvent(EventGameTick)
 }
 
-// xotTick performs regeneration and triggers evnentXoT
-func (u *unit) xotTick() {
+// XoTTick performs regeneration and triggers evnentXoT
+func (u *Unit) XoTTick() {
 	if u.isDead() {
 		return
 	}
@@ -196,8 +184,8 @@ func (u *unit) xotTick() {
 }
 
 // performHealthRegeneration performs health regeneration
-func (u *unit) performHealthRegeneration() {
-	_, _, _, err := newPureHealing(nil, u, u.healthRegeneration()).perform(u.game)
+func (u *Unit) performHealthRegeneration() {
+	_, _, _, err := NewPureHealing(nil, u, u.healthRegeneration()).Perform()
 	if err != nil {
 		log.WithFields(logrus.Fields{
 			"err": err,
@@ -206,7 +194,7 @@ func (u *unit) performHealthRegeneration() {
 }
 
 // performManaRegeneration performs mana regeneration
-func (u *unit) performManaRegeneration() {
+func (u *Unit) performManaRegeneration() {
 	err := u.performManaModification(u.manaRegeneration())
 	if err != nil {
 		log.WithFields(logrus.Fields{
@@ -216,19 +204,19 @@ func (u *unit) performManaRegeneration() {
 }
 
 // performManaModification performs mana modification
-func (u *unit) performManaModification(delta statistic) error {
+func (u *Unit) performManaModification(delta Statistic) error {
 	_, _, err := u.modifyMana(delta)
 	if err != nil {
 		return err
 	}
-	u.game.publish(message{
+	u.Publish(message{
 	// TODO pack message
 	})
 	return nil
 }
 
 // updateModification updates the unitModification
-func (u *unit) updateModification() {
+func (u *Unit) updateModification() {
 	u.modification = unitModification{}
 	u.ForSubjectHandler(u, func(ha Handler) {
 		switch ha := ha.(type) {
@@ -242,7 +230,7 @@ func (u *unit) updateModification() {
 			u.modification.healingThreatFactor += ha.healingThreatFactor
 		}
 	})
-	u.publish(message{
+	u.Publish(message{
 	// TODO pack message
 	})
 }

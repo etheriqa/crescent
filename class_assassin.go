@@ -2,7 +2,7 @@ package main
 
 const assassinStack string = "Assassin Stack"
 
-func newAssassinStack(subject *unit) *Modifier {
+func newAssassinStack(subject *Unit) *Modifier {
 	return NewModifier(
 		subject,
 		unitModification{
@@ -11,7 +11,7 @@ func newAssassinStack(subject *unit) *Modifier {
 		},
 		assassinStack,
 		10,
-		10*second,
+		10*Second,
 	)
 }
 
@@ -24,61 +24,61 @@ func newClassAssassin() *class {
 		healthRegeneration:   2,
 		mana:                 200,
 		manaRegeneration:     3,
-		armor:                defaultArmor,
-		magicResistance:      defaultMagicResistance,
-		criticalStrikeChance: defaultCriticalStrikeChance + 0.05,
-		criticalStrikeFactor: defaultCriticalStrikeFactor + 0.5,
-		cooldownReduction:    defaultCooldownReduction,
-		damageThreatFactor:   defaultDamageThreatFactor,
-		healingThreatFactor:  defaultHealingThreatFactor,
+		armor:                DefaultArmor,
+		magicResistance:      DefaultMagicResistance,
+		criticalStrikeChance: DefaultCriticalStrikeChance + 0.05,
+		criticalStrikeFactor: DefaultCriticalStrikeFactor + 0.5,
+		cooldownReduction:    DefaultCooldownReduction,
+		damageThreatFactor:   DefaultDamageThreatFactor,
+		healingThreatFactor:  DefaultHealingThreatFactor,
 	}
 	// Physical damage
 	q = &ability{
 		name:               "Q",
-		targetType:         targetTypeEnemy,
+		TargetType:         TargetTypeEnemy,
 		healthCost:         0,
 		manaCost:           0,
 		activationDuration: 0,
-		cooldownDuration:   2 * second,
-		disableTypes: []disableType{
-			disableTypeStun,
+		cooldownDuration:   2 * Second,
+		disableTypes: []DisableType{
+			DisableTypeStun,
 		},
-		perform: func(subject, object *unit) {
-			newPhysicalDamage(subject, object, 140).perform(subject.game)
+		perform: func(subject, object *Unit) {
+			NewPhysicalDamage(subject, object, 140).Perform()
 		},
 	}
 	// Physical damage / DoT / Increasing stacks
 	w = &ability{
 		name:               "W",
-		targetType:         targetTypeEnemy,
+		TargetType:         TargetTypeEnemy,
 		healthCost:         0,
 		manaCost:           20,
 		activationDuration: 0,
-		cooldownDuration:   8 * second,
-		disableTypes: []disableType{
-			disableTypeStun,
+		cooldownDuration:   8 * Second,
+		disableTypes: []DisableType{
+			DisableTypeStun,
 		},
-		perform: func(subject, object *unit) {
-			newPhysicalDamage(subject, object, 80).perform(subject.game)
+		perform: func(subject, object *Unit) {
+			NewPhysicalDamage(subject, object, 80).Perform()
 			object.AttachHandler(NewDoT(
-				newPhysicalDamage(subject, object, 20),
+				NewPhysicalDamage(subject, object, 20),
 				w,
-				10*second,
+				10*Second,
 			))
 		},
 	}
 	// Increasing stacks / Decreasing armor and magic resistance
 	e = &ability{
 		name:               "E",
-		targetType:         targetTypeNone,
+		TargetType:         TargetTypeNone,
 		healthCost:         0,
 		manaCost:           40,
 		activationDuration: 0,
-		cooldownDuration:   20 * second,
-		disableTypes: []disableType{
-			disableTypeStun,
+		cooldownDuration:   20 * Second,
+		disableTypes: []DisableType{
+			DisableTypeStun,
 		},
-		perform: func(subject, object *unit) {
+		perform: func(subject, object *Unit) {
 			subject.AttachHandler(NewModifier(
 				subject,
 				unitModification{
@@ -87,7 +87,7 @@ func newClassAssassin() *class {
 				},
 				e.name,
 				1,
-				8*second,
+				8*Second,
 			))
 			for i := 0; i < 2; i++ {
 				subject.AttachHandler(newAssassinStack(subject))
@@ -97,25 +97,25 @@ func newClassAssassin() *class {
 	// Physical
 	r = &ability{
 		name:               "R",
-		targetType:         targetTypeEnemy,
+		TargetType:         TargetTypeEnemy,
 		healthCost:         0,
 		manaCost:           120,
 		activationDuration: 0,
-		cooldownDuration:   60 * second,
-		disableTypes: []disableType{
-			disableTypeStun,
+		cooldownDuration:   60 * Second,
+		disableTypes: []DisableType{
+			DisableTypeStun,
 		},
-		perform: func(subject, object *unit) {
-			stack := statistic(0)
+		perform: func(subject, object *Unit) {
+			stack := Statistic(0)
 			subject.ForSubjectHandler(subject, func(ha Handler) {
 				switch ha := ha.(type) {
 				case *Modifier:
 					if ha.name == assassinStack {
-						stack += statistic(ha.nowStack)
+						stack += Statistic(ha.nowStack)
 					}
 				}
 			})
-			newPhysicalDamage(subject, object, 400*stack*100).perform(subject.game)
+			NewPhysicalDamage(subject, object, 400*stack*100).Perform()
 			subject.ForSubjectHandler(subject, func(ha Handler) {
 				switch ha := ha.(type) {
 				case *Modifier:

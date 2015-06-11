@@ -2,11 +2,11 @@ package main
 
 type Threat struct {
 	*PartialHandler
-	threat statistic
+	threat Statistic
 }
 
 // NewThreat returns a Threat handler
-func NewThreat(subject, object *unit, t statistic) *Threat {
+func NewThreat(subject, object *Unit, t Statistic) *Threat {
 	return &Threat{
 		PartialHandler: NewPermanentPartialHandler(subject, object),
 		threat:         t,
@@ -14,12 +14,12 @@ func NewThreat(subject, object *unit, t statistic) *Threat {
 }
 
 // newDamageThreat initializes a threat handler with damage
-func newDamageThreat(subject, object *unit, d statistic) *Threat {
+func newDamageThreat(subject, object *Unit, d Statistic) *Threat {
 	return NewThreat(subject, object, d*object.damageThreatFactor())
 }
 
-// newHealingThreat initializes a threat handler with healing
-func newHealingThreat(subject, object *unit, h statistic) *Threat {
+// NewHealingThreat initializes a threat handler with healing
+func NewHealingThreat(subject, object *Unit, h Statistic) *Threat {
 	return NewThreat(subject, object, h*object.healingThreatFactor())
 }
 

@@ -9,7 +9,7 @@ type DoT struct {
 }
 
 // NewDoT returns a DoT handler
-func NewDoT(d *damage, a *ability, duration gameDuration) *DoT {
+func NewDoT(d *damage, a *ability, duration GameDuration) *DoT {
 	return &DoT{
 		PartialHandler: NewPartialHandler(d.subject, d.object, duration),
 		damage:         d,
@@ -61,7 +61,7 @@ func (d *DoT) HandleEvent(e Event) {
 			d.Up()
 		}
 	case EventXoT:
-		d.damage.perform(d.Object().game) // TODO refactor
+		d.damage.Perform()
 	}
 }
 

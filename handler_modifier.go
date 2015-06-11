@@ -9,7 +9,7 @@ type Modifier struct {
 }
 
 // NewModifier returns a Modifier handler
-func NewModifier(object *unit, m unitModification, name string, maxStack int, duration gameDuration) *Modifier {
+func NewModifier(object *Unit, m unitModification, name string, maxStack int, duration GameDuration) *Modifier {
 	return &Modifier{
 		PartialHandler:   NewPartialHandler(nil, object, duration),
 		unitModification: m,

@@ -13,27 +13,27 @@ func newClassMage() *class {
 		healthRegeneration:   2,
 		mana:                 400,
 		manaRegeneration:     6,
-		armor:                defaultArmor,
-		magicResistance:      defaultMagicResistance,
-		criticalStrikeChance: defaultCriticalStrikeChance,
-		criticalStrikeFactor: defaultCriticalStrikeFactor,
-		cooldownReduction:    defaultCooldownReduction,
-		damageThreatFactor:   defaultDamageThreatFactor,
-		healingThreatFactor:  defaultHealingThreatFactor,
+		armor:                DefaultArmor,
+		magicResistance:      DefaultMagicResistance,
+		criticalStrikeChance: DefaultCriticalStrikeChance,
+		criticalStrikeFactor: DefaultCriticalStrikeFactor,
+		cooldownReduction:    DefaultCooldownReduction,
+		damageThreatFactor:   DefaultDamageThreatFactor,
+		healingThreatFactor:  DefaultHealingThreatFactor,
 	}
 	// Magic damage / Armor reduction / Proc 10% W
 	q = &ability{
 		name:               "Q",
-		targetType:         targetTypeEnemy,
+		TargetType:         TargetTypeEnemy,
 		healthCost:         0,
 		manaCost:           0,
-		activationDuration: 2 * second,
+		activationDuration: 2 * Second,
 		cooldownDuration:   0,
-		disableTypes: []disableType{
-			disableTypeSilence,
-			disableTypeStun,
+		disableTypes: []DisableType{
+			DisableTypeSilence,
+			DisableTypeStun,
 		},
-		perform: func(subject, object *unit) {
+		perform: func(subject, object *Unit) {
 			object.AttachHandler(NewModifier(
 				object,
 				unitModification{
@@ -41,10 +41,10 @@ func newClassMage() *class {
 				},
 				q.name,
 				1,
-				8*second,
+				8*Second,
 			))
 			// TODO handle the error
-			newMagicDamage(subject, object, 120).perform(subject.game)
+			NewMagicDamage(subject, object, 120).Perform()
 			if rand.Float64() > 0.1 {
 				subject.ForSubjectHandler(subject, func(ha Handler) {
 					switch ha := ha.(type) {
@@ -60,21 +60,21 @@ func newClassMage() *class {
 	// Magic damage / DoT / Proc 20% E
 	w = &ability{
 		name:               "W",
-		targetType:         targetTypeEnemy,
+		TargetType:         TargetTypeEnemy,
 		healthCost:         0,
 		manaCost:           20,
-		activationDuration: 2 * second,
-		cooldownDuration:   8 * second,
-		disableTypes: []disableType{
-			disableTypeSilence,
-			disableTypeStun,
+		activationDuration: 2 * Second,
+		cooldownDuration:   8 * Second,
+		disableTypes: []DisableType{
+			DisableTypeSilence,
+			DisableTypeStun,
 		},
-		perform: func(subject, object *unit) {
+		perform: func(subject, object *Unit) {
 			// TODO handle the error
 			object.AttachHandler(NewDoT(
-				newMagicDamage(subject, object, 30),
+				NewMagicDamage(subject, object, 30),
 				w,
-				10*second,
+				10*Second,
 			))
 			if rand.Float64() > 0.2 {
 				subject.ForSubjectHandler(subject, func(ha Handler) {
@@ -91,44 +91,44 @@ func newClassMage() *class {
 	// Magic damage
 	e = &ability{
 		name:               "E",
-		targetType:         targetTypeEnemy,
+		TargetType:         TargetTypeEnemy,
 		healthCost:         0,
 		manaCost:           60,
-		activationDuration: 2 * second,
-		cooldownDuration:   18 * second,
-		disableTypes: []disableType{
-			disableTypeSilence,
-			disableTypeStun,
+		activationDuration: 2 * Second,
+		cooldownDuration:   18 * Second,
+		disableTypes: []DisableType{
+			DisableTypeSilence,
+			DisableTypeStun,
 		},
-		perform: func(subject, object *unit) {
+		perform: func(subject, object *Unit) {
 			// TODO handle the error
-			newMagicDamage(subject, object, 400).perform(subject.game)
+			NewMagicDamage(subject, object, 400).Perform()
 		},
 	}
 	// Magic damage / All / DoT / Stun
 	r = &ability{
 		name:               "R",
-		targetType:         targetTypeNone,
+		TargetType:         TargetTypeNone,
 		healthCost:         0,
 		manaCost:           200,
-		activationDuration: 2 * second,
-		cooldownDuration:   60 * second,
-		disableTypes: []disableType{
-			disableTypeSilence,
-			disableTypeStun,
+		activationDuration: 2 * Second,
+		cooldownDuration:   60 * Second,
+		disableTypes: []DisableType{
+			DisableTypeSilence,
+			DisableTypeStun,
 		},
-		perform: func(subject, object *unit) {
-			for _, enemy := range subject.game.enemies(subject) {
-				newMagicDamage(subject, enemy, 400).perform(subject.game)
+		perform: func(subject, object *Unit) {
+			for _, enemy := range subject.enemies(subject) {
+				NewMagicDamage(subject, enemy, 400).Perform()
 				enemy.AttachHandler(NewDoT(
-					newMagicDamage(subject, enemy, 40),
+					NewMagicDamage(subject, enemy, 40),
 					r,
-					10*second,
+					10*Second,
 				))
 				enemy.AttachHandler(NewDisable(
 					object,
-					disableTypeStun,
-					500*millisecond,
+					DisableTypeStun,
+					500*Millisecond,
 				))
 			}
 		},
