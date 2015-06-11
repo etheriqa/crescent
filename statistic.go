@@ -136,7 +136,7 @@ func (h healing) Perform() (after, before Statistic, crit bool, err error) {
 		return
 	}
 	if h.subject != nil {
-		for _, enemy := range h.subject.enemies(h.subject) {
+		for _, enemy := range h.subject.Enemies() {
 			enemy.AttachHandler(NewHealingThreat(h.subject, enemy, h.amount))
 		}
 	}

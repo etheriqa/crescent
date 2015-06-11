@@ -118,7 +118,7 @@ func newClassMage() *class {
 			DisableTypeStun,
 		},
 		perform: func(subject, object *Unit) {
-			for _, enemy := range subject.enemies(subject) {
+			for _, enemy := range subject.Enemies() {
 				NewMagicDamage(subject, enemy, 400).Perform()
 				enemy.AttachHandler(NewDoT(
 					NewMagicDamage(subject, enemy, 40),

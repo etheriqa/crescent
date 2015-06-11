@@ -100,7 +100,7 @@ func newClassDisabler() *class {
 			DisableTypeStun,
 		},
 		perform: func(subject, object *Unit) {
-			for _, friend := range subject.friends(subject) {
+			for _, friend := range subject.Friends() {
 				friend.AttachHandler(NewModifier(
 					friend,
 					unitModification{

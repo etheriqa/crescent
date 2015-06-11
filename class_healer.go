@@ -95,7 +95,7 @@ func newClassHealer() *class {
 				1,
 				6*Second,
 			))
-			for _, friend := range subject.friends(subject) {
+			for _, friend := range subject.Friends() {
 				friend.AttachHandler(NewHoT(
 					NewHealing(subject, friend, 20),
 					r,

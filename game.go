@@ -46,8 +46,8 @@ func (g *Game) after(d GameDuration) GameTime {
 	return g.time + GameTime(d)
 }
 
-// friends returns given unit's friend units **including itself**
-func (g *Game) friends(u *Unit) (us []*Unit) {
+// Friends returns given unit's friend units **including itself**
+func (g *Game) Friends(u *Unit) (us []*Unit) {
 	for _, unit := range g.uids {
 		if unit.group == u.group {
 			us = append(us, unit)
@@ -56,8 +56,8 @@ func (g *Game) friends(u *Unit) (us []*Unit) {
 	return
 }
 
-// enemies returns given unit's enemy units
-func (g *Game) enemies(u *Unit) (us []*Unit) {
+// Enemies returns given unit's enemy units
+func (g *Game) Enemies(u *Unit) (us []*Unit) {
 	for _, unit := range g.uids {
 		if unit.group != u.group {
 			us = append(us, unit)

@@ -120,6 +120,16 @@ func (u *Unit) healingThreatFactor() Statistic {
 	return u.class.healingThreatFactor + u.modification.healingThreatFactor
 }
 
+// Friends returns the friend units
+func (u *Unit) Friends() []*Unit {
+	return u.Game.Friends(u)
+}
+
+// Enemies returns the enemy units
+func (u *Unit) Enemies() []*Unit {
+	return u.Game.Enemies(u)
+}
+
 // modifyHealth modifies the unit health and returns before/after health
 func (u *Unit) modifyHealth(delta Statistic) (before, after Statistic, err error) {
 	if u.isDead() {
