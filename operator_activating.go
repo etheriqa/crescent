@@ -6,6 +6,18 @@ type activating struct {
 	receiver *unit
 }
 
+// newActivating returns a activating operator
+func newActivating(performer, receiver *unit, ability *ability) *activating {
+	return &activating{
+		partialOperator: partialOperator{
+			unit:           performer,
+			expirationTime: performer.after(ability.activationDuration),
+		},
+		ability:  ability,
+		receiver: receiver,
+	}
+}
+
 // onAttach checks requirements
 func (a *activating) onAttach() {
 	a.AddEventHandler(a, EventDead)
@@ -21,6 +33,11 @@ func (a *activating) onAttach() {
 	}
 	if err := a.checkRequirements(a.unit, a.receiver); err != nil {
 		a.detachOperator(a)
+		return
+	}
+	if a.isExpired() {
+		a.perform()
+		return
 	}
 	a.publish(message{
 	// TODO pack message
