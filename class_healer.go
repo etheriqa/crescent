@@ -29,7 +29,7 @@ func newClassHealer() *class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		perform: func(subject, object *Unit) {
+		Perform: func(subject, object *Unit) {
 			// TODO handle the error
 			before, after, _, _ := NewMagicDamage(subject, object, 100).Perform()
 			// TODO send a message including the ability name
@@ -48,7 +48,7 @@ func newClassHealer() *class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		perform: func(subject, object *Unit) {
+		Perform: func(subject, object *Unit) {
 			object.AttachHandler(NewHoT(
 				NewHealing(subject, object, 20),
 				w,
@@ -68,7 +68,7 @@ func newClassHealer() *class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		perform: func(subject, object *Unit) {
+		Perform: func(subject, object *Unit) {
 			NewHealing(subject, object, 400).Perform()
 		},
 	}
@@ -84,7 +84,7 @@ func newClassHealer() *class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		perform: func(subject, object *Unit) {
+		Perform: func(subject, object *Unit) {
 			subject.AttachHandler(NewModifier(
 				subject,
 				unitModification{

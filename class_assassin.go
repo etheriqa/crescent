@@ -43,7 +43,7 @@ func newClassAssassin() *class {
 		disableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		perform: func(subject, object *Unit) {
+		Perform: func(subject, object *Unit) {
 			NewPhysicalDamage(subject, object, 140).Perform()
 		},
 	}
@@ -58,7 +58,7 @@ func newClassAssassin() *class {
 		disableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		perform: func(subject, object *Unit) {
+		Perform: func(subject, object *Unit) {
 			NewPhysicalDamage(subject, object, 80).Perform()
 			object.AttachHandler(NewDoT(
 				NewPhysicalDamage(subject, object, 20),
@@ -78,7 +78,7 @@ func newClassAssassin() *class {
 		disableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		perform: func(subject, object *Unit) {
+		Perform: func(subject, object *Unit) {
 			subject.AttachHandler(NewModifier(
 				subject,
 				unitModification{
@@ -105,7 +105,7 @@ func newClassAssassin() *class {
 		disableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		perform: func(subject, object *Unit) {
+		Perform: func(subject, object *Unit) {
 			stack := Statistic(0)
 			subject.ForSubjectHandler(subject, func(ha Handler) {
 				switch ha := ha.(type) {

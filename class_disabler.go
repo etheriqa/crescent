@@ -28,7 +28,7 @@ func newClassDisabler() *class {
 		disableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		perform: func(subject, object *Unit) {
+		Perform: func(subject, object *Unit) {
 			object.AttachHandler(NewModifier(
 				object,
 				unitModification{
@@ -59,7 +59,7 @@ func newClassDisabler() *class {
 			DisableTypeStun,
 			DisableTypeSilence,
 		},
-		perform: func(subject, object *Unit) {
+		Perform: func(subject, object *Unit) {
 			NewMagicDamage(subject, object, 220).Perform()
 			object.AttachHandler(NewDisable(
 				object,
@@ -79,7 +79,7 @@ func newClassDisabler() *class {
 		disableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		perform: func(subject, object *Unit) {
+		Perform: func(subject, object *Unit) {
 			NewPhysicalDamage(subject, object, 280).Perform()
 			object.AttachHandler(NewDisable(
 				object,
@@ -99,7 +99,7 @@ func newClassDisabler() *class {
 		disableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		perform: func(subject, object *Unit) {
+		Perform: func(subject, object *Unit) {
 			for _, friend := range subject.Friends() {
 				friend.AttachHandler(NewModifier(
 					friend,

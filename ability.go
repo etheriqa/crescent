@@ -21,28 +21,28 @@ type ability struct {
 	activationDuration GameDuration
 	cooldownDuration   GameDuration
 	disableTypes       []DisableType
-	perform            func(subject, object *Unit)
+	Perform            func(subject, object *Unit)
 }
 
-// checkRequirements checks the ability requirements are satisfied
-func (a *ability) checkRequirements(subject *Unit, object *Unit) error {
-	if err := a.checkobject(subject, object); err != nil {
+// CheckRequirements checks the ability requirements are satisfied
+func (a *ability) CheckRequirements(subject *Unit, object *Unit) error {
+	if err := a.CheckObject(subject, object); err != nil {
 		return err
 	}
-	if err := a.checkCooldown(subject); err != nil {
+	if err := a.CheckCooldown(subject); err != nil {
 		return err
 	}
-	if err := a.checkDisable(subject); err != nil {
+	if err := a.CheckDisable(subject); err != nil {
 		return err
 	}
-	if err := a.checkCost(subject); err != nil {
+	if err := a.CheckResource(subject); err != nil {
 		return err
 	}
 	return nil
 }
 
-// checkobject checks the object is valid
-func (a *ability) checkobject(subject, object *Unit) error {
+// CheckObject checks the object is valid
+func (a *ability) CheckObject(subject, object *Unit) error {
 	switch a.TargetType {
 	case TargetTypeFriend:
 		if object == nil || subject.group != object.group {
@@ -56,8 +56,8 @@ func (a *ability) checkobject(subject, object *Unit) error {
 	return nil
 }
 
-// checkCooldown checks the subject does not have to wait the cooldown time expiration
-func (a *ability) checkCooldown(subject *Unit) error {
+// CheckCooldown checks the subject does not have to wait the cooldown time expiration
+func (a *ability) CheckCooldown(subject *Unit) error {
 	ok := subject.EverySubjectHandler(subject, func(ha Handler) bool {
 		switch ha := ha.(type) {
 		case *Cooldown:
@@ -73,8 +73,8 @@ func (a *ability) checkCooldown(subject *Unit) error {
 	return errors.New("The subject has to wait the cooldown time expiration")
 }
 
-// checkDisable checks the subject is not interrupted by the disables
-func (a *ability) checkDisable(subject *Unit) error {
+// CheckDisable checks the subject is not interrupted by the disables
+func (a *ability) CheckDisable(subject *Unit) error {
 	ok := subject.EverySubjectHandler(subject, func(ha Handler) bool {
 		switch ha := ha.(type) {
 		case *Disable:
@@ -92,8 +92,8 @@ func (a *ability) checkDisable(subject *Unit) error {
 	return errors.New("The subject is interrupted by the disable")
 }
 
-// checkCost checks the subject satisfies the ability cost
-func (a *ability) checkCost(subject *Unit) error {
+// CheckResource checks the subject satisfies the ability cost
+func (a *ability) CheckResource(subject *Unit) error {
 	if subject.health() < a.healthCost {
 		return errors.New("The subject does not have enough health")
 	}

@@ -33,7 +33,7 @@ func (a *Activating) OnAttach() {
 		a.Stop(a)
 		return
 	}
-	if err := a.checkRequirements(a.Subject(), a.Object()); err != nil {
+	if err := a.CheckRequirements(a.Subject(), a.Object()); err != nil {
 		a.Stop(a)
 		return
 	}
@@ -73,7 +73,7 @@ func (a *Activating) HandleEvent(e Event) {
 
 // perform performs the ability
 func (a *Activating) perform() {
-	if err := a.checkRequirements(a.Subject(), a.Object()); err != nil {
+	if err := a.CheckRequirements(a.Subject(), a.Object()); err != nil {
 		a.Publish(message{
 		// TODO pack message
 		})
@@ -87,6 +87,6 @@ func (a *Activating) perform() {
 	})
 	// TODO consume health
 	// TODO consume mana
-	a.ability.perform(a.Subject(), a.Object())
+	a.ability.Perform(a.Subject(), a.Object())
 	a.Stop(a)
 }

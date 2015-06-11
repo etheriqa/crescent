@@ -33,7 +33,7 @@ func newClassMage() *class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		perform: func(subject, object *Unit) {
+		Perform: func(subject, object *Unit) {
 			object.AttachHandler(NewModifier(
 				object,
 				unitModification{
@@ -69,7 +69,7 @@ func newClassMage() *class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		perform: func(subject, object *Unit) {
+		Perform: func(subject, object *Unit) {
 			// TODO handle the error
 			object.AttachHandler(NewDoT(
 				NewMagicDamage(subject, object, 30),
@@ -100,7 +100,7 @@ func newClassMage() *class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		perform: func(subject, object *Unit) {
+		Perform: func(subject, object *Unit) {
 			// TODO handle the error
 			NewMagicDamage(subject, object, 400).Perform()
 		},
@@ -117,7 +117,7 @@ func newClassMage() *class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		perform: func(subject, object *Unit) {
+		Perform: func(subject, object *Unit) {
 			for _, enemy := range subject.Enemies() {
 				NewMagicDamage(subject, enemy, 400).Perform()
 				enemy.AttachHandler(NewDoT(

@@ -28,7 +28,7 @@ func newClassTank() *class {
 		disableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		perform: func(subject, object *Unit) {
+		Perform: func(subject, object *Unit) {
 			subject.AttachHandler(NewModifier(
 				subject,
 				unitModification{
@@ -53,7 +53,7 @@ func newClassTank() *class {
 		disableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		perform: func(subject, object *Unit) {
+		Perform: func(subject, object *Unit) {
 			subject.AttachHandler(NewModifier(
 				subject,
 				unitModification{
@@ -79,7 +79,7 @@ func newClassTank() *class {
 		disableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		perform: func(subject, object *Unit) {
+		Perform: func(subject, object *Unit) {
 			// TODO handle the error
 			before, after, _, _ := NewPhysicalDamage(subject, object, 300).Perform()
 			// TODO handle the error
@@ -98,7 +98,7 @@ func newClassTank() *class {
 			DisableTypeStun,
 			DisableTypeSilence,
 		},
-		perform: func(subject, object *Unit) {
+		Perform: func(subject, object *Unit) {
 			subject.AttachHandler(NewModifier(
 				subject,
 				unitModification{
