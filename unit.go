@@ -23,8 +23,8 @@ type unit struct {
 	resource     unitResource
 	modification unitModification
 	operators    map[operator]bool
-	dispatcher   *eventDispatcher
-	game         *game
+	*EventDispatcher
+	game *game
 }
 
 type unitResource struct {
@@ -45,12 +45,12 @@ type unitModification struct {
 // newUnit initializes a unit
 func newUnit(g *game, c *class) *unit {
 	return &unit{
-		class:        c,
-		resource:     unitResource{},
-		modification: unitModification{},
-		operators:    make(map[operator]bool),
-		dispatcher:   newEventDispatcher(),
-		game:         g,
+		class:           c,
+		resource:        unitResource{},
+		modification:    unitModification{},
+		operators:       make(map[operator]bool),
+		EventDispatcher: NewEventDispatcher(),
+		game:            g,
 	}
 }
 
@@ -151,9 +151,9 @@ func (u *unit) modifyHealth(delta statistic) (before, after statistic, err error
 	if delta < 0 {
 		switch {
 		case u.isAlive():
-			u.triggerEvent(eventResourceDecreased)
+			u.TriggerEvent(EventResourceDecreased)
 		case u.isDead():
-			u.triggerEvent(eventDead)
+			u.TriggerEvent(EventDead)
 		}
 	}
 	return
@@ -174,7 +174,7 @@ func (u *unit) modifyMana(delta statistic) (before, after statistic, err error) 
 	}
 	u.resource.mana = after
 	if delta < 0 {
-		u.triggerEvent(eventResourceDecreased)
+		u.TriggerEvent(EventResourceDecreased)
 	}
 	return
 }
@@ -191,27 +191,12 @@ func (u *unit) detachOperator(o operator) {
 	o.onDetach()
 }
 
-// addEventHandler registers the eventHandler
-func (u *unit) addEventHandler(h eventHandler, e event) {
-	u.dispatcher.addEventHandler(h, e)
-}
-
-// addEventHandler unregisters the eventHandler
-func (u *unit) removeEventHandler(h eventHandler, e event) {
-	u.dispatcher.removeEventHandler(h, e)
-}
-
-// triggerEvent triggers the event
-func (u *unit) triggerEvent(e event) {
-	u.dispatcher.triggerEvent(e)
-}
-
 // gameTick triggers onComplete iff the operator is completed
 func (u *unit) gameTick() {
 	if u.isDead() {
 		return
 	}
-	u.triggerEvent(eventGameTick)
+	u.TriggerEvent(EventGameTick)
 }
 
 // xotTick performs regeneration and triggers evnentXoT
@@ -221,7 +206,7 @@ func (u *unit) xotTick() {
 	}
 	u.performHealthRegeneration()
 	u.performManaRegeneration()
-	u.triggerEvent(eventXoT)
+	u.TriggerEvent(EventXoT)
 }
 
 // performHealthRegeneration performs health regeneration

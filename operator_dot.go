@@ -23,9 +23,9 @@ func newDoT(d *damage, a *ability, duration gameDuration) *dot {
 
 // onAttach removes duplicate DoTs
 func (d *dot) onAttach() {
-	d.addEventHandler(d, eventDead)
-	d.addEventHandler(d, eventGameTick)
-	d.addEventHandler(d, eventXoT)
+	d.AddEventHandler(d, EventDead)
+	d.AddEventHandler(d, EventGameTick)
+	d.AddEventHandler(d, EventXoT)
 	for o := range d.operators {
 		switch o := o.(type) {
 		case *dot:
@@ -45,24 +45,24 @@ func (d *dot) onAttach() {
 	})
 }
 
-// onDetach removes the eventHandlers
+// onDetach removes the EventHandlers
 func (d *dot) onDetach() {
-	d.removeEventHandler(d, eventDead)
-	d.removeEventHandler(d, eventGameTick)
-	d.removeEventHandler(d, eventXoT)
+	d.RemoveEventHandler(d, EventDead)
+	d.RemoveEventHandler(d, EventGameTick)
+	d.RemoveEventHandler(d, EventXoT)
 }
 
-// handleEvent handles the event
-func (d *dot) handleEvent(e event) {
+// HandleEvent handles the event
+func (d *dot) HandleEvent(e Event) {
 	switch e {
-	case eventDead:
+	case EventDead:
 		d.detachOperator(d)
-	case eventGameTick:
+	case EventGameTick:
 		d.expire(d, message{
 			// TODO pack message
 			t: outDoTEnd,
 		})
-	case eventXoT:
+	case EventXoT:
 		d.damage.perform(d.game)
 	}
 }

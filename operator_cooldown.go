@@ -5,28 +5,28 @@ type cooldown struct {
 	*ability
 }
 
-// onAttach adds the eventHandler
+// onAttach adds the EventHandler
 func (c *cooldown) onAttach() {
-	c.addEventHandler(c, eventDead)
-	c.addEventHandler(c, eventGameTick)
+	c.AddEventHandler(c, EventDead)
+	c.AddEventHandler(c, EventGameTick)
 	c.publish(message{
 		// TODO pack message
 		t: outCooldown,
 	})
 }
 
-// onDetach removes the eventHandler
+// onDetach removes the EventHandler
 func (c *cooldown) onDetach() {
-	c.removeEventHandler(c, eventDead)
-	c.removeEventHandler(c, eventGameTick)
+	c.RemoveEventHandler(c, EventDead)
+	c.RemoveEventHandler(c, EventGameTick)
 }
 
-// handleEvent handles the event
-func (c *cooldown) handleEvent(e event) {
+// HandleEvent handles the event
+func (c *cooldown) HandleEvent(e Event) {
 	switch e {
-	case eventDead:
+	case EventDead:
 		c.detachOperator(c)
-	case eventGameTick:
+	case EventGameTick:
 		c.up()
 	}
 }

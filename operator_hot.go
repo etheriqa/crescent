@@ -23,9 +23,9 @@ func newHoT(h *healing, a *ability, duration gameDuration) *hot {
 
 // onAttach removes duplicate HoTs
 func (h *hot) onAttach() {
-	h.addEventHandler(h, eventDead)
-	h.addEventHandler(h, eventGameTick)
-	h.addEventHandler(h, eventXoT)
+	h.AddEventHandler(h, EventDead)
+	h.AddEventHandler(h, EventGameTick)
+	h.AddEventHandler(h, EventXoT)
 	for o := range h.operators {
 		switch o := o.(type) {
 		case *hot:
@@ -45,24 +45,24 @@ func (h *hot) onAttach() {
 	})
 }
 
-// onDetach removes the eventHandlers
+// onDetach removes the EventHandlers
 func (h *hot) onDetach() {
-	h.removeEventHandler(h, eventDead)
-	h.removeEventHandler(h, eventGameTick)
-	h.removeEventHandler(h, eventXoT)
+	h.RemoveEventHandler(h, EventDead)
+	h.RemoveEventHandler(h, EventGameTick)
+	h.RemoveEventHandler(h, EventXoT)
 }
 
-// handleEvent handles the event
-func (h *hot) handleEvent(e event) {
+// HandleEvent handles the event
+func (h *hot) HandleEvent(e Event) {
 	switch e {
-	case eventDead:
+	case EventDead:
 		h.detachOperator(h)
-	case eventGameTick:
+	case EventGameTick:
 		h.expire(h, message{
 			// TODO pack message
 			t: outHoTEnd,
 		})
-	case eventXoT:
+	case EventXoT:
 		h.healing.perform(h.game)
 	}
 }

@@ -28,7 +28,7 @@ func newHealingThreat(performer, receiver *unit, h statistic) *threat {
 
 // onAttach merges threat operators they have same performer
 func (t *threat) onAttach() {
-	t.addEventHandler(t, eventDead)
+	t.AddEventHandler(t, EventDead)
 	for o := range t.operators {
 		switch o := o.(type) {
 		case *threat:
@@ -41,15 +41,15 @@ func (t *threat) onAttach() {
 	}
 }
 
-// onDetach removes the eventHandler
+// onDetach removes the EventHandler
 func (t *threat) onDetach() {
-	t.removeEventHandler(t, eventDead)
+	t.RemoveEventHandler(t, EventDead)
 }
 
-// handleEvent handles the event
-func (t *threat) handleEvent(e event) {
+// HandleEvent handles the event
+func (t *threat) HandleEvent(e Event) {
 	switch e {
-	case eventDead:
+	case EventDead:
 		t.detachOperator(t)
 	}
 }

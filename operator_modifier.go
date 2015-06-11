@@ -24,8 +24,8 @@ func newModifier(receiver *unit, m unitModification, a *ability, maxStack int, d
 
 // onAttach updates the modificationStats of the unit
 func (m *modifier) onAttach() {
-	m.addEventHandler(m, eventDead)
-	m.addEventHandler(m, eventGameTick)
+	m.AddEventHandler(m, EventDead)
+	m.AddEventHandler(m, EventGameTick)
 	for o := range m.operators {
 		switch o := o.(type) {
 		case *modifier:
@@ -51,17 +51,17 @@ func (m *modifier) onAttach() {
 
 // onDetach updates the modificationStats of the unit
 func (m *modifier) onDetach() {
-	m.removeEventHandler(m, eventDead)
-	m.removeEventHandler(m, eventGameTick)
+	m.RemoveEventHandler(m, EventDead)
+	m.RemoveEventHandler(m, EventGameTick)
 	m.updateModification()
 }
 
-// handleEvent handles the event
-func (m *modifier) handleEvent(e event) {
+// HandleEvent handles the event
+func (m *modifier) HandleEvent(e Event) {
 	switch e {
-	case eventDead:
+	case EventDead:
 		m.detachOperator(m)
-	case eventGameTick:
+	case EventGameTick:
 		m.expire(m, message{
 			// TODO pack message
 			t: outModifierEnd,

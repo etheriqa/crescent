@@ -1,46 +1,50 @@
 package main
 
-type event uint8
+type Event uint8
 
 const (
-	_ event = iota
-	eventDead
-	eventDisableInterrupt
-	eventGameTick
-	eventResourceDecreased
-	eventXoT
+	_ Event = iota
+	EventDead
+	EventDisableInterrupt
+	EventGameTick
+	EventResourceDecreased
+	EventXoT
 )
 
-type eventDispatcher struct {
-	handlers map[event]map[eventHandler]bool
+type EventDispatcher struct {
+	handlers map[Event]map[EventHandler]bool
 }
 
-type eventHandler interface {
-	handleEvent(event)
+type EventHandler interface {
+	HandleEvent(Event)
 }
 
-func newEventDispatcher() *eventDispatcher {
-	return &eventDispatcher{
-		handlers: make(map[event]map[eventHandler]bool),
+// NewEventDispatcher returns a EventDispatcher
+func NewEventDispatcher() *EventDispatcher {
+	return &EventDispatcher{
+		handlers: make(map[Event]map[EventHandler]bool),
 	}
 }
 
-func (d *eventDispatcher) addEventHandler(h eventHandler, e event) {
+// AddEventHandler adds the EventHandler if not exists
+func (d *EventDispatcher) AddEventHandler(h EventHandler, e Event) {
 	if d.handlers[e] == nil {
-		d.handlers[e] = make(map[eventHandler]bool)
+		d.handlers[e] = make(map[EventHandler]bool)
 	}
 	d.handlers[e][h] = true
 }
 
-func (d *eventDispatcher) removeEventHandler(h eventHandler, e event) {
+// RemoveEventHandler removes the EventHandler if exists
+func (d *EventDispatcher) RemoveEventHandler(h EventHandler, e Event) {
 	if d.handlers[e] == nil {
-		d.handlers[e] = make(map[eventHandler]bool)
+		return
 	}
 	delete(d.handlers[e], h)
 }
 
-func (d *eventDispatcher) triggerEvent(e event) {
+// TriggerEvent triggers the Event
+func (d *EventDispatcher) TriggerEvent(e Event) {
 	for h := range d.handlers[e] {
-		h.handleEvent(e)
+		h.HandleEvent(e)
 	}
 }

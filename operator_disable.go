@@ -25,10 +25,10 @@ func newDisable(receiver *unit, disableType disableType, duration gameDuration) 
 	}
 }
 
-// onAttach removes duplicate disables and triggers eventDisableInterrupt
+// onAttach removes duplicate disables and triggers EventDisableInterrupt
 func (d *disable) onAttach() {
-	d.addEventHandler(d, eventDead)
-	d.addEventHandler(d, eventGameTick)
+	d.AddEventHandler(d, EventDead)
+	d.AddEventHandler(d, EventGameTick)
 	for o := range d.operators {
 		switch o := o.(type) {
 		case *disable:
@@ -46,21 +46,21 @@ func (d *disable) onAttach() {
 		// TODO pack message
 		t: outDisableBegin,
 	})
-	d.triggerEvent(eventDisableInterrupt)
+	d.TriggerEvent(EventDisableInterrupt)
 }
 
-// onDetach removes the eventHandler
+// onDetach removes the EventHandler
 func (d *disable) onDetach() {
-	d.removeEventHandler(d, eventDead)
-	d.removeEventHandler(d, eventGameTick)
+	d.RemoveEventHandler(d, EventDead)
+	d.RemoveEventHandler(d, EventGameTick)
 }
 
-// handleEvent handles the event
-func (d *disable) handleEvent(e event) {
+// HandleEvent handles the event
+func (d *disable) HandleEvent(e Event) {
 	switch e {
-	case eventDead:
+	case EventDead:
 		d.detachOperator(d)
-	case eventGameTick:
+	case EventGameTick:
 		d.expire(d, message{
 			// TODO pack message
 			t: outDisableEnd,

@@ -8,10 +8,10 @@ type activating struct {
 
 // onAttach checks requirements
 func (a *activating) onAttach() {
-	a.addEventHandler(a, eventDead)
-	a.addEventHandler(a, eventDisableInterrupt)
-	a.addEventHandler(a, eventGameTick)
-	a.addEventHandler(a, eventResourceDecreased)
+	a.AddEventHandler(a, EventDead)
+	a.AddEventHandler(a, EventDisableInterrupt)
+	a.AddEventHandler(a, EventGameTick)
+	a.AddEventHandler(a, EventResourceDecreased)
 	for o := range a.operators {
 		switch o.(type) {
 		case *activating:
@@ -27,24 +27,24 @@ func (a *activating) onAttach() {
 	})
 }
 
-// onDetach removes the eventHandlers
+// onDetach removes the EventHandlers
 func (a *activating) onDetach() {
-	a.removeEventHandler(a, eventDead)
-	a.removeEventHandler(a, eventDisableInterrupt)
-	a.removeEventHandler(a, eventGameTick)
-	a.removeEventHandler(a, eventResourceDecreased)
+	a.RemoveEventHandler(a, EventDead)
+	a.RemoveEventHandler(a, EventDisableInterrupt)
+	a.RemoveEventHandler(a, EventGameTick)
+	a.RemoveEventHandler(a, EventResourceDecreased)
 }
 
-// handleEvent handles the event
-func (a *activating) handleEvent(e event) {
+// HandleEvent handles the event
+func (a *activating) HandleEvent(e Event) {
 	switch e {
-	case eventDead:
+	case EventDead:
 		a.detachOperator(a)
-	case eventDisableInterrupt:
+	case EventDisableInterrupt:
 		a.perform()
-	case eventGameTick:
+	case EventGameTick:
 		a.perform()
-	case eventResourceDecreased:
+	case EventResourceDecreased:
 		a.perform()
 	}
 }
