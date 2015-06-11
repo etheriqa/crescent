@@ -36,13 +36,13 @@ func NewGame(inc chan message, out chan message) *Game {
 	}
 }
 
-// now returns the game time
-func (g *Game) now() GameTime {
+// Now returns the game time
+func (g *Game) Now() GameTime {
 	return g.time
 }
 
-// after returns the game time after the duration
-func (g *Game) after(d GameDuration) GameTime {
+// After returns the game time after the game duration
+func (g *Game) After(d GameDuration) GameTime {
 	return g.time + GameTime(d)
 }
 

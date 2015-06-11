@@ -10,10 +10,10 @@ type PartialHandler struct {
 func NewPartialHandler(subject, object *Unit, duration GameDuration) *PartialHandler {
 	ha := NewPermanentPartialHandler(subject, object)
 	if subject != nil {
-		ha.expirationTime = subject.after(duration)
+		ha.expirationTime = subject.After(duration)
 	}
 	if object != nil {
-		ha.expirationTime = object.after(duration)
+		ha.expirationTime = object.After(duration)
 	}
 	return ha
 }
@@ -53,10 +53,10 @@ func (p *PartialHandler) Object() *Unit {
 // Now returns the current game time
 func (p *PartialHandler) Now() GameTime {
 	if p.subject != nil {
-		return p.subject.now()
+		return p.subject.Now()
 	}
 	if p.object != nil {
-		return p.object.now()
+		return p.object.Now()
 	}
 	// TODO return error
 	log.Fatal("")
