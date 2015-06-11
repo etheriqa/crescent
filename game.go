@@ -141,6 +141,11 @@ func (g *game) unregister(m *message) {
 }
 
 func (g *game) stage(m *message) {
+	g.uids = make(map[unitID]*unit)
+	g.seats = make(map[uint8]*unit)
+	g.publish(message{
+	// TODO pack message
+	})
 }
 
 func (g *game) seat(m *message) {
@@ -195,9 +200,33 @@ func (g *game) leave(m *message) {
 }
 
 func (g *game) activate(m *message) {
+	key := m.d["key"].(string)
+	unit := g.names[m.name]
+	var a *ability
+	switch key {
+	case "q":
+		a = unit.class.abilities[0]
+	case "w":
+		a = unit.class.abilities[1]
+	case "e":
+		a = unit.class.abilities[2]
+	case "r":
+		a = unit.class.abilities[3]
+	default:
+		return
+	}
+	target := g.uids[m.d["uid"].(unitID)]
+	unit.attachOperator(newActivating(unit, target, a))
 }
 
 func (g *game) interrupt(m *message) {
+	unit := g.names[m.name]
+	for o := range unit.operators {
+		switch o.(type) {
+		case *activating:
+			unit.detachOperator(o)
+		}
+	}
 }
 
 func (g *game) chat(m *message) {
