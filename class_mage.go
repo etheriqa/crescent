@@ -39,7 +39,7 @@ func newClassMage() *class {
 				unitModification{
 					armor: -10,
 				},
-				q,
+				q.name,
 				1,
 				8*second,
 			))

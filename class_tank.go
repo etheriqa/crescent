@@ -34,7 +34,7 @@ func newClassTank() *class {
 				unitModification{
 					damageThreatFactor: 1,
 				},
-				q,
+				q.name,
 				5,
 				10*second,
 			))
@@ -60,7 +60,7 @@ func newClassTank() *class {
 					armor:           50,
 					magicResistance: 50,
 				},
-				w,
+				w.name,
 				1,
 				2*second,
 			))
@@ -105,7 +105,7 @@ func newClassTank() *class {
 					armor:           150,
 					magicResistance: 150,
 				},
-				r,
+				r.name,
 				1,
 				8*second,
 			))

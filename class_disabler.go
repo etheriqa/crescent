@@ -34,7 +34,7 @@ func newClassDisabler() *class {
 				unitModification{
 					magicResistance: -15,
 				},
-				q,
+				q.name,
 				1,
 				12*second,
 			))
@@ -107,7 +107,7 @@ func newClassDisabler() *class {
 						criticalStrikeChance: 0.2,
 						criticalStrikeFactor: 0.5,
 					},
-					r,
+					r.name,
 					1,
 					10*second,
 				))

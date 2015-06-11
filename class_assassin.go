@@ -1,10 +1,21 @@
 package main
 
+const assassinStack string = "Assassin Stack"
+
+func newAssassinStack(performer *unit) *modifier {
+	return newModifier(
+		performer,
+		unitModification{
+			criticalStrikeChance: 0.05,
+			criticalStrikeFactor: 0.1,
+		},
+		assassinStack,
+		10,
+		10*second,
+	)
+}
+
 func newClassAssassin() *class {
-	type stack struct {
-		partialOperator
-		stack int
-	}
 	var q, w, e, r *ability
 	class := &class{
 		name: "Assassin",
@@ -48,7 +59,6 @@ func newClassAssassin() *class {
 			disableTypeStun,
 		},
 		perform: func(performer, receiver *unit) {
-			// TODO check crits and increase stack
 			newPhysicalDamage(performer, receiver, 80).perform(performer.game)
 			receiver.attachOperator(newDoT(
 				newPhysicalDamage(performer, receiver, 20),
@@ -69,17 +79,19 @@ func newClassAssassin() *class {
 			disableTypeStun,
 		},
 		perform: func(performer, receiver *unit) {
-			// TODO increase stack
 			performer.attachOperator(newModifier(
 				performer,
 				unitModification{
 					armor:           -25,
 					magicResistance: -25,
 				},
-				e,
+				e.name,
 				1,
 				8*second,
 			))
+			for i := 0; i < 2; i++ {
+				performer.attachOperator(newAssassinStack(performer))
+			}
 		},
 	}
 	// Physical
@@ -94,8 +106,24 @@ func newClassAssassin() *class {
 			disableTypeStun,
 		},
 		perform: func(performer, receiver *unit) {
-			newPhysicalDamage(performer, receiver, 600).perform(performer.game)
-			// TODO consume all stacks
+			stack := statistic(0)
+			for o := range performer.operators {
+				switch o := o.(type) {
+				case *modifier:
+					if o.name == assassinStack {
+						stack += statistic(o.nowStack)
+					}
+				}
+			}
+			newPhysicalDamage(performer, receiver, 400*stack*100).perform(performer.game)
+			for o := range performer.operators {
+				switch o := o.(type) {
+				case *modifier:
+					if o.name == assassinStack {
+						performer.detachOperator(o)
+					}
+				}
+			}
 		},
 	}
 	class.abilities = []*ability{q, w, e, r}

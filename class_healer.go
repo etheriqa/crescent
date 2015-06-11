@@ -91,7 +91,7 @@ func newClassHealer() *class {
 					criticalStrikeChance: 0.5,
 					criticalStrikeFactor: 1.5,
 				},
-				r,
+				r.name,
 				1,
 				6*second,
 			))

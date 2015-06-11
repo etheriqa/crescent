@@ -3,20 +3,20 @@ package main
 type modifier struct {
 	partialOperator
 	unitModification
-	*ability
+	name     string
 	maxStack int
 	nowStack int
 }
 
 // newModifier initalizes a modifier
-func newModifier(receiver *unit, m unitModification, a *ability, maxStack int, duration gameDuration) *modifier {
+func newModifier(receiver *unit, m unitModification, name string, maxStack int, duration gameDuration) *modifier {
 	return &modifier{
 		partialOperator: partialOperator{
 			unit:           receiver,
 			expirationTime: receiver.after(duration),
 		},
 		unitModification: m,
-		ability:          a,
+		name:             name,
 		maxStack:         maxStack,
 		nowStack:         1,
 	}
@@ -29,7 +29,7 @@ func (m *modifier) onAttach() {
 	for o := range m.operators {
 		switch o := o.(type) {
 		case *modifier:
-			if o == m || o.ability != m.ability {
+			if o == m || o.name != m.name {
 				continue
 			}
 			if o.expirationTime > m.expirationTime {
@@ -54,6 +54,10 @@ func (m *modifier) onDetach() {
 	m.RemoveEventHandler(m, EventDead)
 	m.RemoveEventHandler(m, EventGameTick)
 	m.updateModification()
+	m.publish(message{
+		// TODO pack message
+		t: outModifierEnd,
+	})
 }
 
 // HandleEvent handles the event
@@ -62,9 +66,8 @@ func (m *modifier) HandleEvent(e Event) {
 	case EventDead:
 		m.detachOperator(m)
 	case EventGameTick:
-		m.expire(m, message{
-			// TODO pack message
-			t: outModifierEnd,
-		})
+		if m.isExpired() {
+			m.detachOperator(m)
+		}
 	}
 }
