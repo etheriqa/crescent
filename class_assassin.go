@@ -2,8 +2,8 @@ package main
 
 const assassinStack string = "Assassin Stack"
 
-func newAssassinStack(performer *unit) *modifier {
-	return newModifier(
+func newAssassinStack(performer *unit) *Modifier {
+	return NewModifier(
 		performer,
 		unitModification{
 			criticalStrikeChance: 0.05,
@@ -60,7 +60,7 @@ func newClassAssassin() *class {
 		},
 		perform: func(performer, receiver *unit) {
 			newPhysicalDamage(performer, receiver, 80).perform(performer.game)
-			receiver.attachOperator(newDoT(
+			receiver.attachHandler(NewDoT(
 				newPhysicalDamage(performer, receiver, 20),
 				w,
 				10*second,
@@ -79,7 +79,7 @@ func newClassAssassin() *class {
 			disableTypeStun,
 		},
 		perform: func(performer, receiver *unit) {
-			performer.attachOperator(newModifier(
+			performer.attachHandler(NewModifier(
 				performer,
 				unitModification{
 					armor:           -25,
@@ -90,7 +90,7 @@ func newClassAssassin() *class {
 				8*second,
 			))
 			for i := 0; i < 2; i++ {
-				performer.attachOperator(newAssassinStack(performer))
+				performer.attachHandler(newAssassinStack(performer))
 			}
 		},
 	}
@@ -107,20 +107,20 @@ func newClassAssassin() *class {
 		},
 		perform: func(performer, receiver *unit) {
 			stack := statistic(0)
-			for o := range performer.operators {
-				switch o := o.(type) {
-				case *modifier:
-					if o.name == assassinStack {
-						stack += statistic(o.nowStack)
+			for ha := range performer.handlers {
+				switch ha := ha.(type) {
+				case *Modifier:
+					if ha.name == assassinStack {
+						stack += statistic(ha.nowStack)
 					}
 				}
 			}
 			newPhysicalDamage(performer, receiver, 400*stack*100).perform(performer.game)
-			for o := range performer.operators {
-				switch o := o.(type) {
-				case *modifier:
-					if o.name == assassinStack {
-						performer.detachOperator(o)
+			for ha := range performer.handlers {
+				switch ha := ha.(type) {
+				case *Modifier:
+					if ha.name == assassinStack {
+						performer.detachHandler(ha)
 					}
 				}
 			}

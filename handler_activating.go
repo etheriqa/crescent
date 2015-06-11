@@ -1,15 +1,15 @@
 package main
 
-type activating struct {
-	partialOperator
+type Activating struct {
+	partialHandler
 	*ability
 	receiver *unit
 }
 
-// newActivating returns a activating operator
-func newActivating(performer, receiver *unit, ability *ability) *activating {
-	return &activating{
-		partialOperator: partialOperator{
+// NewActivating returns a activating handler
+func NewActivating(performer, receiver *unit, ability *ability) *Activating {
+	return &Activating{
+		partialHandler: partialHandler{
 			unit:           performer,
 			expirationTime: performer.after(ability.activationDuration),
 		},
@@ -18,21 +18,21 @@ func newActivating(performer, receiver *unit, ability *ability) *activating {
 	}
 }
 
-// onAttach checks requirements
-func (a *activating) onAttach() {
+// OnAttach checks requirements
+func (a *Activating) OnAttach() {
 	a.AddEventHandler(a, EventDead)
 	a.AddEventHandler(a, EventDisableInterrupt)
 	a.AddEventHandler(a, EventGameTick)
 	a.AddEventHandler(a, EventResourceDecreased)
-	for o := range a.operators {
-		switch o.(type) {
-		case *activating:
-			a.detachOperator(a)
+	for ha := range a.handlers {
+		switch ha.(type) {
+		case *Activating:
+			a.detachHandler(a)
 			return
 		}
 	}
 	if err := a.checkRequirements(a.unit, a.receiver); err != nil {
-		a.detachOperator(a)
+		a.detachHandler(a)
 		return
 	}
 	if a.isExpired() {
@@ -44,8 +44,8 @@ func (a *activating) onAttach() {
 	})
 }
 
-// onDetach removes the EventHandlers
-func (a *activating) onDetach() {
+// OnDetach removes the EventHandlers
+func (a *Activating) OnDetach() {
 	a.RemoveEventHandler(a, EventDead)
 	a.RemoveEventHandler(a, EventDisableInterrupt)
 	a.RemoveEventHandler(a, EventGameTick)
@@ -53,10 +53,10 @@ func (a *activating) onDetach() {
 }
 
 // HandleEvent handles the event
-func (a *activating) HandleEvent(e Event) {
+func (a *Activating) HandleEvent(e Event) {
 	switch e {
 	case EventDead:
-		a.detachOperator(a)
+		a.detachHandler(a)
 	case EventDisableInterrupt:
 		a.perform()
 	case EventGameTick:
@@ -67,12 +67,12 @@ func (a *activating) HandleEvent(e Event) {
 }
 
 // perform performs the ability
-func (a *activating) perform() {
+func (a *Activating) perform() {
 	if err := a.checkRequirements(a.unit, a.receiver); err != nil {
 		a.publish(message{
 		// TODO pack message
 		})
-		a.detachOperator(a)
+		a.detachHandler(a)
 	}
 	if !a.isExpired() {
 		return
@@ -81,5 +81,5 @@ func (a *activating) perform() {
 	// TODO pack message
 	})
 	a.ability.perform(a.unit, a.receiver)
-	a.detachOperator(a)
+	a.detachHandler(a)
 }

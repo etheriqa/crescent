@@ -1,12 +1,12 @@
 package main
 
-type cooldown struct {
-	partialOperator
+type Cooldown struct {
+	partialHandler
 	*ability
 }
 
-// onAttach adds the EventHandler
-func (c *cooldown) onAttach() {
+// OnAttach adds the EventHandler
+func (c *Cooldown) OnAttach() {
 	c.AddEventHandler(c, EventDead)
 	c.AddEventHandler(c, EventGameTick)
 	c.publish(message{
@@ -15,24 +15,24 @@ func (c *cooldown) onAttach() {
 	})
 }
 
-// onDetach removes the EventHandler
-func (c *cooldown) onDetach() {
+// OnDetach removes the EventHandler
+func (c *Cooldown) OnDetach() {
 	c.RemoveEventHandler(c, EventDead)
 	c.RemoveEventHandler(c, EventGameTick)
 }
 
 // HandleEvent handles the event
-func (c *cooldown) HandleEvent(e Event) {
+func (c *Cooldown) HandleEvent(e Event) {
 	switch e {
 	case EventDead:
-		c.detachOperator(c)
+		c.detachHandler(c)
 	case EventGameTick:
 		c.up()
 	}
 }
 
 // up ends the cooldown time
-func (c *cooldown) up() {
+func (c *Cooldown) up() {
 	c.expire(c, message{
 		// TODO pack message
 		t: outCooldown,

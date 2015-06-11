@@ -2,16 +2,16 @@ package main
 
 type hotType string
 
-type hot struct {
-	partialOperator
+type HoT struct {
+	partialHandler
 	healing *healing
 	ability *ability
 }
 
-// newHoT returns a HoT
-func newHoT(h *healing, a *ability, duration gameDuration) *hot {
-	return &hot{
-		partialOperator: partialOperator{
+// NewHoT returns a HoT
+func NewHoT(h *healing, a *ability, duration gameDuration) *HoT {
+	return &HoT{
+		partialHandler: partialHandler{
 			unit:           h.receiver,
 			performer:      h.performer,
 			expirationTime: h.receiver.after(duration),
@@ -21,22 +21,22 @@ func newHoT(h *healing, a *ability, duration gameDuration) *hot {
 	}
 }
 
-// onAttach removes duplicate HoTs
-func (h *hot) onAttach() {
+// OnAttach removes duplicate HoTs
+func (h *HoT) OnAttach() {
 	h.AddEventHandler(h, EventDead)
 	h.AddEventHandler(h, EventGameTick)
 	h.AddEventHandler(h, EventXoT)
-	for o := range h.operators {
-		switch o := o.(type) {
-		case *hot:
-			if o == h || o.performer != h.performer || o.ability != h.ability {
+	for ha := range h.handlers {
+		switch ha := ha.(type) {
+		case *HoT:
+			if ha == h || ha.performer != h.performer || ha.ability != h.ability {
 				continue
 			}
-			if o.expirationTime > h.expirationTime {
-				h.detachOperator(h)
+			if ha.expirationTime > h.expirationTime {
+				h.detachHandler(h)
 				return
 			}
-			h.detachOperator(o)
+			h.detachHandler(ha)
 		}
 	}
 	h.publish(message{
@@ -45,18 +45,18 @@ func (h *hot) onAttach() {
 	})
 }
 
-// onDetach removes the EventHandlers
-func (h *hot) onDetach() {
+// OnDetach removes the EventHandlers
+func (h *HoT) OnDetach() {
 	h.RemoveEventHandler(h, EventDead)
 	h.RemoveEventHandler(h, EventGameTick)
 	h.RemoveEventHandler(h, EventXoT)
 }
 
 // HandleEvent handles the event
-func (h *hot) HandleEvent(e Event) {
+func (h *HoT) HandleEvent(e Event) {
 	switch e {
 	case EventDead:
-		h.detachOperator(h)
+		h.detachHandler(h)
 	case EventGameTick:
 		h.expire(h, message{
 			// TODO pack message

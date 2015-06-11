@@ -11,8 +11,8 @@ func TestUnitUpdateModification(t *testing.T) {
 	g := mockGame()
 	c := &class{}
 	u := newUnit(g, c)
-	um1 := &modifier{
-		partialOperator: partialOperator{
+	um1 := &Modifier{
+		partialHandler: partialHandler{
 			unit: u,
 		},
 		unitModification: unitModification{
@@ -26,8 +26,8 @@ func TestUnitUpdateModification(t *testing.T) {
 		},
 		name: "um1",
 	}
-	um2 := &modifier{
-		partialOperator: partialOperator{
+	um2 := &Modifier{
+		partialHandler: partialHandler{
 			unit: u,
 		},
 		unitModification: unitModification{
@@ -48,7 +48,7 @@ func TestUnitUpdateModification(t *testing.T) {
 	assert.EqualValues(0, u.cooldownReduction())
 	assert.EqualValues(0, u.damageThreatFactor())
 	assert.EqualValues(0, u.healingThreatFactor())
-	u.attachOperator(um1)
+	u.attachHandler(um1)
 	assert.EqualValues(10, u.armor())
 	assert.EqualValues(20, u.magicResistance())
 	assert.EqualValues(30, u.criticalStrikeChance())
@@ -56,7 +56,7 @@ func TestUnitUpdateModification(t *testing.T) {
 	assert.EqualValues(50, u.cooldownReduction())
 	assert.EqualValues(60, u.damageThreatFactor())
 	assert.EqualValues(70, u.healingThreatFactor())
-	u.attachOperator(um2)
+	u.attachHandler(um2)
 	assert.EqualValues(1010, u.armor())
 	assert.EqualValues(2020, u.magicResistance())
 	assert.EqualValues(3030, u.criticalStrikeChance())
@@ -64,7 +64,7 @@ func TestUnitUpdateModification(t *testing.T) {
 	assert.EqualValues(5050, u.cooldownReduction())
 	assert.EqualValues(6060, u.damageThreatFactor())
 	assert.EqualValues(7070, u.healingThreatFactor())
-	u.detachOperator(um1)
+	u.detachHandler(um1)
 	assert.EqualValues(1000, u.armor())
 	assert.EqualValues(2000, u.magicResistance())
 	assert.EqualValues(3000, u.criticalStrikeChance())

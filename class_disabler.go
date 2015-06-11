@@ -29,7 +29,7 @@ func newClassDisabler() *class {
 			disableTypeStun,
 		},
 		perform: func(performer, receiver *unit) {
-			receiver.attachOperator(newModifier(
+			receiver.attachHandler(NewModifier(
 				receiver,
 				unitModification{
 					magicResistance: -15,
@@ -40,7 +40,7 @@ func newClassDisabler() *class {
 			))
 			// TODO handle the error
 			newPhysicalDamage(performer, receiver, 110).perform(performer.game)
-			receiver.attachOperator(newDoT(
+			receiver.attachHandler(NewDoT(
 				newPhysicalDamage(performer, receiver, 25),
 				q,
 				4*second,
@@ -61,7 +61,7 @@ func newClassDisabler() *class {
 		},
 		perform: func(performer, receiver *unit) {
 			newMagicDamage(performer, receiver, 220).perform(performer.game)
-			receiver.attachOperator(newDisable(
+			receiver.attachHandler(NewDisable(
 				receiver,
 				disableTypeSilence,
 				500*millisecond,
@@ -81,7 +81,7 @@ func newClassDisabler() *class {
 		},
 		perform: func(performer, receiver *unit) {
 			newPhysicalDamage(performer, receiver, 280).perform(performer.game)
-			receiver.attachOperator(newDisable(
+			receiver.attachHandler(NewDisable(
 				receiver,
 				disableTypeStun,
 				2*second,
@@ -101,7 +101,7 @@ func newClassDisabler() *class {
 		},
 		perform: func(performer, receiver *unit) {
 			for _, friend := range performer.game.friends(performer) {
-				friend.attachOperator(newModifier(
+				friend.attachHandler(NewModifier(
 					friend,
 					unitModification{
 						criticalStrikeChance: 0.2,

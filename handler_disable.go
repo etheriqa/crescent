@@ -9,15 +9,15 @@ const (
 	disableTypeTaunt
 )
 
-type disable struct {
-	partialOperator
+type Disable struct {
+	partialHandler
 	disableType disableType
 }
 
-// newDisable returns a disable operator
-func newDisable(receiver *unit, disableType disableType, duration gameDuration) *disable {
-	return &disable{
-		partialOperator: partialOperator{
+// NewDisable returns a disable handler
+func NewDisable(receiver *unit, disableType disableType, duration gameDuration) *Disable {
+	return &Disable{
+		partialHandler: partialHandler{
 			unit:           receiver,
 			expirationTime: receiver.after(duration),
 		},
@@ -25,21 +25,21 @@ func newDisable(receiver *unit, disableType disableType, duration gameDuration) 
 	}
 }
 
-// onAttach removes duplicate disables and triggers EventDisableInterrupt
-func (d *disable) onAttach() {
+// OnAttach removes duplicate disables and triggers EventDisableInterrupt
+func (d *Disable) OnAttach() {
 	d.AddEventHandler(d, EventDead)
 	d.AddEventHandler(d, EventGameTick)
-	for o := range d.operators {
-		switch o := o.(type) {
-		case *disable:
-			if o == d || o.disableType != d.disableType {
+	for ha := range d.handlers {
+		switch ha := ha.(type) {
+		case *Disable:
+			if ha == d || ha.disableType != d.disableType {
 				continue
 			}
-			if o.expirationTime > d.expirationTime {
-				d.detachOperator(d)
+			if ha.expirationTime > d.expirationTime {
+				d.detachHandler(d)
 				return
 			}
-			d.detachOperator(o)
+			d.detachHandler(ha)
 		}
 	}
 	d.publish(message{
@@ -49,17 +49,17 @@ func (d *disable) onAttach() {
 	d.TriggerEvent(EventDisableInterrupt)
 }
 
-// onDetach removes the EventHandler
-func (d *disable) onDetach() {
+// OnDetach removes the EventHandler
+func (d *Disable) OnDetach() {
 	d.RemoveEventHandler(d, EventDead)
 	d.RemoveEventHandler(d, EventGameTick)
 }
 
 // HandleEvent handles the event
-func (d *disable) HandleEvent(e Event) {
+func (d *Disable) HandleEvent(e Event) {
 	switch e {
 	case EventDead:
-		d.detachOperator(d)
+		d.detachHandler(d)
 	case EventGameTick:
 		d.expire(d, message{
 			// TODO pack message

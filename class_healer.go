@@ -49,7 +49,7 @@ func newClassHealer() *class {
 			disableTypeStun,
 		},
 		perform: func(performer, receiver *unit) {
-			receiver.attachOperator(newHoT(
+			receiver.attachHandler(NewHoT(
 				newHealing(performer, receiver, 20),
 				w,
 				12*second,
@@ -85,7 +85,7 @@ func newClassHealer() *class {
 			disableTypeStun,
 		},
 		perform: func(performer, receiver *unit) {
-			performer.attachOperator(newModifier(
+			performer.attachHandler(NewModifier(
 				performer,
 				unitModification{
 					criticalStrikeChance: 0.5,
@@ -96,7 +96,7 @@ func newClassHealer() *class {
 				6*second,
 			))
 			for _, friend := range performer.game.friends(performer) {
-				friend.attachOperator(newHoT(
+				friend.attachHandler(NewHoT(
 					newHealing(performer, friend, 20),
 					r,
 					6*second,

@@ -58,9 +58,9 @@ func (a *ability) checkReceiver(performer, receiver *unit) error {
 
 // checkCooldown checks the performer does not have to wait the cooldown time expiration
 func (a *ability) checkCooldown(performer *unit) error {
-	for o := range performer.operators {
+	for o := range performer.handlers {
 		switch o := o.(type) {
-		case *cooldown:
+		case *Cooldown:
 			if o.ability != a {
 				return errors.New("The performer has to wait the cooldown time expiration")
 			}
@@ -71,9 +71,9 @@ func (a *ability) checkCooldown(performer *unit) error {
 
 // checkDisable checks the performer is not interrupted by the disables
 func (a *ability) checkDisable(performer *unit) error {
-	for o := range performer.operators {
+	for o := range performer.handlers {
 		switch o := o.(type) {
-		case *disable:
+		case *Disable:
 			for d := range a.disableTypes {
 				if disableType(d) == o.disableType {
 					return errors.New("The performer is interrupted by the disable")

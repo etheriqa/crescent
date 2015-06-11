@@ -82,7 +82,7 @@ func newPureDamage(performer, receiver *unit, baseDamage statistic) *damage {
 	}
 }
 
-// perform subtracts amount the damage from the receiver and attaches a threat operator to the performer and publishes a message
+// perform subtracts amount the damage from the receiver and attaches a threat handler to the performer and publishes a message
 func (d damage) perform(g *game) (before, after statistic, crit bool, err error) {
 	amount, crit := applyCriticalStrike(
 		d.amount,
@@ -94,7 +94,7 @@ func (d damage) perform(g *game) (before, after statistic, crit bool, err error)
 		return
 	}
 	if d.performer != nil {
-		d.receiver.attachOperator(newDamageThreat(d.performer, d.receiver, d.amount))
+		d.receiver.attachHandler(newDamageThreat(d.performer, d.receiver, d.amount))
 	}
 	g.publish(message{
 	// TODO pack message
@@ -124,7 +124,7 @@ func newPureHealing(performer, receiver *unit, baseHealing statistic) *healing {
 	}
 }
 
-// perform adds amount of healing to the receiver and attaches a threat operator to the enemies and publish a message
+// perform adds amount of healing to the receiver and attaches a threat handler to the enemies and publish a message
 func (h healing) perform(g *game) (after, before statistic, crit bool, err error) {
 	amount, crit := applyCriticalStrike(
 		h.amount,
@@ -137,7 +137,7 @@ func (h healing) perform(g *game) (after, before statistic, crit bool, err error
 	}
 	if h.performer != nil {
 		for _, enemy := range g.enemies(h.performer) {
-			enemy.attachOperator(newHealingThreat(h.performer, enemy, h.amount))
+			enemy.attachHandler(newHealingThreat(h.performer, enemy, h.amount))
 		}
 	}
 	g.publish(message{

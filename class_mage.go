@@ -34,7 +34,7 @@ func newClassMage() *class {
 			disableTypeStun,
 		},
 		perform: func(performer, receiver *unit) {
-			receiver.attachOperator(newModifier(
+			receiver.attachHandler(NewModifier(
 				receiver,
 				unitModification{
 					armor: -10,
@@ -46,11 +46,11 @@ func newClassMage() *class {
 			// TODO handle the error
 			newMagicDamage(performer, receiver, 120).perform(performer.game)
 			if rand.Float64() > 0.1 {
-				for o := range performer.operators {
-					switch o := o.(type) {
-					case *cooldown:
-						if o.ability == w {
-							performer.detachOperator(o)
+				for ha := range performer.handlers {
+					switch ha := ha.(type) {
+					case *Cooldown:
+						if ha.ability == w {
+							performer.detachHandler(ha)
 						}
 					}
 				}
@@ -71,17 +71,17 @@ func newClassMage() *class {
 		},
 		perform: func(performer, receiver *unit) {
 			// TODO handle the error
-			receiver.attachOperator(newDoT(
+			receiver.attachHandler(NewDoT(
 				newMagicDamage(performer, receiver, 30),
 				w,
 				10*second,
 			))
 			if rand.Float64() > 0.2 {
-				for o := range performer.operators {
-					switch o := o.(type) {
-					case *cooldown:
-						if o.ability == e {
-							performer.detachOperator(o)
+				for ha := range performer.handlers {
+					switch ha := ha.(type) {
+					case *Cooldown:
+						if ha.ability == e {
+							performer.detachHandler(ha)
 						}
 					}
 				}
@@ -120,12 +120,12 @@ func newClassMage() *class {
 		perform: func(performer, receiver *unit) {
 			for _, enemy := range performer.game.enemies(performer) {
 				newMagicDamage(performer, enemy, 400).perform(performer.game)
-				enemy.attachOperator(newDoT(
+				enemy.attachHandler(NewDoT(
 					newMagicDamage(performer, enemy, 40),
 					r,
 					10*second,
 				))
-				enemy.attachOperator(newDisable(
+				enemy.attachHandler(NewDisable(
 					receiver,
 					disableTypeStun,
 					500*millisecond,

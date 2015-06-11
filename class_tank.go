@@ -29,7 +29,7 @@ func newClassTank() *class {
 			disableTypeStun,
 		},
 		perform: func(performer, receiver *unit) {
-			performer.attachOperator(newModifier(
+			performer.attachHandler(NewModifier(
 				performer,
 				unitModification{
 					damageThreatFactor: 1,
@@ -54,7 +54,7 @@ func newClassTank() *class {
 			disableTypeStun,
 		},
 		perform: func(performer, receiver *unit) {
-			performer.attachOperator(newModifier(
+			performer.attachHandler(NewModifier(
 				performer,
 				unitModification{
 					armor:           50,
@@ -99,7 +99,7 @@ func newClassTank() *class {
 			disableTypeSilence,
 		},
 		perform: func(performer, receiver *unit) {
-			performer.attachOperator(newModifier(
+			performer.attachHandler(NewModifier(
 				performer,
 				unitModification{
 					armor:           150,

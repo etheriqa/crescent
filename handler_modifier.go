@@ -1,17 +1,17 @@
 package main
 
-type modifier struct {
-	partialOperator
+type Modifier struct {
+	partialHandler
 	unitModification
 	name     string
 	maxStack int
 	nowStack int
 }
 
-// newModifier initalizes a modifier
-func newModifier(receiver *unit, m unitModification, name string, maxStack int, duration gameDuration) *modifier {
-	return &modifier{
-		partialOperator: partialOperator{
+// NewModifier initalizes a modifier
+func NewModifier(receiver *unit, m unitModification, name string, maxStack int, duration gameDuration) *Modifier {
+	return &Modifier{
+		partialHandler: partialHandler{
 			unit:           receiver,
 			expirationTime: receiver.after(duration),
 		},
@@ -22,24 +22,24 @@ func newModifier(receiver *unit, m unitModification, name string, maxStack int, 
 	}
 }
 
-// onAttach updates the modificationStats of the unit
-func (m *modifier) onAttach() {
+// OnAttach updates the modificationStats of the unit
+func (m *Modifier) OnAttach() {
 	m.AddEventHandler(m, EventDead)
 	m.AddEventHandler(m, EventGameTick)
-	for o := range m.operators {
-		switch o := o.(type) {
-		case *modifier:
-			if o == m || o.name != m.name {
+	for ha := range m.handlers {
+		switch ha := ha.(type) {
+		case *Modifier:
+			if ha == m || ha.name != m.name {
 				continue
 			}
-			if o.expirationTime > m.expirationTime {
-				m.expirationTime = o.expirationTime
+			if ha.expirationTime > m.expirationTime {
+				m.expirationTime = ha.expirationTime
 			}
-			m.nowStack += o.nowStack
+			m.nowStack += ha.nowStack
 			if m.nowStack > m.maxStack {
 				m.nowStack = m.maxStack
 			}
-			m.detachOperator(o)
+			m.detachHandler(ha)
 		}
 	}
 	m.updateModification()
@@ -49,8 +49,8 @@ func (m *modifier) onAttach() {
 	})
 }
 
-// onDetach updates the modificationStats of the unit
-func (m *modifier) onDetach() {
+// OnDetach updates the modificationStats of the unit
+func (m *Modifier) OnDetach() {
 	m.RemoveEventHandler(m, EventDead)
 	m.RemoveEventHandler(m, EventGameTick)
 	m.updateModification()
@@ -61,13 +61,13 @@ func (m *modifier) onDetach() {
 }
 
 // HandleEvent handles the event
-func (m *modifier) HandleEvent(e Event) {
+func (m *Modifier) HandleEvent(e Event) {
 	switch e {
 	case EventDead:
-		m.detachOperator(m)
+		m.detachHandler(m)
 	case EventGameTick:
 		if m.isExpired() {
-			m.detachOperator(m)
+			m.detachHandler(m)
 		}
 	}
 }

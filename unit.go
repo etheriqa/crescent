@@ -22,7 +22,7 @@ type unit struct {
 	class        *class
 	resource     unitResource
 	modification unitModification
-	operators    map[operator]bool
+	handlers     map[Handler]bool
 	*EventDispatcher
 	game *game
 }
@@ -48,7 +48,7 @@ func newUnit(g *game, c *class) *unit {
 		class:           c,
 		resource:        unitResource{},
 		modification:    unitModification{},
-		operators:       make(map[operator]bool),
+		handlers:        make(map[Handler]bool),
 		EventDispatcher: NewEventDispatcher(),
 		game:            g,
 	}
@@ -179,19 +179,19 @@ func (u *unit) modifyMana(delta statistic) (before, after statistic, err error) 
 	return
 }
 
-// attachOperator adds the operator
-func (u *unit) attachOperator(o operator) {
-	u.operators[o] = true
-	o.onAttach()
+// attachHandler adds the handler
+func (u *unit) attachHandler(ha Handler) {
+	u.handlers[ha] = true
+	ha.OnAttach()
 }
 
-// detachOperator removes the operator
-func (u *unit) detachOperator(o operator) {
-	delete(u.operators, o)
-	o.onDetach()
+// detachHandler removes the handler
+func (u *unit) detachHandler(ha Handler) {
+	delete(u.handlers, ha)
+	ha.OnDetach()
 }
 
-// gameTick triggers onComplete iff the operator is completed
+// gameTick triggers onComplete iff the handler is completed
 func (u *unit) gameTick() {
 	if u.isDead() {
 		return
@@ -244,9 +244,9 @@ func (u *unit) performManaModification(delta statistic) error {
 // updateModification updates the unitModification
 func (u *unit) updateModification() {
 	u.modification = unitModification{}
-	for o := range u.operators {
+	for o := range u.handlers {
 		switch o := o.(type) {
-		case *modifier:
+		case *Modifier:
 			u.modification.armor += o.armor
 			u.modification.magicResistance += o.magicResistance
 			u.modification.criticalStrikeChance += o.criticalStrikeChance

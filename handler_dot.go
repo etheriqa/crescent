@@ -2,16 +2,16 @@ package main
 
 type dotType string
 
-type dot struct {
-	partialOperator
+type DoT struct {
+	partialHandler
 	damage  *damage
 	ability *ability
 }
 
-// newDoT returns a DoT
-func newDoT(d *damage, a *ability, duration gameDuration) *dot {
-	return &dot{
-		partialOperator: partialOperator{
+// NewDoT returns a DoT
+func NewDoT(d *damage, a *ability, duration gameDuration) *DoT {
+	return &DoT{
+		partialHandler: partialHandler{
 			unit:           d.receiver,
 			performer:      d.performer,
 			expirationTime: d.receiver.after(duration),
@@ -21,22 +21,22 @@ func newDoT(d *damage, a *ability, duration gameDuration) *dot {
 	}
 }
 
-// onAttach removes duplicate DoTs
-func (d *dot) onAttach() {
+// OnAttach removes duplicate DoTs
+func (d *DoT) OnAttach() {
 	d.AddEventHandler(d, EventDead)
 	d.AddEventHandler(d, EventGameTick)
 	d.AddEventHandler(d, EventXoT)
-	for o := range d.operators {
-		switch o := o.(type) {
-		case *dot:
-			if o == d || o.performer != d.performer || o.ability != d.ability {
+	for ha := range d.handlers {
+		switch ha := ha.(type) {
+		case *DoT:
+			if ha == d || ha.performer != d.performer || ha.ability != d.ability {
 				continue
 			}
-			if o.expirationTime > d.expirationTime {
-				d.detachOperator(d)
+			if ha.expirationTime > d.expirationTime {
+				d.detachHandler(d)
 				return
 			}
-			d.detachOperator(o)
+			d.detachHandler(ha)
 		}
 	}
 	d.publish(message{
@@ -45,18 +45,18 @@ func (d *dot) onAttach() {
 	})
 }
 
-// onDetach removes the EventHandlers
-func (d *dot) onDetach() {
+// OnDetach removes the EventHandlers
+func (d *DoT) OnDetach() {
 	d.RemoveEventHandler(d, EventDead)
 	d.RemoveEventHandler(d, EventGameTick)
 	d.RemoveEventHandler(d, EventXoT)
 }
 
 // HandleEvent handles the event
-func (d *dot) HandleEvent(e Event) {
+func (d *DoT) HandleEvent(e Event) {
 	switch e {
 	case EventDead:
-		d.detachOperator(d)
+		d.detachHandler(d)
 	case EventGameTick:
 		d.expire(d, message{
 			// TODO pack message

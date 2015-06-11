@@ -13,38 +13,38 @@ func TestThreatOnAttach(t *testing.T) {
 	u := newUnit(g, c)
 	performer1 := newUnit(g, c)
 	performer2 := newUnit(g, c)
-	threat1 := &threat{
-		partialOperator: partialOperator{
+	threat1 := &Threat{
+		partialHandler: partialHandler{
 			unit:      u,
 			performer: performer1,
 		},
 		threat: 10,
 	}
-	threat2 := &threat{
-		partialOperator: partialOperator{
+	threat2 := &Threat{
+		partialHandler: partialHandler{
 			unit:      u,
 			performer: performer1,
 		},
 		threat: 10,
 	}
-	threat3 := &threat{
-		partialOperator: partialOperator{
+	threat3 := &Threat{
+		partialHandler: partialHandler{
 			unit:      u,
 			performer: performer2,
 		},
 		threat: 100,
 	}
-	u.attachOperator(&disable{
-		partialOperator: partialOperator{
+	u.attachHandler(&Disable{
+		partialHandler: partialHandler{
 			unit: u,
 		},
 	})
-	u.attachOperator(threat1)
-	u.attachOperator(threat2)
-	u.attachOperator(threat3)
-	assert.False(u.operators[threat1])
-	assert.True(u.operators[threat2])
-	assert.True(u.operators[threat3])
+	u.attachHandler(threat1)
+	u.attachHandler(threat2)
+	u.attachHandler(threat3)
+	assert.False(u.handlers[threat1])
+	assert.True(u.handlers[threat2])
+	assert.True(u.handlers[threat3])
 	assert.EqualValues(20, threat2.threat)
 	assert.EqualValues(100, threat3.threat)
 }

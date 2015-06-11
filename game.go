@@ -216,15 +216,15 @@ func (g *game) activate(m *message) {
 		return
 	}
 	target := g.uids[m.d["uid"].(unitID)]
-	unit.attachOperator(newActivating(unit, target, a))
+	unit.attachHandler(NewActivating(unit, target, a))
 }
 
 func (g *game) interrupt(m *message) {
 	unit := g.names[m.name]
-	for o := range unit.operators {
+	for o := range unit.handlers {
 		switch o.(type) {
-		case *activating:
-			unit.detachOperator(o)
+		case *Activating:
+			unit.detachHandler(o)
 		}
 	}
 }
