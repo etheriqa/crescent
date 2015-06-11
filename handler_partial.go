@@ -35,8 +35,7 @@ func (p *PartialHandler) Container() HandlerContainer {
 	if p.object != nil {
 		return p.object
 	}
-	// TODO return error
-	log.Fatal("")
+	log.Panic("The PartialHandler has no Units")
 	return nil
 }
 
@@ -58,8 +57,7 @@ func (p *PartialHandler) Now() GameTime {
 	if p.object != nil {
 		return p.object.Now()
 	}
-	// TODO return error
-	log.Fatal("")
+	log.Panic("The PartialHandler has no Units")
 	return GameTime(0)
 }
 
