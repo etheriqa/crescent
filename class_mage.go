@@ -47,7 +47,7 @@ func newClassMage() *class {
 			// TODO handle the error
 			NewMagicDamage(up, 120).Perform()
 			if rand.Float64() > 0.1 {
-				up.ForSubjectHandler(up.Subject(), func(ha Handler) {
+				up.ForSubjectHandler(func(ha Handler) {
 					switch ha := ha.(type) {
 					case *Cooldown:
 						if ha.ability == w {
@@ -78,7 +78,7 @@ func newClassMage() *class {
 				10*Second,
 			))
 			if rand.Float64() > 0.2 {
-				up.ForSubjectHandler(up.Subject(), func(ha Handler) {
+				up.ForSubjectHandler(func(ha Handler) {
 					switch ha := ha.(type) {
 					case *Cooldown:
 						if ha.ability == e {

@@ -18,7 +18,7 @@ type GameClock interface {
 }
 
 type Game struct {
-	HandlerContainer
+	*HandlerContainer
 	time  GameTime
 	names map[string]*Unit
 	uid   unitID

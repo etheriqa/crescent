@@ -108,7 +108,7 @@ func newClassAssassin() *class {
 		},
 		Perform: func(up UnitPair) {
 			stack := Statistic(0)
-			up.ForSubjectHandler(up.Subject(), func(ha Handler) {
+			up.ForSubjectHandler(func(ha Handler) {
 				switch ha := ha.(type) {
 				case *Corrector:
 					if ha.name == assassinStack {
@@ -117,7 +117,7 @@ func newClassAssassin() *class {
 				}
 			})
 			NewPhysicalDamage(up, 400*stack*100).Perform()
-			up.ForSubjectHandler(up.Subject(), func(ha Handler) {
+			up.ForSubjectHandler(func(ha Handler) {
 				switch ha := ha.(type) {
 				case *Corrector:
 					if ha.name == assassinStack {

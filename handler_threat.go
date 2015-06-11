@@ -27,7 +27,7 @@ func NewHealingThreat(up UnitPair, h Statistic) *Threat {
 func (t *Threat) OnAttach() {
 	t.Subject().AddEventHandler(t, EventDead)
 	t.Object().AddEventHandler(t, EventDead)
-	t.ForSubjectHandler(t.Subject(), func(ha Handler) {
+	t.ForSubjectHandler(func(ha Handler) {
 		switch ha := ha.(type) {
 		case *Threat:
 			if ha == t || ha.Object() != t.Object() {

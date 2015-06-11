@@ -20,7 +20,7 @@ func (t *Ticker) OnAttach() {
 	t.Object().AddEventHandler(t, EventDead)
 	t.Object().AddEventHandler(t, EventGameTick)
 	t.Object().AddEventHandler(t, EventTicker)
-	ok := t.EveryObjectHandler(t.Object(), func(ha Handler) bool {
+	ok := t.EveryObjectHandler(func(ha Handler) bool {
 		switch ha := ha.(type) {
 		case *Ticker:
 			if ha == t || ha.Subject() != t.Subject() || ha.ability != t.ability {

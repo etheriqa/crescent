@@ -63,7 +63,7 @@ func (m *Corrector) HealingThreatFactor() Statistic {
 func (m *Corrector) OnAttach() {
 	m.Object().AddEventHandler(m, EventDead)
 	m.Object().AddEventHandler(m, EventGameTick)
-	m.ForObjectHandler(m.Object(), func(ha Handler) {
+	m.ForObjectHandler(func(ha Handler) {
 		switch ha := ha.(type) {
 		case *Corrector:
 			if ha == m || ha.name != m.name {

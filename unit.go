@@ -130,6 +130,36 @@ func (u *Unit) Enemies() []*Unit {
 	return u.Game.Enemies(u)
 }
 
+// ForSubjectHandler calls the callback with the handler has this unit as subject
+func (u *Unit) ForSubjectHandler(callback func(Handler)) {
+	u.Game.ForSubjectHandler(u, callback)
+}
+
+// ForObjectHandler calls the callback with the handler has this unit as object
+func (u *Unit) ForObjectHandler(callback func(Handler)) {
+	u.Game.ForObjectHandler(u, callback)
+}
+
+// EverySubjectHandler returns true if all of callback results are true
+func (u *Unit) EverySubjectHandler(callback func(Handler) bool) bool {
+	return u.Game.EverySubjectHandler(u, callback)
+}
+
+// EveryObjectHandler returns true if all of callback results are true
+func (u *Unit) EveryObjectHandler(callback func(Handler) bool) bool {
+	return u.Game.EveryObjectHandler(u, callback)
+}
+
+// SomeSubjectHandler returns true if any of callback results are true
+func (u *Unit) SomeSubjectHandler(callback func(Handler) bool) bool {
+	return u.Game.SomeSubjectHandler(u, callback)
+}
+
+// SomeObjectHandler returns true if any of callback results are true
+func (u *Unit) SomeObjectHandler(callback func(Handler) bool) bool {
+	return u.Game.SomeObjectHandler(u, callback)
+}
+
 // modifyHealth modifies the unit health and returns before/after health
 func (u *Unit) modifyHealth(delta Statistic) (before, after Statistic, err error) {
 	if u.isDead() {
@@ -228,7 +258,7 @@ func (u *Unit) performManaModification(delta Statistic) error {
 // ReloadCorrection updates the UnitCorrection
 func (u *Unit) ReloadCorrection() {
 	u.correction = UnitCorrection{}
-	u.ForSubjectHandler(u, func(ha Handler) {
+	u.ForSubjectHandler(func(ha Handler) {
 		switch ha := ha.(type) {
 		case *Corrector:
 			u.correction.Armor += ha.Armor()

@@ -26,7 +26,7 @@ func NewDisable(object *Unit, dt DisableType, duration GameDuration) *Disable {
 func (d *Disable) OnAttach() {
 	d.Object().AddEventHandler(d, EventDead)
 	d.Object().AddEventHandler(d, EventGameTick)
-	ok := d.EveryObjectHandler(d.Object(), func(ha Handler) bool {
+	ok := d.EveryObjectHandler(func(ha Handler) bool {
 		switch ha := ha.(type) {
 		case *Disable:
 			if ha == d || ha.DisableType != d.DisableType {
