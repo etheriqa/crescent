@@ -14,14 +14,14 @@ const (
 type unitID uint64
 
 type Unit struct {
-	id           unitID
-	playerName   string
-	unitName     string
-	group        uint8
-	seat         uint8
-	class        *class
-	resource     unitResource
-	modification unitModification
+	id         unitID
+	playerName string
+	unitName   string
+	group      uint8
+	seat       uint8
+	class      *class
+	resource   unitResource
+	correction UnitCorrection
 	*Game
 	*EventDispatcher
 }
@@ -31,14 +31,14 @@ type unitResource struct {
 	mana   Statistic
 }
 
-type unitModification struct {
-	armor                Statistic
-	magicResistance      Statistic
-	criticalStrikeChance Statistic
-	criticalStrikeFactor Statistic
-	cooldownReduction    Statistic
-	damageThreatFactor   Statistic
-	healingThreatFactor  Statistic
+type UnitCorrection struct {
+	Armor                Statistic
+	MagicResistance      Statistic
+	CriticalStrikeChance Statistic
+	CriticalStrikeFactor Statistic
+	CooldownReduction    Statistic
+	DamageThreatFactor   Statistic
+	HealingThreatFactor  Statistic
 }
 
 // newUnit initializes a unit
@@ -46,7 +46,7 @@ func NewUnit(g *Game, c *class) *Unit {
 	return &Unit{
 		class:           c,
 		resource:        unitResource{},
-		modification:    unitModification{},
+		correction:      UnitCorrection{},
 		Game:            g,
 		EventDispatcher: NewEventDispatcher(),
 	}
@@ -85,11 +85,11 @@ func (u *Unit) manaRegeneration() Statistic {
 }
 
 func (u *Unit) armor() Statistic {
-	return u.class.armor + u.modification.armor
+	return u.class.armor + u.correction.Armor
 }
 
 func (u *Unit) magicResistance() Statistic {
-	return u.class.magicResistance + u.modification.magicResistance
+	return u.class.magicResistance + u.correction.MagicResistance
 }
 
 func (u *Unit) physicalDamageReductionFactor() Statistic {
@@ -101,23 +101,23 @@ func (u *Unit) magicDamageReductionFactor() Statistic {
 }
 
 func (u *Unit) criticalStrikeChance() Statistic {
-	return u.class.criticalStrikeChance + u.modification.criticalStrikeChance
+	return u.class.criticalStrikeChance + u.correction.CriticalStrikeChance
 }
 
 func (u *Unit) criticalStrikeFactor() Statistic {
-	return u.class.criticalStrikeFactor + u.modification.criticalStrikeFactor
+	return u.class.criticalStrikeFactor + u.correction.CriticalStrikeFactor
 }
 
 func (u *Unit) cooldownReduction() Statistic {
-	return u.class.cooldownReduction + u.modification.cooldownReduction
+	return u.class.cooldownReduction + u.correction.CooldownReduction
 }
 
 func (u *Unit) damageThreatFactor() Statistic {
-	return u.class.damageThreatFactor + u.modification.damageThreatFactor
+	return u.class.damageThreatFactor + u.correction.DamageThreatFactor
 }
 
 func (u *Unit) healingThreatFactor() Statistic {
-	return u.class.healingThreatFactor + u.modification.healingThreatFactor
+	return u.class.healingThreatFactor + u.correction.HealingThreatFactor
 }
 
 // Friends returns the friend units
@@ -225,19 +225,19 @@ func (u *Unit) performManaModification(delta Statistic) error {
 	return nil
 }
 
-// updateModification updates the unitModification
-func (u *Unit) updateModification() {
-	u.modification = unitModification{}
+// ReloadCorrection updates the UnitCorrection
+func (u *Unit) ReloadCorrection() {
+	u.correction = UnitCorrection{}
 	u.ForSubjectHandler(u, func(ha Handler) {
 		switch ha := ha.(type) {
-		case *Modifier:
-			u.modification.armor += ha.armor
-			u.modification.magicResistance += ha.magicResistance
-			u.modification.criticalStrikeChance += ha.criticalStrikeChance
-			u.modification.criticalStrikeFactor += ha.criticalStrikeFactor
-			u.modification.cooldownReduction += ha.cooldownReduction
-			u.modification.damageThreatFactor += ha.damageThreatFactor
-			u.modification.healingThreatFactor += ha.healingThreatFactor
+		case *Corrector:
+			u.correction.Armor += ha.Armor()
+			u.correction.MagicResistance += ha.MagicResistance()
+			u.correction.CriticalStrikeChance += ha.CriticalStrikeChance()
+			u.correction.CriticalStrikeFactor += ha.CriticalStrikeFactor()
+			u.correction.CooldownReduction += ha.CooldownReduction()
+			u.correction.DamageThreatFactor += ha.DamageThreatFactor()
+			u.correction.HealingThreatFactor += ha.HealingThreatFactor()
 		}
 	})
 	u.Publish(message{

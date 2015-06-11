@@ -29,10 +29,10 @@ func newClassDisabler() *class {
 			DisableTypeStun,
 		},
 		Perform: func(subject, object *Unit) {
-			object.AttachHandler(NewModifier(
+			object.AttachHandler(NewCorrector(
 				object,
-				unitModification{
-					magicResistance: -15,
+				UnitCorrection{
+					MagicResistance: -15,
 				},
 				q.name,
 				1,
@@ -101,11 +101,11 @@ func newClassDisabler() *class {
 		},
 		Perform: func(subject, object *Unit) {
 			for _, friend := range subject.Friends() {
-				friend.AttachHandler(NewModifier(
+				friend.AttachHandler(NewCorrector(
 					friend,
-					unitModification{
-						criticalStrikeChance: 0.2,
-						criticalStrikeFactor: 0.5,
+					UnitCorrection{
+						CriticalStrikeChance: 0.2,
+						CriticalStrikeFactor: 0.5,
 					},
 					r.name,
 					1,

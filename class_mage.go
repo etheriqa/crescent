@@ -34,10 +34,10 @@ func newClassMage() *class {
 			DisableTypeStun,
 		},
 		Perform: func(subject, object *Unit) {
-			object.AttachHandler(NewModifier(
+			object.AttachHandler(NewCorrector(
 				object,
-				unitModification{
-					armor: -10,
+				UnitCorrection{
+					Armor: -10,
 				},
 				q.name,
 				1,

@@ -2,12 +2,12 @@ package main
 
 const assassinStack string = "Assassin Stack"
 
-func newAssassinStack(subject *Unit) *Modifier {
-	return NewModifier(
+func newAssassinStack(subject *Unit) *Corrector {
+	return NewCorrector(
 		subject,
-		unitModification{
-			criticalStrikeChance: 0.05,
-			criticalStrikeFactor: 0.1,
+		UnitCorrection{
+			CriticalStrikeChance: 0.05,
+			CriticalStrikeFactor: 0.1,
 		},
 		assassinStack,
 		10,
@@ -79,11 +79,11 @@ func newClassAssassin() *class {
 			DisableTypeStun,
 		},
 		Perform: func(subject, object *Unit) {
-			subject.AttachHandler(NewModifier(
+			subject.AttachHandler(NewCorrector(
 				subject,
-				unitModification{
-					armor:           -25,
-					magicResistance: -25,
+				UnitCorrection{
+					Armor:           -25,
+					MagicResistance: -25,
 				},
 				e.name,
 				1,
@@ -109,7 +109,7 @@ func newClassAssassin() *class {
 			stack := Statistic(0)
 			subject.ForSubjectHandler(subject, func(ha Handler) {
 				switch ha := ha.(type) {
-				case *Modifier:
+				case *Corrector:
 					if ha.name == assassinStack {
 						stack += Statistic(ha.Stack())
 					}
@@ -118,7 +118,7 @@ func newClassAssassin() *class {
 			NewPhysicalDamage(subject, object, 400*stack*100).Perform()
 			subject.ForSubjectHandler(subject, func(ha Handler) {
 				switch ha := ha.(type) {
-				case *Modifier:
+				case *Corrector:
 					if ha.name == assassinStack {
 						subject.DetachHandler(ha)
 					}

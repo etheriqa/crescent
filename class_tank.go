@@ -29,10 +29,10 @@ func newClassTank() *class {
 			DisableTypeStun,
 		},
 		Perform: func(subject, object *Unit) {
-			subject.AttachHandler(NewModifier(
+			subject.AttachHandler(NewCorrector(
 				subject,
-				unitModification{
-					damageThreatFactor: 1,
+				UnitCorrection{
+					DamageThreatFactor: 1,
 				},
 				q.name,
 				5,
@@ -54,11 +54,11 @@ func newClassTank() *class {
 			DisableTypeStun,
 		},
 		Perform: func(subject, object *Unit) {
-			subject.AttachHandler(NewModifier(
+			subject.AttachHandler(NewCorrector(
 				subject,
-				unitModification{
-					armor:           50,
-					magicResistance: 50,
+				UnitCorrection{
+					Armor:           50,
+					MagicResistance: 50,
 				},
 				w.name,
 				1,
@@ -99,11 +99,11 @@ func newClassTank() *class {
 			DisableTypeSilence,
 		},
 		Perform: func(subject, object *Unit) {
-			subject.AttachHandler(NewModifier(
+			subject.AttachHandler(NewCorrector(
 				subject,
-				unitModification{
-					armor:           150,
-					magicResistance: 150,
+				UnitCorrection{
+					Armor:           150,
+					MagicResistance: 150,
 				},
 				r.name,
 				1,

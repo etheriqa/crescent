@@ -85,11 +85,11 @@ func newClassHealer() *class {
 			DisableTypeStun,
 		},
 		Perform: func(subject, object *Unit) {
-			subject.AttachHandler(NewModifier(
+			subject.AttachHandler(NewCorrector(
 				subject,
-				unitModification{
-					criticalStrikeChance: 0.5,
-					criticalStrikeFactor: 1.5,
+				UnitCorrection{
+					CriticalStrikeChance: 0.5,
+					CriticalStrikeFactor: 1.5,
 				},
 				r.name,
 				1,
