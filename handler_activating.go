@@ -88,5 +88,6 @@ func (a *Activating) perform() {
 	// TODO consume health
 	// TODO consume mana
 	a.ability.Perform(a.UnitPair)
+	a.AttachHandler(NewCooldown(a.Subject(), a.ability))
 	a.Stop(a)
 }

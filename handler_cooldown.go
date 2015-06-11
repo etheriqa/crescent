@@ -5,10 +5,18 @@ type Cooldown struct {
 	*ability
 }
 
+// NewCooldown returns a Cooldown handler
+func NewCooldown(subject *Unit, ability *ability) *Cooldown {
+	return &Cooldown{
+		PartialHandler: MakePartialHandler(MakeSubject(subject), ability.cooldownDuration),
+		ability:        ability,
+	}
+}
+
 // OnAttach adds the EventHandler
 func (c *Cooldown) OnAttach() {
-	c.Object().AddEventHandler(c, EventDead)
-	c.Object().AddEventHandler(c, EventGameTick)
+	c.Subject().AddEventHandler(c, EventDead)
+	c.Subject().AddEventHandler(c, EventGameTick)
 	c.Publish(message{
 	// TODO pack message
 	})
@@ -16,8 +24,8 @@ func (c *Cooldown) OnAttach() {
 
 // OnDetach removes the EventHandler
 func (c *Cooldown) OnDetach() {
-	c.Object().RemoveEventHandler(c, EventDead)
-	c.Object().RemoveEventHandler(c, EventGameTick)
+	c.Subject().RemoveEventHandler(c, EventDead)
+	c.Subject().RemoveEventHandler(c, EventGameTick)
 }
 
 // HandleEvent handles the Event
