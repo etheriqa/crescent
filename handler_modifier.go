@@ -4,19 +4,24 @@ type Modifier struct {
 	*PartialHandler
 	unitModification
 	name     string
-	maxStack int
-	nowStack int
+	maxStack Statistic
+	stack    Statistic
 }
 
 // NewModifier returns a Modifier handler
-func NewModifier(object *Unit, m unitModification, name string, maxStack int, duration GameDuration) *Modifier {
+func NewModifier(object *Unit, m unitModification, name string, maxStack Statistic, duration GameDuration) *Modifier {
 	return &Modifier{
 		PartialHandler:   NewPartialHandler(nil, object, duration),
 		unitModification: m,
 		name:             name,
 		maxStack:         maxStack,
-		nowStack:         1,
+		stack:            Statistic(1),
 	}
+}
+
+// Stack returns the number of stacks
+func (m *Modifier) Stack() Statistic {
+	return m.stack
 }
 
 // OnAttach updates the modificationStats of the unit
@@ -32,9 +37,9 @@ func (m *Modifier) OnAttach() {
 			if ha.expirationTime > m.expirationTime {
 				m.expirationTime = ha.expirationTime
 			}
-			m.nowStack += ha.nowStack
-			if m.nowStack > m.maxStack {
-				m.nowStack = m.maxStack
+			m.stack += ha.stack
+			if m.stack > m.maxStack {
+				m.stack = m.maxStack
 			}
 			ha.Stop(ha)
 		}

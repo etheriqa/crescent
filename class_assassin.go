@@ -111,7 +111,7 @@ func newClassAssassin() *class {
 				switch ha := ha.(type) {
 				case *Modifier:
 					if ha.name == assassinStack {
-						stack += Statistic(ha.nowStack)
+						stack += Statistic(ha.Stack())
 					}
 				}
 			})
