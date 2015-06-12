@@ -33,8 +33,7 @@ func newClassHealer() *class {
 		Perform: func(up UnitPair) {
 			// TODO handle the error
 			before, after, _, _ := NewMagicDamage(up, 100).Perform()
-			// TODO send a message including the ability name
-			up.Subject().performManaModification((before - after) * 0.1)
+			up.Subject().ModifyMana((before - after) * 0.1)
 		},
 	}
 	// HoT

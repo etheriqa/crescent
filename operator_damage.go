@@ -44,7 +44,7 @@ func (d *Damage) Perform() (before, after Statistic, crit bool, err error) {
 		d.criticalStrikeChance,
 		d.criticalStrikeFactor,
 	)
-	after, before, err = d.Object().modifyHealth(-amount)
+	after, before, err = d.Object().ModifyHealth(-amount)
 	if err != nil {
 		return
 	}

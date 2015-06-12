@@ -68,7 +68,7 @@ func (u *Unit) healthMax() Statistic {
 	return u.class.health
 }
 
-func (u *Unit) healthRegeneration() Statistic {
+func (u *Unit) HealthRegeneration() Statistic {
 	return u.class.healthRegeneration
 }
 
@@ -80,7 +80,7 @@ func (u *Unit) manaMax() Statistic {
 	return u.class.mana
 }
 
-func (u *Unit) manaRegeneration() Statistic {
+func (u *Unit) ManaRegeneration() Statistic {
 	return u.class.manaRegeneration
 }
 
@@ -161,7 +161,7 @@ func (u *Unit) SomeObjectHandler(callback func(Handler) bool) bool {
 }
 
 // modifyHealth modifies the unit health and returns before/after health
-func (u *Unit) modifyHealth(delta Statistic) (before, after Statistic, err error) {
+func (u *Unit) ModifyHealth(delta Statistic) (before, after Statistic, err error) {
 	if u.isDead() {
 		return u.health(), u.health(), errors.New("Cannot modify the health of dead unit")
 	}
@@ -174,6 +174,7 @@ func (u *Unit) modifyHealth(delta Statistic) (before, after Statistic, err error
 		after = u.healthMax()
 	}
 	u.resource.health = after
+	u.Publish(message{}) // TODO pack message
 	if delta < 0 {
 		switch {
 		case u.isAlive():
@@ -185,8 +186,8 @@ func (u *Unit) modifyHealth(delta Statistic) (before, after Statistic, err error
 	return
 }
 
-// modifyMana modifies the unit mana and returns before/after mana
-func (u *Unit) modifyMana(delta Statistic) (before, after Statistic, err error) {
+// ModifyMana modifies the unit mana and returns before/after mana
+func (u *Unit) ModifyMana(delta Statistic) (before, after Statistic, err error) {
 	if u.isDead() {
 		return u.health(), u.health(), errors.New("Cannot modify the mana of dead unit")
 	}
@@ -199,6 +200,7 @@ func (u *Unit) modifyMana(delta Statistic) (before, after Statistic, err error) 
 		after = u.manaMax()
 	}
 	u.resource.mana = after
+	u.Publish(message{}) // TODO pack message
 	if delta < 0 {
 		u.TriggerEvent(EventResourceDecreased)
 	}
@@ -223,38 +225,6 @@ func (u *Unit) TickerTick() {
 	u.TriggerEvent(EventTicker)
 }
 
-// performHealthRegeneration performs health regeneration
-func (u *Unit) performHealthRegeneration() {
-	_, _, _, err := NewPureHealing(MakeObject(u), u.healthRegeneration()).Perform()
-	if err != nil {
-		log.WithFields(logrus.Fields{
-			"err": err,
-		}).Fatal("Failed unit.performHealthRegeneration")
-	}
-}
-
-// performManaRegeneration performs mana regeneration
-func (u *Unit) performManaRegeneration() {
-	err := u.performManaModification(u.manaRegeneration())
-	if err != nil {
-		log.WithFields(logrus.Fields{
-			"err": err,
-		}).Fatal("Failed unit.performManaRegeneration")
-	}
-}
-
-// performManaModification performs mana modification
-func (u *Unit) performManaModification(delta Statistic) error {
-	_, _, err := u.modifyMana(delta)
-	if err != nil {
-		return err
-	}
-	u.Publish(message{
-	// TODO pack message
-	})
-	return nil
-}
-
 // ReloadCorrection updates the UnitCorrection
 func (u *Unit) ReloadCorrection() {
 	u.correction = UnitCorrection{}
@@ -273,4 +243,24 @@ func (u *Unit) ReloadCorrection() {
 	u.Publish(message{
 	// TODO pack message
 	})
+}
+
+// performHealthRegeneration performs health regeneration
+func (u *Unit) performHealthRegeneration() {
+	_, _, err := u.ModifyHealth(u.HealthRegeneration())
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"err": err,
+		}).Panic("Failed unit.performHealthRegeneration")
+	}
+}
+
+// performManaRegeneration performs mana regeneration
+func (u *Unit) performManaRegeneration() {
+	_, _, err := u.ModifyMana(u.ManaRegeneration())
+	if err != nil {
+		log.WithFields(logrus.Fields{
+			"err": err,
+		}).Panic("Failed unit.performManaRegeneration")
+	}
 }

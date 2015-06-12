@@ -34,7 +34,7 @@ func (h *Healing) Perform() (after, before Statistic, crit bool, err error) {
 		h.criticalStrikeChance,
 		h.criticalStrikeFactor,
 	)
-	after, before, err = h.Object().modifyHealth(amount)
+	after, before, err = h.Object().ModifyHealth(amount)
 	if err != nil {
 		return
 	}
