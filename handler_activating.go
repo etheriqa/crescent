@@ -90,8 +90,8 @@ func (a *Activating) perform() {
 	a.Publish(message{
 	// TODO pack message
 	})
-	// TODO consume health
-	// TODO consume mana
+	a.Subject().ModifyHealth(a.ability.HealthCost)
+	a.Subject().ModifyMana(a.ability.ManaCost)
 	a.ability.Perform(a.UnitPair)
 	a.AttachHandler(NewCooldown(a.Subject(), a.ability))
 	a.Stop(a)
