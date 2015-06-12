@@ -2,15 +2,20 @@ package main
 
 type Activating struct {
 	PartialHandler
-	*ability
+	ability *Ability
 }
 
 // NewActivating returns a Activating handler
-func NewActivating(up UnitPair, ability *ability) *Activating {
+func NewActivating(up UnitPair, ability *Ability) *Activating {
 	return &Activating{
-		PartialHandler: MakePartialHandler(up, ability.activationDuration),
+		PartialHandler: MakePartialHandler(up, ability.ActivationDuration),
 		ability:        ability,
 	}
+}
+
+// Ability returns the ability
+func (a *Activating) Ability() *Ability {
+	return a.ability
 }
 
 // OnAttach checks requirements
@@ -33,7 +38,7 @@ func (a *Activating) OnAttach() {
 		a.Stop(a)
 		return
 	}
-	if err := a.CheckRequirements(a.Subject(), a.Object()); err != nil {
+	if err := a.ability.CheckRequirements(a.Subject(), a.Object()); err != nil {
 		a.Stop(a)
 		return
 	}
@@ -73,7 +78,7 @@ func (a *Activating) HandleEvent(e Event) {
 
 // perform performs the ability
 func (a *Activating) perform() {
-	if err := a.CheckRequirements(a.Subject(), a.Object()); err != nil {
+	if err := a.ability.CheckRequirements(a.Subject(), a.Object()); err != nil {
 		a.Publish(message{
 		// TODO pack message
 		})

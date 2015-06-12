@@ -1,32 +1,32 @@
 package main
 
-func newClassHealer() *class {
-	var q, w, e, r *ability
-	class := &class{
-		name: "Healer",
+func newClassHealer() *Class {
+	var q, w, e, r *Ability
+	Class := &Class{
+		Name: "Healer",
 		// TODO stats
-		health:               700,
-		healthRegeneration:   2,
-		mana:                 400,
-		manaRegeneration:     6,
-		armor:                DefaultArmor,
-		magicResistance:      DefaultMagicResistance,
-		criticalStrikeChance: DefaultCriticalStrikeChance,
-		criticalStrikeFactor: DefaultCriticalStrikeFactor,
-		cooldownReduction:    DefaultCooldownReduction,
-		damageThreatFactor:   DefaultDamageThreatFactor,
-		healingThreatFactor:  DefaultHealingThreatFactor,
-		abilities:            []*ability{q, w, e, r},
+		Health:               700,
+		HealthRegeneration:   2,
+		Mana:                 400,
+		ManaRegeneration:     6,
+		Armor:                DefaultArmor,
+		MagicResistance:      DefaultMagicResistance,
+		CriticalStrikeChance: DefaultCriticalStrikeChance,
+		CriticalStrikeFactor: DefaultCriticalStrikeFactor,
+		CooldownReduction:    DefaultCooldownReduction,
+		DamageThreatFactor:   DefaultDamageThreatFactor,
+		HealingThreatFactor:  DefaultHealingThreatFactor,
+		Abilities:            []*Ability{q, w, e, r},
 	}
 	// Magic damage / Mana restore
-	q = &ability{
-		name:               "Healer Q",
+	q = &Ability{
+		Name:               "Healer Q",
 		TargetType:         TargetTypeEnemy,
-		healthCost:         0,
-		manaCost:           0,
-		activationDuration: 2 * Second,
-		cooldownDuration:   2 * Second,
-		disableTypes: []DisableType{
+		HealthCost:         0,
+		ManaCost:           0,
+		ActivationDuration: 2 * Second,
+		CooldownDuration:   2 * Second,
+		DisableTypes: []DisableType{
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
@@ -37,14 +37,14 @@ func newClassHealer() *class {
 		},
 	}
 	// HoT
-	w = &ability{
-		name:               "Healer W",
+	w = &Ability{
+		Name:               "Healer W",
 		TargetType:         TargetTypeFriend,
-		healthCost:         0,
-		manaCost:           40,
-		activationDuration: 2 * Second,
-		cooldownDuration:   4 * Second,
-		disableTypes: []DisableType{
+		HealthCost:         0,
+		ManaCost:           40,
+		ActivationDuration: 2 * Second,
+		CooldownDuration:   4 * Second,
+		DisableTypes: []DisableType{
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
@@ -57,14 +57,14 @@ func newClassHealer() *class {
 		},
 	}
 	// Healing
-	e = &ability{
-		name:               "Healer E",
+	e = &Ability{
+		Name:               "Healer E",
 		TargetType:         TargetTypeFriend,
-		healthCost:         0,
-		manaCost:           80,
-		activationDuration: 2 * Second,
-		cooldownDuration:   8 * Second,
-		disableTypes: []DisableType{
+		HealthCost:         0,
+		ManaCost:           80,
+		ActivationDuration: 2 * Second,
+		CooldownDuration:   8 * Second,
+		DisableTypes: []DisableType{
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
@@ -73,14 +73,14 @@ func newClassHealer() *class {
 		},
 	}
 	// HoT / Increasing critical strike chance and critical strike factor
-	r = &ability{
-		name:               "Healer R",
+	r = &Ability{
+		Name:               "Healer R",
 		TargetType:         TargetTypeNone,
-		healthCost:         0,
-		manaCost:           200,
-		activationDuration: 0,
-		cooldownDuration:   60 * Second,
-		disableTypes: []DisableType{
+		HealthCost:         0,
+		ManaCost:           200,
+		ActivationDuration: 0,
+		CooldownDuration:   60 * Second,
+		DisableTypes: []DisableType{
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
@@ -91,7 +91,7 @@ func newClassHealer() *class {
 					CriticalStrikeChance: 0.5,
 					CriticalStrikeFactor: 1.5,
 				},
-				r.name,
+				r.Name,
 				1,
 				6*Second,
 			))
@@ -104,5 +104,5 @@ func newClassHealer() *class {
 			}
 		},
 	}
-	return class
+	return Class
 }

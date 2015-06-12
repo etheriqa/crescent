@@ -13,19 +13,19 @@ const (
 	TargetTypeEnemy
 )
 
-type ability struct {
-	name               string
+type Ability struct {
+	Name               string
 	TargetType         TargetType
-	healthCost         Statistic
-	manaCost           Statistic
-	activationDuration GameDuration
-	cooldownDuration   GameDuration
-	disableTypes       []DisableType
+	HealthCost         Statistic
+	ManaCost           Statistic
+	ActivationDuration GameDuration
+	CooldownDuration   GameDuration
+	DisableTypes       []DisableType
 	Perform            func(up UnitPair)
 }
 
 // CheckRequirements checks the ability requirements are satisfied
-func (a *ability) CheckRequirements(subject *Unit, object *Unit) error {
+func (a *Ability) CheckRequirements(subject *Unit, object *Unit) error {
 	if err := a.CheckObject(subject, object); err != nil {
 		return err
 	}
@@ -42,7 +42,7 @@ func (a *ability) CheckRequirements(subject *Unit, object *Unit) error {
 }
 
 // CheckObject checks the object is valid
-func (a *ability) CheckObject(subject, object *Unit) error {
+func (a *Ability) CheckObject(subject, object *Unit) error {
 	switch a.TargetType {
 	case TargetTypeNone:
 		if object != nil {
@@ -61,11 +61,11 @@ func (a *ability) CheckObject(subject, object *Unit) error {
 }
 
 // CheckCooldown checks the subject does not have to wait the cooldown time expiration
-func (a *ability) CheckCooldown(subject *Unit) error {
+func (a *Ability) CheckCooldown(subject *Unit) error {
 	ok := subject.EverySubjectHandler(func(ha Handler) bool {
 		switch ha := ha.(type) {
 		case *Cooldown:
-			if ha.ability == a {
+			if ha.Ability() == a {
 				return false
 			}
 		}
@@ -78,11 +78,11 @@ func (a *ability) CheckCooldown(subject *Unit) error {
 }
 
 // CheckDisable checks the subject is not interrupted by the disables
-func (a *ability) CheckDisable(subject *Unit) error {
+func (a *Ability) CheckDisable(subject *Unit) error {
 	ok := subject.EverySubjectHandler(func(ha Handler) bool {
 		switch ha := ha.(type) {
 		case *Disable:
-			for dt := range a.disableTypes {
+			for dt := range a.DisableTypes {
 				if DisableType(dt) == ha.DisableType {
 					return false
 				}
@@ -97,11 +97,11 @@ func (a *ability) CheckDisable(subject *Unit) error {
 }
 
 // CheckResource checks the subject satisfies the ability cost
-func (a *ability) CheckResource(subject *Unit) error {
-	if subject.health() < a.healthCost {
+func (a *Ability) CheckResource(subject *Unit) error {
+	if subject.Health() < a.HealthCost {
 		return errors.New("The subject does not have enough health")
 	}
-	if subject.mana() < a.manaCost {
+	if subject.Mana() < a.ManaCost {
 		return errors.New("The subject does not have enough mana")
 	}
 	return nil

@@ -19,16 +19,16 @@ type Unit struct {
 	unitName   string
 	group      uint8
 	seat       uint8
-	class      *class
-	resource   unitResource
+	class      *Class
+	resource   UnitResource
 	correction UnitCorrection
 	*Game
 	*EventDispatcher
 }
 
-type unitResource struct {
-	health Statistic
-	mana   Statistic
+type UnitResource struct {
+	Health Statistic
+	Mana   Statistic
 }
 
 type UnitCorrection struct {
@@ -42,82 +42,87 @@ type UnitCorrection struct {
 }
 
 // newUnit initializes a unit
-func NewUnit(g *Game, c *class) *Unit {
+func NewUnit(game *Game, class *Class) *Unit {
 	return &Unit{
-		class:           c,
-		resource:        unitResource{},
+		class:           class,
+		resource:        UnitResource{},
 		correction:      UnitCorrection{},
-		Game:            g,
+		Game:            game,
 		EventDispatcher: NewEventDispatcher(),
 	}
 }
 
-func (u *Unit) isAlive() bool {
-	return u.resource.health > 0
+func (u *Unit) IsAlive() bool {
+	return u.resource.Health > 0
 }
 
-func (u *Unit) isDead() bool {
-	return u.resource.health <= 0
+func (u *Unit) IsDead() bool {
+	return u.resource.Health <= 0
 }
 
-func (u *Unit) health() Statistic {
-	return u.resource.health
+func (u *Unit) Health() Statistic {
+	return u.resource.Health
 }
 
-func (u *Unit) healthMax() Statistic {
-	return u.class.health
+func (u *Unit) HealthMax() Statistic {
+	return u.class.Health
 }
 
 func (u *Unit) HealthRegeneration() Statistic {
-	return u.class.healthRegeneration
+	return u.class.HealthRegeneration
 }
 
-func (u *Unit) mana() Statistic {
-	return u.resource.mana
+func (u *Unit) Mana() Statistic {
+	return u.resource.Mana
 }
 
-func (u *Unit) manaMax() Statistic {
-	return u.class.mana
+func (u *Unit) ManaMax() Statistic {
+	return u.class.Mana
 }
 
 func (u *Unit) ManaRegeneration() Statistic {
-	return u.class.manaRegeneration
+	return u.class.ManaRegeneration
 }
 
-func (u *Unit) armor() Statistic {
-	return u.class.armor + u.correction.Armor
+func (u *Unit) Armor() Statistic {
+	return u.class.Armor + u.correction.Armor
 }
 
-func (u *Unit) magicResistance() Statistic {
-	return u.class.magicResistance + u.correction.MagicResistance
+func (u *Unit) MagicResistance() Statistic {
+	return u.class.MagicResistance + u.correction.MagicResistance
 }
 
-func (u *Unit) physicalDamageReductionFactor() Statistic {
-	return damageReductionFactor(u.armor())
+func (u *Unit) PhysicalDamageReductionFactor() Statistic {
+	return damageReductionFactor(u.Armor())
 }
 
-func (u *Unit) magicDamageReductionFactor() Statistic {
-	return damageReductionFactor(u.magicResistance())
+func (u *Unit) MagicDamageReductionFactor() Statistic {
+	return damageReductionFactor(u.MagicResistance())
 }
 
-func (u *Unit) criticalStrikeChance() Statistic {
-	return u.class.criticalStrikeChance + u.correction.CriticalStrikeChance
+func (u *Unit) CriticalStrikeChance() Statistic {
+	return u.class.CriticalStrikeChance + u.correction.CriticalStrikeChance
 }
 
-func (u *Unit) criticalStrikeFactor() Statistic {
-	return u.class.criticalStrikeFactor + u.correction.CriticalStrikeFactor
+func (u *Unit) CriticalStrikeFactor() Statistic {
+	return u.class.CriticalStrikeFactor + u.correction.CriticalStrikeFactor
 }
 
-func (u *Unit) cooldownReduction() Statistic {
-	return u.class.cooldownReduction + u.correction.CooldownReduction
+func (u *Unit) CooldownReduction() Statistic {
+	return u.class.CooldownReduction + u.correction.CooldownReduction
 }
 
-func (u *Unit) damageThreatFactor() Statistic {
-	return u.class.damageThreatFactor + u.correction.DamageThreatFactor
+func (u *Unit) DamageThreatFactor() Statistic {
+	return u.class.DamageThreatFactor + u.correction.DamageThreatFactor
 }
 
-func (u *Unit) healingThreatFactor() Statistic {
-	return u.class.healingThreatFactor + u.correction.HealingThreatFactor
+func (u *Unit) HealingThreatFactor() Statistic {
+	return u.class.HealingThreatFactor + u.correction.HealingThreatFactor
+}
+
+// Ability returns the ability
+func (u *Unit) Ability(key string) *Ability {
+	return u.class.Ability(key)
 }
 
 // Friends returns the friend units
@@ -160,26 +165,26 @@ func (u *Unit) SomeObjectHandler(callback func(Handler) bool) bool {
 	return u.Game.SomeObjectHandler(u, callback)
 }
 
-// modifyHealth modifies the unit health and returns before/after health
+// ModifyHealth modifies the unit health and returns before/after health
 func (u *Unit) ModifyHealth(delta Statistic) (before, after Statistic, err error) {
-	if u.isDead() {
-		return u.health(), u.health(), errors.New("Cannot modify the health of dead unit")
+	if u.IsDead() {
+		return u.Health(), u.Health(), errors.New("Cannot modify the health of dead unit")
 	}
-	before = u.health()
-	after = u.health() + delta
+	before = u.Health()
+	after = u.Health() + delta
 	if after < 0 {
 		after = 0
 	}
-	if after > u.healthMax() {
-		after = u.healthMax()
+	if after > u.HealthMax() {
+		after = u.HealthMax()
 	}
-	u.resource.health = after
+	u.resource.Health = after
 	u.Publish(message{}) // TODO pack message
 	if delta < 0 {
 		switch {
-		case u.isAlive():
+		case u.IsAlive():
 			u.TriggerEvent(EventResourceDecreased)
-		case u.isDead():
+		case u.IsDead():
 			u.TriggerEvent(EventDead)
 		}
 	}
@@ -188,18 +193,18 @@ func (u *Unit) ModifyHealth(delta Statistic) (before, after Statistic, err error
 
 // ModifyMana modifies the unit mana and returns before/after mana
 func (u *Unit) ModifyMana(delta Statistic) (before, after Statistic, err error) {
-	if u.isDead() {
-		return u.health(), u.health(), errors.New("Cannot modify the mana of dead unit")
+	if u.IsDead() {
+		return u.Health(), u.Health(), errors.New("Cannot modify the mana of dead unit")
 	}
-	before = u.mana()
-	after = u.mana() + delta
+	before = u.Mana()
+	after = u.Mana() + delta
 	if after < 0 {
 		after = 0
 	}
-	if after > u.manaMax() {
-		after = u.manaMax()
+	if after > u.ManaMax() {
+		after = u.ManaMax()
 	}
-	u.resource.mana = after
+	u.resource.Mana = after
 	u.Publish(message{}) // TODO pack message
 	if delta < 0 {
 		u.TriggerEvent(EventResourceDecreased)
@@ -209,7 +214,7 @@ func (u *Unit) ModifyMana(delta Statistic) (before, after Statistic, err error) 
 
 // GameTick triggers onComplete iff the handler is completed
 func (u *Unit) GameTick() {
-	if u.isDead() {
+	if u.IsDead() {
 		return
 	}
 	u.TriggerEvent(EventGameTick)
@@ -217,7 +222,7 @@ func (u *Unit) GameTick() {
 
 // TickerTick performs regeneration and triggers eventTicker
 func (u *Unit) TickerTick() {
-	if u.isDead() {
+	if u.IsDead() {
 		return
 	}
 	u.performHealthRegeneration()

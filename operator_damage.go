@@ -9,12 +9,12 @@ type Damage struct {
 
 // NewPhysicalDamage returns a damage affected by armor of the object
 func NewPhysicalDamage(up UnitPair, baseDamage Statistic) *Damage {
-	return NewTrueDamage(up, baseDamage*up.Object().physicalDamageReductionFactor())
+	return NewTrueDamage(up, baseDamage*up.Object().PhysicalDamageReductionFactor())
 }
 
 // NewMagicDamage returns a damage affected by magic resistance of the object
 func NewMagicDamage(up UnitPair, baseDamage Statistic) *Damage {
-	return NewTrueDamage(up, baseDamage*up.Object().magicDamageReductionFactor())
+	return NewTrueDamage(up, baseDamage*up.Object().MagicDamageReductionFactor())
 }
 
 // NewTrueDamage returns a damage that ignores damage reduction
@@ -22,8 +22,8 @@ func NewTrueDamage(up UnitPair, baseDamage Statistic) *Damage {
 	return &Damage{
 		UnitPair:             up,
 		amount:               baseDamage,
-		criticalStrikeChance: up.Subject().criticalStrikeChance(),
-		criticalStrikeFactor: up.Subject().criticalStrikeFactor(),
+		criticalStrikeChance: up.Subject().CriticalStrikeChance(),
+		criticalStrikeFactor: up.Subject().CriticalStrikeFactor(),
 	}
 }
 

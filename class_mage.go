@@ -4,33 +4,33 @@ import (
 	"math/rand"
 )
 
-func newClassMage() *class {
-	var q, w, e, r *ability
-	class := &class{
-		name: "Mage",
+func newClassMage() *Class {
+	var q, w, e, r *Ability
+	Class := &Class{
+		Name: "Mage",
 		// TODO stats
-		health:               600,
-		healthRegeneration:   2,
-		mana:                 400,
-		manaRegeneration:     6,
-		armor:                DefaultArmor,
-		magicResistance:      DefaultMagicResistance,
-		criticalStrikeChance: DefaultCriticalStrikeChance,
-		criticalStrikeFactor: DefaultCriticalStrikeFactor,
-		cooldownReduction:    DefaultCooldownReduction,
-		damageThreatFactor:   DefaultDamageThreatFactor,
-		healingThreatFactor:  DefaultHealingThreatFactor,
-		abilities:            []*ability{q, w, e, r},
+		Health:               600,
+		HealthRegeneration:   2,
+		Mana:                 400,
+		ManaRegeneration:     6,
+		Armor:                DefaultArmor,
+		MagicResistance:      DefaultMagicResistance,
+		CriticalStrikeChance: DefaultCriticalStrikeChance,
+		CriticalStrikeFactor: DefaultCriticalStrikeFactor,
+		CooldownReduction:    DefaultCooldownReduction,
+		DamageThreatFactor:   DefaultDamageThreatFactor,
+		HealingThreatFactor:  DefaultHealingThreatFactor,
+		Abilities:            []*Ability{q, w, e, r},
 	}
 	// Magic damage / Armor reduction / Proc 10% W
-	q = &ability{
-		name:               "Q",
+	q = &Ability{
+		Name:               "Q",
 		TargetType:         TargetTypeEnemy,
-		healthCost:         0,
-		manaCost:           0,
-		activationDuration: 2 * Second,
-		cooldownDuration:   0,
-		disableTypes: []DisableType{
+		HealthCost:         0,
+		ManaCost:           0,
+		ActivationDuration: 2 * Second,
+		CooldownDuration:   0,
+		DisableTypes: []DisableType{
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
@@ -40,7 +40,7 @@ func newClassMage() *class {
 				UnitCorrection{
 					Armor: -10,
 				},
-				q.name,
+				q.Name,
 				1,
 				8*Second,
 			))
@@ -59,14 +59,14 @@ func newClassMage() *class {
 		},
 	}
 	// Magic damage / DoT / Proc 20% E
-	w = &ability{
-		name:               "W",
+	w = &Ability{
+		Name:               "W",
 		TargetType:         TargetTypeEnemy,
-		healthCost:         0,
-		manaCost:           20,
-		activationDuration: 2 * Second,
-		cooldownDuration:   8 * Second,
-		disableTypes: []DisableType{
+		HealthCost:         0,
+		ManaCost:           20,
+		ActivationDuration: 2 * Second,
+		CooldownDuration:   8 * Second,
+		DisableTypes: []DisableType{
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
@@ -90,14 +90,14 @@ func newClassMage() *class {
 		},
 	}
 	// Magic damage
-	e = &ability{
-		name:               "E",
+	e = &Ability{
+		Name:               "E",
 		TargetType:         TargetTypeEnemy,
-		healthCost:         0,
-		manaCost:           60,
-		activationDuration: 2 * Second,
-		cooldownDuration:   18 * Second,
-		disableTypes: []DisableType{
+		HealthCost:         0,
+		ManaCost:           60,
+		ActivationDuration: 2 * Second,
+		CooldownDuration:   18 * Second,
+		DisableTypes: []DisableType{
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
@@ -107,14 +107,14 @@ func newClassMage() *class {
 		},
 	}
 	// Magic damage / All / DoT / Stun
-	r = &ability{
-		name:               "R",
+	r = &Ability{
+		Name:               "R",
 		TargetType:         TargetTypeNone,
-		healthCost:         0,
-		manaCost:           200,
-		activationDuration: 2 * Second,
-		cooldownDuration:   60 * Second,
-		disableTypes: []DisableType{
+		HealthCost:         0,
+		ManaCost:           200,
+		ActivationDuration: 2 * Second,
+		CooldownDuration:   60 * Second,
+		DisableTypes: []DisableType{
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
@@ -134,5 +134,5 @@ func newClassMage() *class {
 			}
 		},
 	}
-	return class
+	return Class
 }

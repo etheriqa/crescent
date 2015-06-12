@@ -3,11 +3,11 @@ package main
 type Ticker struct {
 	PartialHandler
 	operator Operator
-	ability  *ability
+	ability  *Ability
 }
 
 // NewTicker
-func NewTicker(op Operator, a *ability, duration GameDuration) *Ticker {
+func NewTicker(op Operator, a *Ability, duration GameDuration) *Ticker {
 	return &Ticker{
 		PartialHandler: MakePartialHandler(MakeUnitPair(op.Subject(), op.Object()), duration), // TODO refactor
 		operator:       op,

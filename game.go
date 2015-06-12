@@ -161,7 +161,7 @@ func (g *Game) seat(m *message) {
 	if _, ok := g.seats[seat]; ok {
 		return
 	}
-	var c *class
+	var c *Class
 	switch unitName {
 	case "Assassin":
 		c = newClassAssassin()
@@ -209,17 +209,8 @@ func (g *Game) leave(m *message) {
 func (g *Game) activate(m *message) {
 	key := m.d["key"].(string)
 	unit := g.names[m.name]
-	var a *ability
-	switch key {
-	case "q":
-		a = unit.class.abilities[0]
-	case "w":
-		a = unit.class.abilities[1]
-	case "e":
-		a = unit.class.abilities[2]
-	case "r":
-		a = unit.class.abilities[3]
-	default:
+	a := unit.Ability(key)
+	if a == nil {
 		return
 	}
 	target := g.uids[m.d["uid"].(unitID)]

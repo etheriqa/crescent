@@ -1,32 +1,32 @@
 package main
 
-func newClassTank() *class {
-	var q, w, e, r *ability
-	class := &class{
-		name: "Tank",
+func newClassTank() *Class {
+	var q, w, e, r *Ability
+	Class := &Class{
+		Name: "Tank",
 		// TODO stats
-		health:               1000,
-		healthRegeneration:   5,
-		mana:                 200,
-		manaRegeneration:     3,
-		armor:                DefaultArmor,
-		magicResistance:      DefaultMagicResistance,
-		criticalStrikeChance: DefaultCriticalStrikeChance,
-		criticalStrikeFactor: DefaultCriticalStrikeFactor,
-		cooldownReduction:    DefaultCooldownReduction,
-		damageThreatFactor:   DefaultDamageThreatFactor,
-		healingThreatFactor:  DefaultHealingThreatFactor,
-		abilities:            []*ability{q, w, e, r},
+		Health:               1000,
+		HealthRegeneration:   5,
+		Mana:                 200,
+		ManaRegeneration:     3,
+		Armor:                DefaultArmor,
+		MagicResistance:      DefaultMagicResistance,
+		CriticalStrikeChance: DefaultCriticalStrikeChance,
+		CriticalStrikeFactor: DefaultCriticalStrikeFactor,
+		CooldownReduction:    DefaultCooldownReduction,
+		DamageThreatFactor:   DefaultDamageThreatFactor,
+		HealingThreatFactor:  DefaultHealingThreatFactor,
+		Abilities:            []*Ability{q, w, e, r},
 	}
 	// True damage / Increasing threat factor
-	q = &ability{
-		name:               "Tank Q",
+	q = &Ability{
+		Name:               "Tank Q",
 		TargetType:         TargetTypeEnemy,
-		healthCost:         0,
-		manaCost:           0,
-		activationDuration: 0,
-		cooldownDuration:   2 * Second,
-		disableTypes: []DisableType{
+		HealthCost:         0,
+		ManaCost:           0,
+		ActivationDuration: 0,
+		CooldownDuration:   2 * Second,
+		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
 		Perform: func(up UnitPair) {
@@ -35,7 +35,7 @@ func newClassTank() *class {
 				UnitCorrection{
 					DamageThreatFactor: 1,
 				},
-				q.name,
+				q.Name,
 				5,
 				10*Second,
 			))
@@ -44,14 +44,14 @@ func newClassTank() *class {
 		},
 	}
 	// Physical damage / Increasing AR & MR
-	w = &ability{
-		name:               "Tank W",
+	w = &Ability{
+		Name:               "Tank W",
 		TargetType:         TargetTypeEnemy,
-		healthCost:         0,
-		manaCost:           15,
-		activationDuration: 2 * Second,
-		cooldownDuration:   8 * Second,
-		disableTypes: []DisableType{
+		HealthCost:         0,
+		ManaCost:           15,
+		ActivationDuration: 2 * Second,
+		CooldownDuration:   8 * Second,
+		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
 		Perform: func(up UnitPair) {
@@ -61,7 +61,7 @@ func newClassTank() *class {
 					Armor:           50,
 					MagicResistance: 50,
 				},
-				w.name,
+				w.Name,
 				1,
 				2*Second,
 			))
@@ -70,14 +70,14 @@ func newClassTank() *class {
 		},
 	}
 	// Physical damage / Life steal
-	e = &ability{
-		name:               "Tank E",
+	e = &Ability{
+		Name:               "Tank E",
 		TargetType:         TargetTypeEnemy,
-		healthCost:         0,
-		manaCost:           50,
-		activationDuration: 0,
-		cooldownDuration:   15 * Second,
-		disableTypes: []DisableType{
+		HealthCost:         0,
+		ManaCost:           50,
+		ActivationDuration: 0,
+		CooldownDuration:   15 * Second,
+		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
 		Perform: func(up UnitPair) {
@@ -88,14 +88,14 @@ func newClassTank() *class {
 		},
 	}
 	// Increasing AR & MR
-	r = &ability{
-		name:               "Tank R",
+	r = &Ability{
+		Name:               "Tank R",
 		TargetType:         TargetTypeNone,
-		healthCost:         0,
-		manaCost:           120,
-		activationDuration: 4,
-		cooldownDuration:   60,
-		disableTypes: []DisableType{
+		HealthCost:         0,
+		ManaCost:           120,
+		ActivationDuration: 4,
+		CooldownDuration:   60,
+		DisableTypes: []DisableType{
 			DisableTypeStun,
 			DisableTypeSilence,
 		},
@@ -106,11 +106,11 @@ func newClassTank() *class {
 					Armor:           150,
 					MagicResistance: 150,
 				},
-				r.name,
+				r.Name,
 				1,
 				8*Second,
 			))
 		},
 	}
-	return class
+	return Class
 }

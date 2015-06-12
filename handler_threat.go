@@ -15,12 +15,12 @@ func NewThreat(up UnitPair, t Statistic) *Threat {
 
 // NewDamageThreat initializes a threat handler with damage
 func NewDamageThreat(up UnitPair, d Statistic) *Threat {
-	return NewThreat(up, d*up.Object().damageThreatFactor())
+	return NewThreat(up, d*up.Object().DamageThreatFactor())
 }
 
 // NewHealingThreat initializes a threat handler with healing
 func NewHealingThreat(up UnitPair, h Statistic) *Threat {
-	return NewThreat(up, h*up.Object().healingThreatFactor())
+	return NewThreat(up, h*up.Object().HealingThreatFactor())
 }
 
 // OnAttach merges threat handlers they have same subject

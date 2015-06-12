@@ -2,15 +2,20 @@ package main
 
 type Cooldown struct {
 	PartialHandler
-	*ability
+	ability *Ability
 }
 
 // NewCooldown returns a Cooldown handler
-func NewCooldown(subject *Unit, ability *ability) *Cooldown {
+func NewCooldown(subject *Unit, ability *Ability) *Cooldown {
 	return &Cooldown{
-		PartialHandler: MakePartialHandler(MakeSubject(subject), ability.cooldownDuration),
+		PartialHandler: MakePartialHandler(MakeSubject(subject), ability.CooldownDuration),
 		ability:        ability,
 	}
+}
+
+// Ability returns the ability
+func (c *Cooldown) Ability() *Ability {
+	return c.ability
 }
 
 // OnAttach adds the EventHandler

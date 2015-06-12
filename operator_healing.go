@@ -12,8 +12,8 @@ func NewHealing(up UnitPair, baseHealing Statistic) *Healing {
 	return &Healing{
 		UnitPair:             up,
 		amount:               baseHealing,
-		criticalStrikeChance: up.Subject().criticalStrikeChance(),
-		criticalStrikeFactor: up.Subject().criticalStrikeFactor(),
+		criticalStrikeChance: up.Subject().CriticalStrikeChance(),
+		criticalStrikeFactor: up.Subject().CriticalStrikeFactor(),
 	}
 }
 

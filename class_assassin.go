@@ -15,33 +15,33 @@ func newAssassinStack(subject *Unit) *Corrector {
 	)
 }
 
-func newClassAssassin() *class {
-	var q, w, e, r *ability
-	class := &class{
-		name: "Assassin",
+func newClassAssassin() *Class {
+	var q, w, e, r *Ability
+	Class := &Class{
+		Name: "Assassin",
 		// TODO stats
-		health:               600,
-		healthRegeneration:   2,
-		mana:                 200,
-		manaRegeneration:     3,
-		armor:                DefaultArmor,
-		magicResistance:      DefaultMagicResistance,
-		criticalStrikeChance: DefaultCriticalStrikeChance + 0.05,
-		criticalStrikeFactor: DefaultCriticalStrikeFactor + 0.5,
-		cooldownReduction:    DefaultCooldownReduction,
-		damageThreatFactor:   DefaultDamageThreatFactor,
-		healingThreatFactor:  DefaultHealingThreatFactor,
-		abilities:            []*ability{q, w, e, r},
+		Health:               600,
+		HealthRegeneration:   2,
+		Mana:                 200,
+		ManaRegeneration:     3,
+		Armor:                DefaultArmor,
+		MagicResistance:      DefaultMagicResistance,
+		CriticalStrikeChance: DefaultCriticalStrikeChance + 0.05,
+		CriticalStrikeFactor: DefaultCriticalStrikeFactor + 0.5,
+		CooldownReduction:    DefaultCooldownReduction,
+		DamageThreatFactor:   DefaultDamageThreatFactor,
+		HealingThreatFactor:  DefaultHealingThreatFactor,
+		Abilities:            []*Ability{q, w, e, r},
 	}
 	// Physical damage
-	q = &ability{
-		name:               "Q",
+	q = &Ability{
+		Name:               "Q",
 		TargetType:         TargetTypeEnemy,
-		healthCost:         0,
-		manaCost:           0,
-		activationDuration: 0,
-		cooldownDuration:   2 * Second,
-		disableTypes: []DisableType{
+		HealthCost:         0,
+		ManaCost:           0,
+		ActivationDuration: 0,
+		CooldownDuration:   2 * Second,
+		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
 		Perform: func(up UnitPair) {
@@ -49,14 +49,14 @@ func newClassAssassin() *class {
 		},
 	}
 	// Physical damage / DoT / Increasing stacks
-	w = &ability{
-		name:               "W",
+	w = &Ability{
+		Name:               "W",
 		TargetType:         TargetTypeEnemy,
-		healthCost:         0,
-		manaCost:           20,
-		activationDuration: 0,
-		cooldownDuration:   8 * Second,
-		disableTypes: []DisableType{
+		HealthCost:         0,
+		ManaCost:           20,
+		ActivationDuration: 0,
+		CooldownDuration:   8 * Second,
+		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
 		Perform: func(up UnitPair) {
@@ -69,14 +69,14 @@ func newClassAssassin() *class {
 		},
 	}
 	// Increasing stacks / Decreasing armor and magic resistance
-	e = &ability{
-		name:               "E",
+	e = &Ability{
+		Name:               "E",
 		TargetType:         TargetTypeNone,
-		healthCost:         0,
-		manaCost:           40,
-		activationDuration: 0,
-		cooldownDuration:   20 * Second,
-		disableTypes: []DisableType{
+		HealthCost:         0,
+		ManaCost:           40,
+		ActivationDuration: 0,
+		CooldownDuration:   20 * Second,
+		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
 		Perform: func(up UnitPair) {
@@ -86,7 +86,7 @@ func newClassAssassin() *class {
 					Armor:           -25,
 					MagicResistance: -25,
 				},
-				e.name,
+				e.Name,
 				1,
 				8*Second,
 			))
@@ -96,14 +96,14 @@ func newClassAssassin() *class {
 		},
 	}
 	// Physical
-	r = &ability{
-		name:               "R",
+	r = &Ability{
+		Name:               "R",
 		TargetType:         TargetTypeEnemy,
-		healthCost:         0,
-		manaCost:           120,
-		activationDuration: 0,
-		cooldownDuration:   60 * Second,
-		disableTypes: []DisableType{
+		HealthCost:         0,
+		ManaCost:           120,
+		ActivationDuration: 0,
+		CooldownDuration:   60 * Second,
+		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
 		Perform: func(up UnitPair) {
@@ -127,5 +127,5 @@ func newClassAssassin() *class {
 			})
 		},
 	}
-	return class
+	return Class
 }

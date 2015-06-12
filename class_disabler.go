@@ -1,32 +1,32 @@
 package main
 
-func newClassDisabler() *class {
-	var q, w, e, r *ability
-	class := &class{
-		name: "Disabler",
+func newClassDisabler() *Class {
+	var q, w, e, r *Ability
+	Class := &Class{
+		Name: "Disabler",
 		// TODO stats
-		health:               800,
-		healthRegeneration:   2,
-		mana:                 300,
-		manaRegeneration:     4,
-		armor:                DefaultArmor,
-		magicResistance:      DefaultMagicResistance,
-		criticalStrikeChance: DefaultCriticalStrikeChance,
-		criticalStrikeFactor: DefaultCriticalStrikeFactor,
-		cooldownReduction:    DefaultCooldownReduction,
-		damageThreatFactor:   DefaultDamageThreatFactor,
-		healingThreatFactor:  DefaultHealingThreatFactor,
-		abilities:            []*ability{q, w, e, r},
+		Health:               800,
+		HealthRegeneration:   2,
+		Mana:                 300,
+		ManaRegeneration:     4,
+		Armor:                DefaultArmor,
+		MagicResistance:      DefaultMagicResistance,
+		CriticalStrikeChance: DefaultCriticalStrikeChance,
+		CriticalStrikeFactor: DefaultCriticalStrikeFactor,
+		CooldownReduction:    DefaultCooldownReduction,
+		DamageThreatFactor:   DefaultDamageThreatFactor,
+		HealingThreatFactor:  DefaultHealingThreatFactor,
+		Abilities:            []*Ability{q, w, e, r},
 	}
 	// Physical damage / DoT / Magic resistance reduction
-	q = &ability{
-		name:               "Q",
+	q = &Ability{
+		Name:               "Q",
 		TargetType:         TargetTypeEnemy,
-		healthCost:         0,
-		manaCost:           0,
-		activationDuration: 0,
-		cooldownDuration:   2 * Second,
-		disableTypes: []DisableType{
+		HealthCost:         0,
+		ManaCost:           0,
+		ActivationDuration: 0,
+		CooldownDuration:   2 * Second,
+		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
 		Perform: func(up UnitPair) {
@@ -35,7 +35,7 @@ func newClassDisabler() *class {
 				UnitCorrection{
 					MagicResistance: -15,
 				},
-				q.name,
+				q.Name,
 				1,
 				12*Second,
 			))
@@ -49,14 +49,14 @@ func newClassDisabler() *class {
 		},
 	}
 	// Magic damage / Silence
-	w = &ability{
-		name:               "W",
+	w = &Ability{
+		Name:               "W",
 		TargetType:         TargetTypeEnemy,
-		healthCost:         0,
-		manaCost:           40,
-		activationDuration: 2 * Second,
-		cooldownDuration:   8 * Second,
-		disableTypes: []DisableType{
+		HealthCost:         0,
+		ManaCost:           40,
+		ActivationDuration: 2 * Second,
+		CooldownDuration:   8 * Second,
+		DisableTypes: []DisableType{
 			DisableTypeStun,
 			DisableTypeSilence,
 		},
@@ -70,14 +70,14 @@ func newClassDisabler() *class {
 		},
 	}
 	// Physical damage / Stun
-	e = &ability{
-		name:               "E",
+	e = &Ability{
+		Name:               "E",
 		TargetType:         TargetTypeEnemy,
-		healthCost:         0,
-		manaCost:           60,
-		activationDuration: 0,
-		cooldownDuration:   20 * Second,
-		disableTypes: []DisableType{
+		HealthCost:         0,
+		ManaCost:           60,
+		ActivationDuration: 0,
+		CooldownDuration:   20 * Second,
+		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
 		Perform: func(up UnitPair) {
@@ -90,14 +90,14 @@ func newClassDisabler() *class {
 		},
 	}
 	// Increasing critical / All
-	r = &ability{
-		name:               "R",
+	r = &Ability{
+		Name:               "R",
 		TargetType:         TargetTypeNone,
-		healthCost:         0,
-		manaCost:           120,
-		activationDuration: 0,
-		cooldownDuration:   60 * Second,
-		disableTypes: []DisableType{
+		HealthCost:         0,
+		ManaCost:           120,
+		ActivationDuration: 0,
+		CooldownDuration:   60 * Second,
+		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
 		Perform: func(up UnitPair) {
@@ -108,12 +108,12 @@ func newClassDisabler() *class {
 						CriticalStrikeChance: 0.2,
 						CriticalStrikeFactor: 0.5,
 					},
-					r.name,
+					r.Name,
 					1,
 					10*Second,
 				))
 			}
 		},
 	}
-	return class
+	return Class
 }
