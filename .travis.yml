@@ -3,5 +3,5 @@ install:
   - go get -t ./...
   - go get github.com/mattn/goveralls
 script:
-  - make test
+  - make cover.out
   - $HOME/gopath/bin/goveralls -coverprofile=cover.out -service=travis-ci

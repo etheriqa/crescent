@@ -2,7 +2,7 @@ TARGET = crescent
 COVER = cover.out
 SRCS = $(shell find . -name '*.go')
 
-.PHONY: test cover
+.PHONY: test cover watch
 
 $(TARGET): test
 	go build -o $(TARGET)
