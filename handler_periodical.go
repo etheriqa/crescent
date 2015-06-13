@@ -1,17 +1,9 @@
 package main
 
-type DisableType uint8
-
-const (
-	_ DisableType = iota
-
-	DisableTypeSilence
-	DisableTypeStun
-)
-
-type Disable struct {
-	UnitObject
-	disableType    DisableType
+type Periodical struct {
+	UnitPair
+	name           string
+	routine        func()
 	expirationTime GameTime
 
 	clock    GameClock
@@ -19,12 +11,12 @@ type Disable struct {
 	writer   GameEventWriter
 }
 
-// OnAttach removes duplicate Disables
-func (h *Disable) OnAttach() {
-	ok := h.handlers.BindObject(h).Every(func(o Handler) bool {
+// OnAttach removes duplicate Periodicals
+func (h *Periodical) OnAttach() {
+	ok := h.handlers.BindSubject(h).BindObject(h).Every(func(o Handler) bool {
 		switch o := o.(type) {
-		case *Disable:
-			if h == o || h.disableType != o.disableType {
+		case *Periodical:
+			if h == o || h.name != o.name {
 				return true
 			}
 			if h.expirationTime <= o.expirationTime {
@@ -40,27 +32,30 @@ func (h *Disable) OnAttach() {
 	}
 
 	h.Object().AddEventHandler(h, EventGameTick)
+	h.Object().AddEventHandler(h, EventPeriodicalTick)
 	h.Object().AddEventHandler(h, EventDead)
 	h.writer.Write(nil) // TODO
-	h.Object().TriggerEvent(EventDisabled)
 }
 
 // OnDetach does nothing
-func (h *Disable) OnDetach() {
+func (h *Periodical) OnDetach() {
 	h.Object().RemoveEventHandler(h, EventGameTick)
+	h.Object().RemoveEventHandler(h, EventPeriodicalTick)
 	h.Object().RemoveEventHandler(h, EventDead)
 }
 
 // HandleEvent handles the Event
-func (h *Disable) HandleEvent(e Event) {
+func (h *Periodical) HandleEvent(e Event) {
 	switch e {
+	case EventDead:
+		h.handlers.Detach(h)
 	case EventGameTick:
 		if h.clock.Before(h.expirationTime) {
 			return
 		}
 		h.handlers.Detach(h)
 		h.writer.Write(nil) // TODO
-	case EventDead:
-		h.handlers.Detach(h)
+	case EventPeriodicalTick:
+		h.routine()
 	}
 }

@@ -24,20 +24,4 @@ type Class struct {
 	DamageThreatFactor   Statistic
 	HealingThreatFactor  Statistic
 	Abilities            []*Ability
-	Initializer          func(u *Unit)
-}
-
-func (c *Class) Ability(key string) *Ability {
-	switch key {
-	case "q":
-		return c.Abilities[0]
-	case "w":
-		return c.Abilities[1]
-	case "e":
-		return c.Abilities[2]
-	case "r":
-		return c.Abilities[3]
-	default:
-		return nil
-	}
 }

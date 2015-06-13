@@ -6,7 +6,7 @@ import (
 
 func newClassMage() *Class {
 	var q, w, e, r *Ability
-	Class := &Class{
+	class := &Class{
 		Name: "Mage",
 		// TODO stats
 		Health:               600,
@@ -34,28 +34,26 @@ func newClassMage() *Class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		Perform: func(up UnitPair) {
-			up.AttachHandler(NewCorrector(
-				up.Object(),
-				UnitCorrection{
-					Armor: -10,
-				},
-				q.Name,
-				1,
-				8*Second,
-			))
-			// TODO handle the error
-			NewMagicDamage(up, 120).Perform()
-			if rand.Float64() > 0.1 {
-				up.ForSubjectHandler(func(ha Handler) {
-					switch ha := ha.(type) {
-					case *Cooldown:
-						if ha.ability == w {
-							up.DetachHandler(ha)
-						}
-					}
-				})
+		Perform: func(op Operator, s Subject, o *Unit) {
+			c := UnitCorrection{
+				Armor: -10,
 			}
+			op.Correction(o, c, 1, 8*Second, q.Name)
+			_, _, _, err := op.MagicDamage(s, o, 120).Perform()
+			if err != nil {
+				log.Fatal(err)
+			}
+			if rand.Float64() > 0.1 {
+				return
+			}
+			op.Handlers().BindObject(s.Subject()).Each(func(h Handler) {
+				switch h := h.(type) {
+				case *Cooldown:
+					if h.Ability() == w {
+						op.Handlers().Detach(h)
+					}
+				}
+			})
 		},
 	}
 	// Magic damage / DoT / Proc 20% E
@@ -70,23 +68,19 @@ func newClassMage() *Class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		Perform: func(up UnitPair) {
-			// TODO handle the error
-			up.AttachHandler(NewTicker(
-				NewMagicDamage(up, 30),
-				w,
-				10*Second,
-			))
+		Perform: func(op Operator, s Subject, o *Unit) {
+			op.DoT(op.MagicDamage(s, o, 30), 10*Second, w.Name)
 			if rand.Float64() > 0.2 {
-				up.ForSubjectHandler(func(ha Handler) {
-					switch ha := ha.(type) {
-					case *Cooldown:
-						if ha.ability == e {
-							up.DetachHandler(ha)
-						}
-					}
-				})
+				return
 			}
+			op.Handlers().BindObject(s.Subject()).Each(func(h Handler) {
+				switch h := h.(type) {
+				case *Cooldown:
+					if h.Ability() == e {
+						op.Handlers().Detach(h)
+					}
+				}
+			})
 		},
 	}
 	// Magic damage
@@ -101,9 +95,11 @@ func newClassMage() *Class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		Perform: func(up UnitPair) {
-			// TODO handle the error
-			NewMagicDamage(up, 400).Perform()
+		Perform: func(op Operator, s Subject, o *Unit) {
+			_, _, _, err := op.MagicDamage(s, o, 400).Perform()
+			if err != nil {
+				log.Fatal(err)
+			}
 		},
 	}
 	// Magic damage / All / DoT / Stun
@@ -118,21 +114,16 @@ func newClassMage() *Class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		Perform: func(up UnitPair) {
-			for _, enemy := range up.Subject().Enemies() {
-				NewMagicDamage(MakeUnitPair(up.Subject(), enemy), 400).Perform()
-				up.AttachHandler(NewTicker(
-					NewMagicDamage(MakeUnitPair(up.Subject(), enemy), 40),
-					r,
-					10*Second,
-				))
-				up.AttachHandler(NewDisable(
-					enemy,
-					DisableTypeStun,
-					500*Millisecond,
-				))
-			}
+		Perform: func(op Operator, s Subject, o *Unit) {
+			op.Units().EachEnemy(s.Subject(), func(enemy *Unit) {
+				_, _, _, err := op.MagicDamage(s, enemy, 400).Perform()
+				if err != nil {
+					log.Fatal(err)
+				}
+				op.DoT(op.MagicDamage(s, enemy, 20), 10*Second, r.Name)
+				op.Disable(enemy, DisableTypeStun, Second)
+			})
 		},
 	}
-	return Class
+	return class
 }

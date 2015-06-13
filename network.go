@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/json"
 	"net/http"
 	"sync"
 
@@ -9,52 +8,40 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-var wsUpgrader = websocket.Upgrader{
-	CheckOrigin: func(*http.Request) bool { return true }, // fixme
-}
-
-type connectionID uint64
+type ClientID uint64
+type ClientName string
 
 type Network struct {
-	rw    *sync.RWMutex
-	cid   connectionID
-	cids  map[connectionID]*connection
-	names map[string]*connection
-	inc   chan message
-	out   chan message
+	mu   *sync.RWMutex
+	seq  ClientID
+	id   map[ClientID]*Client
+	name map[ClientName]bool
+
+	ichan chan Input
+	ochan chan Output
 }
 
-type connection struct {
-	id   connectionID
-	name string
+type Client struct {
+	id   ClientID
+	name ClientName
 	ws   *websocket.Conn
 	buf  chan []byte
 }
 
-type frame struct {
-	Type string           `json:"type"`
-	Data *json.RawMessage `json:"data"`
-}
-
-// newNetwork initializes a network
-func NewNetwork(inc chan message, out chan message) *Network {
+// NewNetwork returns a Network
+func NewNetwork(i chan Input, o chan Output) *Network {
 	return &Network{
-		rw:    new(sync.RWMutex),
-		cid:   0,
-		cids:  make(map[connectionID]*connection),
-		names: make(map[string]*connection),
-		inc:   inc,
-		out:   out,
+		mu:   new(sync.RWMutex),
+		seq:  0,
+		id:   make(map[ClientID]*Client),
+		name: make(map[ClientName]bool),
+
+		ichan: i,
+		ochan: o,
 	}
 }
 
-// nextConnectionID generates a connection ID
-func (n *Network) nextConnectionID() connectionID {
-	n.cid++
-	return n.cid
-}
-
-// Run executes the network routine
+// Run starts the network routine
 func (n *Network) Run(addr string) {
 	go n.dispatcher()
 	http.HandleFunc("/", n.wsHandler)
@@ -64,208 +51,190 @@ func (n *Network) Run(addr string) {
 	}
 }
 
-// wsHandler handles a WebSocket connection
+// sync calls the callback with writing lock
+func (n *Network) sync(callback func()) {
+	n.mu.Lock()
+	callback()
+	n.mu.Unlock()
+}
+
+// sync calls the callback with reading lock
+func (n *Network) syncR(callback func()) {
+	n.mu.RLock()
+	callback()
+	n.mu.RUnlock()
+}
+
+// wsHandler handles a HTTP request
 func (n *Network) wsHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Method Not Allowed", 405)
 		return
 	}
-	name := r.FormValue("name")
-	n.rw.Lock()
-	if _, ok := n.names[name]; name == "" || ok {
+	name := ClientName(r.FormValue("name"))
+	if name == "" {
 		http.Error(w, "Bad Request", 400)
-		n.rw.Unlock()
 		return
 	}
-	ws, err := wsUpgrader.Upgrade(w, r, nil)
-	if err != nil {
-		log.WithField("err", err).Warn("Failed websocket.Upgrade()")
-		http.Error(w, "Internal Server Error", 500)
-		n.rw.Unlock()
+	var c *Client
+	var ok bool
+	n.sync(func() {
+		if n.name[name] {
+			http.Error(w, "Bad Request", 400)
+			return
+		}
+		upgrader := websocket.Upgrader{
+			CheckOrigin: func(*http.Request) bool { return true }, // FIXME
+		}
+		ws, err := upgrader.Upgrade(w, r, nil)
+		if err != nil {
+			log.WithField("err", err).Warn("Failed websocket.Upgrade()")
+			http.Error(w, "Internal Server Error", 500)
+			return
+		}
+		n.seq++
+		c = NewClient(n.seq, name, ws)
+		ok = true
+	})
+	if !ok {
 		return
 	}
-	c := newConnection(n.nextConnectionID(), name, ws)
-	n.register(c)
-	n.rw.Unlock()
+	n.sync(func() { n.register(c) })
 	go n.receiver(c)
 	n.sender(c)
 }
 
-// register registers a connection
-func (n *Network) register(c *connection) {
-	n.cids[c.id] = c
-	n.names[c.name] = c
-	n.inc <- message{
-		name: c.name,
-		t:    netRegister,
+// register registers the Client
+func (n *Network) register(c *Client) {
+	n.id[c.id] = c
+	n.name[c.name] = true
+	n.ichan <- Input{
+		ClientID: c.id,
+		Input: InputConnect{
+			ClientName: c.name,
+		},
 	}
 	log.WithFields(logrus.Fields{
-		"cid":  c.id,
+		"id":   c.id,
 		"name": c.name,
 		"addr": c.ws.RemoteAddr(),
 	}).Info("Client has been registered")
 }
 
-// unregister closes the connection and unregisters it
-func (n *Network) unregister(c *connection) {
-	if _, ok := n.cids[c.id]; !ok {
+// unregister unregisters the Client
+func (n *Network) unregister(c *Client) {
+	if _, ok := n.id[c.id]; !ok {
 		return
 	}
-	delete(n.cids, c.id)
-	delete(n.names, c.name)
+	delete(n.id, c.id)
+	delete(n.name, c.name)
 	close(c.buf)
 	c.ws.Close()
-	n.inc <- message{
-		name: c.name,
-		t:    netUnregister,
+	n.ichan <- Input{
+		ClientID: c.id,
+		Input:    InputDisconnect{},
 	}
 	log.WithFields(logrus.Fields{
-		"cid":  c.id,
+		"id":   c.id,
 		"name": c.name,
 		"addr": c.ws.RemoteAddr(),
 	}).Info("Client has been unregistered")
 }
 
-// receiver reads frames from the connection then writes messages to the game routine
-func (n *Network) receiver(c *connection) {
-	defer func() {
-		n.rw.Lock()
-		n.unregister(c)
-		n.rw.Unlock()
-	}()
+// receiver reads frames from the WebSocket connection and writes messages to the Instance
+func (n *Network) receiver(c *Client) {
+	defer n.sync(func() { n.unregister(c) })
 	for {
 		_, p, err := c.ws.ReadMessage()
 		if err != nil {
 			log.WithFields(logrus.Fields{
-				"cid":  c.id,
+				"id":   c.id,
 				"name": c.name,
 				"err":  err,
 			}).Warn("Failed websocket.ReadMessage()")
 			return
 		}
-		log.WithFields(logrus.Fields{
-			"cid":  c.id,
-			"name": c.name,
-			"p":    string(p),
-		}).Debug("websocket.ReadMessage()")
-		m, err := decodeFrame(p)
+		in, err := DecodeInputFrame(p)
 		if err != nil {
 			log.WithFields(logrus.Fields{
-				"cid":  c.id,
+				"id":   c.id,
 				"name": c.name,
 				"p":    string(p),
 				"err":  err,
-			}).Warn("Failed decodeFrame()")
+			}).Warn("Failed DecodeInputFrame()")
 			return
 		}
-		m.name = c.name
-		n.inc <- m
+		n.ichan <- Input{
+			ClientID: c.id,
+			Input:    in,
+		}
 	}
 }
 
-// sender reads frames from the write buffer then writes frames to the connection
-func (n *Network) sender(c *connection) {
-	defer func() {
-		n.rw.Lock()
-		n.unregister(c)
-		n.rw.Unlock()
-	}()
+// sender reads frames from the write buffer and writes frames to the WebSocket connection
+func (n *Network) sender(c *Client) {
+	defer n.sync(func() { n.unregister(c) })
 	for {
 		select {
 		case p, ok := <-c.buf:
 			if !ok {
-				c.ws.WriteMessage(websocket.CloseMessage, []byte{})
+				err := c.ws.WriteMessage(websocket.CloseMessage, []byte{})
+				if err != nil {
+					log.WithFields(logrus.Fields{
+						"id":   c.id,
+						"name": c.name,
+						"err":  err,
+					}).Warn("Failed websocket.WriteMessage()")
+				}
 				return
 			}
 			err := c.ws.WriteMessage(websocket.TextMessage, p)
 			if err != nil {
 				log.WithFields(logrus.Fields{
-					"cid":  c.id,
+					"id":   c.id,
 					"name": c.name,
 					"err":  err,
 				}).Warn("Failed websocket.WriteMessage()")
 				return
 			}
-			log.WithFields(logrus.Fields{
-				"cid":  c.id,
-				"name": c.name,
-				"p":    string(p),
-			}).Debug("websocket.WriteMessage()")
 		}
 	}
 }
 
-// dispatcher reads messages from the game routine then writes frames to the write buffer
+// dispatcher reads messages from the Instance and writes frames to the write buffer
 func (n *Network) dispatcher() {
 	for {
 		select {
-		case m, ok := <-n.out:
+		case out, ok := <-n.ochan:
 			if !ok {
-				log.Fatal("Cannot read the outgoing message channel")
+				log.Fatal("Cannot read from the output channel")
 			}
-			p, err := encodeFrame(m)
+			p, err := EncodeOutputFrame(out.Output)
 			if err != nil {
 				log.WithFields(logrus.Fields{
-					"m":   m,
-					"err": err,
-				}).Fatal("Failed encodeFrame()")
+					"Output": out.Output,
+					"err":    err,
+				}).Fatal("Failed EncodeOutputFrame")
 			}
-			switch m.t {
-			case gameTerminate:
-				n.rw.Lock()
-				if c, ok := n.names[m.name]; ok {
-					n.unregister(c)
-				}
-				n.rw.Unlock()
-			default:
-				n.rw.RLock()
-				for _, c := range n.cids {
-					c.buf <- p
-				}
-				n.rw.RUnlock()
+			if c, ok := n.id[out.ClientID]; ok {
+				c.buf <- p
+			} else {
+				n.syncR(func() {
+					for _, c := range n.id {
+						c.buf <- p
+					}
+				})
 			}
 		}
 	}
 }
 
-// newConnection initializes a connection
-func newConnection(id connectionID, name string, ws *websocket.Conn) *connection {
-	return &connection{
+// NewClient returns a Client
+func NewClient(id ClientID, name ClientName, ws *websocket.Conn) *Client {
+	return &Client{
 		id:   id,
 		name: name,
 		ws:   ws,
 		buf:  make(chan []byte, 1024),
 	}
-}
-
-// decodeFrame validates JSON schema and converts a JSON text into a incoming message
-func decodeFrame(p []byte) (message, error) {
-	var f frame
-	if err := json.Unmarshal(p, &f); err != nil {
-		return message{}, err
-	}
-	var d map[string]interface{}
-	if err := json.Unmarshal(*f.Data, &d); err != nil {
-		return message{}, err
-	}
-	// TODO validate d
-	return message{
-		t: f.Type,
-		d: d,
-	}, nil
-}
-
-// encodeFrame converts a outgoing message into a JSON text and validates JSON schema
-func encodeFrame(m message) ([]byte, error) {
-	// TODO validate m.data
-	d := new(json.RawMessage)
-	var err error
-	*d, err = json.Marshal(m.d)
-	if err != nil {
-		return nil, err
-	}
-	return json.Marshal(frame{
-		Type: m.t,
-		Data: d,
-	})
 }

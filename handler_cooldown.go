@@ -1,54 +1,55 @@
 package main
 
 type Cooldown struct {
-	PartialHandler
-	ability *Ability
+	UnitObject
+	ability        *Ability
+	expirationTime GameTime
+
+	clock    GameClock
+	handlers HandlerContainer
+	writer   GameEventWriter
 }
 
-// NewCooldown returns a Cooldown handler
-func NewCooldown(subject *Unit, ability *Ability) *Cooldown {
-	return &Cooldown{
-		PartialHandler: MakePartialHandler(MakeSubject(subject), ability.CooldownDuration),
-		ability:        ability,
-	}
+// Ability returns the Ability
+func (h *Cooldown) Ability() *Ability {
+	return h.ability
 }
 
-// Ability returns the ability
-func (c *Cooldown) Ability() *Ability {
-	return c.ability
-}
-
-// OnAttach adds the EventHandler
-func (c *Cooldown) OnAttach() {
-	c.Subject().AddEventHandler(c, EventDead)
-	c.Subject().AddEventHandler(c, EventGameTick)
-	c.Publish(message{
-	// TODO pack message
+// OnAttach removes other Cooldown handlers
+func (h *Cooldown) OnAttach() {
+	h.handlers.BindObject(h).Each(func(o Handler) {
+		switch o := o.(type) {
+		case *Cooldown:
+			if h == o {
+				return
+			}
+			h.handlers.Detach(o)
+		}
 	})
+
+	if h.ability.CooldownDuration == 0 {
+		h.handlers.Detach(h)
+		return
+	}
+
+	h.expirationTime = h.clock.Add(h.ability.CooldownDuration)
+	h.Object().AddEventHandler(h, EventGameTick)
+	h.writer.Write(nil) // TODO
 }
 
-// OnDetach removes the EventHandler
-func (c *Cooldown) OnDetach() {
-	c.Subject().RemoveEventHandler(c, EventDead)
-	c.Subject().RemoveEventHandler(c, EventGameTick)
+// OnDetach does nothing
+func (h *Cooldown) OnDetach() {
+	h.Object().RemoveEventHandler(h, EventGameTick)
 }
 
 // HandleEvent handles the Event
-func (c *Cooldown) HandleEvent(e Event) {
+func (h *Cooldown) HandleEvent(e Event) {
 	switch e {
-	case EventDead:
-		c.Stop(c)
 	case EventGameTick:
-		if c.IsExpired() {
-			c.Up()
+		if h.clock.Before(h.expirationTime) {
+			return
 		}
+		h.handlers.Detach(h)
+		h.writer.Write(nil) // TODO
 	}
-}
-
-// Up ends the cooldown time
-func (c *Cooldown) Up() {
-	c.Stop(c)
-	c.Publish(message{
-	// TODO pack message
-	})
 }

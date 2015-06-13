@@ -1,8 +1,8 @@
 package main
 
-func newClassHealer() *Class {
+func NewClassHealer() *Class {
 	var q, w, e, r *Ability
-	Class := &Class{
+	class := &Class{
 		Name: "Healer",
 		// TODO stats
 		Health:               700,
@@ -30,10 +30,13 @@ func newClassHealer() *Class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		Perform: func(up UnitPair) {
+		Perform: func(op Operator, s Subject, o *Unit) {
 			// TODO handle the error
-			before, after, _, _ := NewMagicDamage(up, 100).Perform()
-			up.Subject().ModifyMana((before - after) * 0.1)
+			before, after, _, err := op.MagicDamage(s, o, 100).Perform()
+			if err != nil {
+				log.Fatal(err)
+			}
+			s.Subject().ModifyMana(op.Writer(), (before-after)*0.1)
 		},
 	}
 	// HoT
@@ -48,12 +51,8 @@ func newClassHealer() *Class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		Perform: func(up UnitPair) {
-			up.AttachHandler(NewTicker(
-				NewHealing(up, 20),
-				w,
-				12*Second,
-			))
+		Perform: func(op Operator, s Subject, o *Unit) {
+			op.HoT(op.Healing(s, o, 10), 12*Second, w.Name)
 		},
 	}
 	// Healing
@@ -68,8 +67,11 @@ func newClassHealer() *Class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		Perform: func(up UnitPair) {
-			NewHealing(up, 400).Perform()
+		Perform: func(op Operator, s Subject, o *Unit) {
+			_, _, _, err := op.Healing(s, o, 400).Perform()
+			if err != nil {
+				log.Fatal(err)
+			}
 		},
 	}
 	// HoT / Increasing critical strike chance and critical strike factor
@@ -84,25 +86,17 @@ func newClassHealer() *Class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		Perform: func(up UnitPair) {
-			up.AttachHandler(NewCorrector(
-				up.Subject(),
-				UnitCorrection{
-					CriticalStrikeChance: 0.5,
-					CriticalStrikeFactor: 1.5,
-				},
-				r.Name,
-				1,
-				6*Second,
-			))
-			for _, friend := range up.Subject().Friends() {
-				up.AttachHandler(NewTicker(
-					NewHealing(MakeUnitPair(up.Subject(), friend), 20),
-					r,
-					6*Second,
-				))
+		Perform: func(op Operator, s Subject, o *Unit) {
+			c := UnitCorrection{
+
+				CriticalStrikeChance: 0.5,
+				CriticalStrikeFactor: 1.5,
 			}
+			op.Correction(s.Subject(), c, 1, 6*Second, r.Name)
+			op.Units().EachFriend(s.Subject(), func(friend *Unit) {
+				op.HoT(op.Healing(s.Subject(), friend, 20), 12*Second, r.Name)
+			})
 		},
 	}
-	return Class
+	return class
 }

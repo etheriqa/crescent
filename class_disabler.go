@@ -1,8 +1,8 @@
 package main
 
-func newClassDisabler() *Class {
+func NewClassDisabler() *Class {
 	var q, w, e, r *Ability
-	Class := &Class{
+	class := &Class{
 		Name: "Disabler",
 		// TODO stats
 		Health:               800,
@@ -29,23 +29,16 @@ func newClassDisabler() *Class {
 		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(up UnitPair) {
-			up.AttachHandler(NewCorrector(
-				up.Object(),
-				UnitCorrection{
-					MagicResistance: -15,
-				},
-				q.Name,
-				1,
-				12*Second,
-			))
-			// TODO handle the error
-			NewPhysicalDamage(up, 110).Perform()
-			up.AttachHandler(NewTicker(
-				NewPhysicalDamage(up, 25),
-				q,
-				4*Second,
-			))
+		Perform: func(op Operator, s Subject, o *Unit) {
+			c := UnitCorrection{
+				MagicResistance: -15,
+			}
+			op.Correction(o, c, 1, 12*Second, q.Name)
+			_, _, _, err := op.PhysicalDamage(s, o, 110).Perform()
+			if err != nil {
+				log.Fatal(err)
+			}
+			op.DoT(op.PhysicalDamage(s, o, 12), 4*Second, q.Name)
 		},
 	}
 	// Magic damage / Silence
@@ -60,13 +53,12 @@ func newClassDisabler() *Class {
 			DisableTypeStun,
 			DisableTypeSilence,
 		},
-		Perform: func(up UnitPair) {
-			NewMagicDamage(up, 220).Perform()
-			up.AttachHandler(NewDisable(
-				up.Object(),
-				DisableTypeSilence,
-				500*Millisecond,
-			))
+		Perform: func(op Operator, s Subject, o *Unit) {
+			_, _, _, err := op.MagicDamage(s, o, 220).Perform()
+			if err != nil {
+				log.Fatal(err)
+			}
+			op.Disable(o, DisableTypeSilence, Second)
 		},
 	}
 	// Physical damage / Stun
@@ -80,13 +72,12 @@ func newClassDisabler() *Class {
 		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(up UnitPair) {
-			NewPhysicalDamage(up, 280).Perform()
-			up.AttachHandler(NewDisable(
-				up.Object(),
-				DisableTypeStun,
-				2*Second,
-			))
+		Perform: func(op Operator, s Subject, o *Unit) {
+			_, _, _, err := op.PhysicalDamage(s, o, 280).Perform()
+			if err != nil {
+				log.Fatal(err)
+			}
+			op.Disable(o, DisableTypeStun, 2*Second)
 		},
 	}
 	// Increasing critical / All
@@ -100,20 +91,15 @@ func newClassDisabler() *Class {
 		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(up UnitPair) {
-			for _, friend := range up.Subject().Friends() {
-				friend.AttachHandler(NewCorrector(
-					friend,
-					UnitCorrection{
-						CriticalStrikeChance: 0.2,
-						CriticalStrikeFactor: 0.5,
-					},
-					r.Name,
-					1,
-					10*Second,
-				))
+		Perform: func(op Operator, s Subject, o *Unit) {
+			c := UnitCorrection{
+				CriticalStrikeChance: 0.2,
+				CriticalStrikeFactor: 0.5,
 			}
+			op.Units().EachFriend(s.Subject(), func(u *Unit) {
+				op.Correction(u, c, 1, 10*Second, r.Name)
+			})
 		},
 	}
-	return Class
+	return class
 }

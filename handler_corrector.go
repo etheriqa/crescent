@@ -1,110 +1,126 @@
 package main
 
-type Corrector struct {
-	PartialHandler
-	correction UnitCorrection
-	name       string
-	maxStack   Statistic
-	stack      Statistic
+type Corrector interface {
+	ArmorCorrection() Statistic
+	MagicResistanceCorrection() Statistic
+	CriticalStrikeChanceCorrection() Statistic
+	CriticalStrikeFactorCorrection() Statistic
+	CooldownReductionCorrection() Statistic
+	DamageThreatFactorCorrection() Statistic
+	HealingThreatFactorCorrection() Statistic
 }
 
-// NewCorrector returns a Corrector handler
-func NewCorrector(object *Unit, c UnitCorrection, name string, maxStack Statistic, duration GameDuration) *Corrector {
-	return &Corrector{
-		PartialHandler: MakePartialHandler(MakeObject(object), duration),
-		correction:     c,
-		name:           name,
-		maxStack:       maxStack,
-		stack:          Statistic(1),
-	}
+type Correction struct {
+	UnitObject
+	name           string
+	correction     UnitCorrection
+	stackLimit     Statistic
+	stack          Statistic
+	expirationTime GameTime
+
+	clock    GameClock
+	handlers HandlerContainer
+	writer   GameEventWriter
 }
 
-// Stack returns the number of stacks
-func (m *Corrector) Stack() Statistic {
-	return m.stack
+// ArmorCorrection returns amount of armor correction
+func (h *Correction) ArmorCorrection() Statistic {
+	return h.correction.Armor
 }
 
-// Armor returns amount of Armor correction
-func (m *Corrector) Armor() Statistic {
-	return m.stack * m.correction.Armor
+// MagicResistanceCorrection returns amount of magic resistance correction
+func (h *Correction) MagicResistanceCorrection() Statistic {
+	return h.correction.MagicResistance
 }
 
-// MagicResistance returns amount of Magic Resistance correction
-func (m *Corrector) MagicResistance() Statistic {
-	return m.stack * m.correction.MagicResistance
+// CriticalStrikeChanceCorrection returns amount of critical strike chance correction
+func (h *Correction) CriticalStrikeChanceCorrection() Statistic {
+	return h.correction.CriticalStrikeChance
 }
 
-// CriticalStrikeChance returns amount of Critical Strike Chance correction
-func (m *Corrector) CriticalStrikeChance() Statistic {
-	return m.stack * m.correction.CriticalStrikeChance
+// CriticalStrikeFactorCorrection returns amount of critical strike factor correction
+func (h *Correction) CriticalStrikeFactorCorrection() Statistic {
+	return h.correction.CriticalStrikeFactor
 }
 
-// CriticalStrikeFactor returns amount of Critical Strike Factor correction
-func (m *Corrector) CriticalStrikeFactor() Statistic {
-	return m.stack * m.correction.CriticalStrikeFactor
+// CooldownReductionCorrection returns amount of cooldown reduction correction
+func (h *Correction) CooldownReductionCorrection() Statistic {
+	return h.correction.CooldownReduction
 }
 
-// CooldownReduction returns amount of Cooldown Reduction correction
-func (m *Corrector) CooldownReduction() Statistic {
-	return m.stack * m.correction.CooldownReduction
+// DamageThreatFactorCorrection returns amount of damage threat factor correction
+func (h *Correction) DamageThreatFactorCorrection() Statistic {
+	return h.correction.DamageThreatFactor
 }
 
-// DamageThreatFactor returns amount of Damage Threat Factor correction
-func (m *Corrector) DamageThreatFactor() Statistic {
-	return m.stack * m.correction.DamageThreatFactor
+// HealingThreatFactorCorrection returns amount of healing threat factor correction
+func (h *Correction) HealingThreatFactorCorrection() Statistic {
+	return h.correction.HealingThreatFactor
 }
 
-// HealingThreatFactor returns amount of Healing Threat Factor correction
-func (m *Corrector) HealingThreatFactor() Statistic {
-	return m.stack * m.correction.HealingThreatFactor
+// Stack returns stack number
+func (h *Correction) Stack() Statistic {
+	return h.stack
 }
 
-// OnAttach updates the modificationStats of the unit
-func (m *Corrector) OnAttach() {
-	m.Object().AddEventHandler(m, EventDead)
-	m.Object().AddEventHandler(m, EventGameTick)
-	m.ForObjectHandler(func(ha Handler) {
-		switch ha := ha.(type) {
-		case *Corrector:
-			if ha == m || ha.name != m.name {
+// OnAttach merges Correction handlers and updates the UnitCorrection of the Object
+func (h *Correction) OnAttach() {
+	h.handlers.BindObject(h).Each(func(o Handler) {
+		switch o := o.(type) {
+		case *Correction:
+			if h == o || h.name != o.name {
 				return
 			}
-			if ha.expirationTime > m.expirationTime {
-				m.expirationTime = ha.expirationTime
+			if h.expirationTime < o.expirationTime {
+				h.expirationTime = o.expirationTime
+				h.stack = o.stack
+			} else {
+				h.stack += o.stack
 			}
-			m.stack += ha.stack
-			if m.stack > m.maxStack {
-				m.stack = m.maxStack
-			}
-			ha.Stop(ha)
+			h.handlers.Detach(o)
 		}
 	})
-	m.Object().ReloadCorrection()
+
+	if h.stack > h.stackLimit {
+		h.stack = h.stackLimit
+	}
+	h.Object().AddEventHandler(h, EventGameTick)
+	h.updateCorrection()
+	h.writer.Write(nil) // TODO
 }
 
-// OnDetach updates the modificationStats of the unit
-func (m *Corrector) OnDetach() {
-	m.Object().RemoveEventHandler(m, EventDead)
-	m.Object().RemoveEventHandler(m, EventGameTick)
-	m.Object().ReloadCorrection()
+// OnDetach updates the UnitCorrection of the Object
+func (h *Correction) OnDetach() {
+	h.Object().RemoveEventHandler(h, EventGameTick)
+	h.updateCorrection()
 }
 
-// HandleEvent handles the event
-func (m *Corrector) HandleEvent(e Event) {
+// HandleEvent handles the Event
+func (h *Correction) HandleEvent(e Event) {
 	switch e {
-	case EventDead:
-		m.Stop(m)
 	case EventGameTick:
-		if m.IsExpired() {
-			m.Up()
+		if h.clock.Before(h.expirationTime) {
+			return
 		}
+		h.handlers.Detach(h)
+		h.writer.Write(nil) // TODO
 	}
 }
 
-// Up ends the Corrector
-func (m *Corrector) Up() {
-	m.Stop(m)
-	m.Publish(message{
-	// TODO pack message
+// updateCorrection updates the UnitCorrection of the Object
+func (h *Correction) updateCorrection() {
+	c := UnitCorrection{}
+	h.handlers.BindObject(h).Each(func(o Handler) {
+		switch o := o.(type) {
+		case Corrector:
+			c.Armor += o.ArmorCorrection()
+			c.MagicResistance += o.MagicResistanceCorrection()
+			c.CriticalStrikeChance += o.CriticalStrikeChanceCorrection()
+			c.CriticalStrikeFactor += o.CriticalStrikeFactorCorrection()
+			c.CooldownReduction += o.CooldownReductionCorrection()
+			c.DamageThreatFactor += o.DamageThreatFactorCorrection()
+			c.HealingThreatFactor += o.HealingThreatFactorCorrection()
+		}
 	})
+	h.Object().UpdateCorrection(c)
 }

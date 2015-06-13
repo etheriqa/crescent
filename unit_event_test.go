@@ -3,6 +3,7 @@ package main
 import (
 	"testing"
 
+	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 )
 
@@ -15,7 +16,10 @@ func (m *MockedEventHandler) HandleEvent(e Event) {
 }
 
 func TestEventDispatcher(t *testing.T) {
-	dispatcher := NewEventDispatcher()
+	assert := assert.New(t)
+
+	dispatcher := MakeEventHandlerSet()
+	assert.Implements((*EventDispatcher)(nil), dispatcher)
 
 	a := new(MockedEventHandler)
 	a.On("HandleEvent", EventGameTick).Return().Times(3)
@@ -33,16 +37,16 @@ func TestEventDispatcher(t *testing.T) {
 
 	b := new(MockedEventHandler)
 	b.On("HandleEvent", EventGameTick).Return().Times(3)
-	b.On("HandleEvent", EventTicker).Return().Once()
+	b.On("HandleEvent", EventPeriodicalTick).Return().Once()
 	dispatcher.AddEventHandler(b, EventGameTick)
 	dispatcher.TriggerEvent(EventGameTick)
-	dispatcher.TriggerEvent(EventTicker)
-	dispatcher.AddEventHandler(b, EventTicker)
+	dispatcher.TriggerEvent(EventPeriodicalTick)
+	dispatcher.AddEventHandler(b, EventPeriodicalTick)
 	dispatcher.TriggerEvent(EventGameTick)
-	dispatcher.TriggerEvent(EventTicker)
-	dispatcher.RemoveEventHandler(b, EventTicker)
+	dispatcher.TriggerEvent(EventPeriodicalTick)
+	dispatcher.RemoveEventHandler(b, EventPeriodicalTick)
 	dispatcher.TriggerEvent(EventGameTick)
-	dispatcher.TriggerEvent(EventTicker)
+	dispatcher.TriggerEvent(EventPeriodicalTick)
 	dispatcher.RemoveEventHandler(b, EventGameTick)
 	b.AssertExpectations(t)
 

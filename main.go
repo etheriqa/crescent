@@ -2,14 +2,8 @@ package main
 
 import (
 	"flag"
-	"time"
 
 	"github.com/Sirupsen/logrus"
-)
-
-const (
-	GameTick   = time.Millisecond
-	TickerTick = time.Second
 )
 
 var addr = flag.String("addr", ":25200", "service address")
@@ -28,19 +22,10 @@ func main() {
 		"addr":  *addr,
 		"debug": *debug,
 	}).Info("Start up")
-	i := make(chan message)
-	o := make(chan message)
-	n := NewNetwork(i, o)
-	g := NewGame(i, o)
-	go n.Run(*addr)
-	go g.Run()
-	t := time.Tick(GameTick)
-	for {
-		select {
-		case <-t:
-			i <- message{
-				t: "sysTick",
-			}
-		}
-	}
+	i := make(chan Input, 1024)
+	o := make(chan Output, 1024)
+	network := NewNetwork(i, o)
+	instance := NewInstance(i, o)
+	go network.Run(*addr)
+	instance.Run()
 }

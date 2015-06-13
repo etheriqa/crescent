@@ -1,98 +1,208 @@
 package main
 
+import (
+	"errors"
+)
+
 type Activating struct {
-	PartialHandler
-	ability *Ability
+	UnitSubject
+	object         *Unit
+	ability        *Ability
+	expirationTime GameTime
+
+	clock    GameClock
+	handlers HandlerContainer
+	operator Operator
+	writer   GameEventWriter
 }
 
-// NewActivating returns a Activating handler
-func NewActivating(up UnitPair, ability *Ability) *Activating {
-	return &Activating{
-		PartialHandler: MakePartialHandler(up, ability.ActivationDuration),
-		ability:        ability,
-	}
-}
-
-// Ability returns the ability
-func (a *Activating) Ability() *Ability {
-	return a.ability
+// Ability returns the Ability
+func (h *Activating) Ability() *Ability {
+	return h.ability
 }
 
 // OnAttach checks requirements
-func (a *Activating) OnAttach() {
-	a.Subject().AddEventHandler(a, EventDead)
-	a.Subject().AddEventHandler(a, EventDisableInterrupt)
-	a.Subject().AddEventHandler(a, EventGameTick)
-	a.Subject().AddEventHandler(a, EventResourceDecreased)
-	if a.Object() != nil {
-		a.Object().AddEventHandler(a, EventDead)
-	}
-	ok := a.EverySubjectHandler(func(ha Handler) bool {
-		switch ha.(type) {
+func (h *Activating) OnAttach() {
+	ok := h.handlers.BindSubject(h).Every(func(o Handler) bool {
+		switch o.(type) {
 		case *Activating:
-			return false
+			if h != o {
+				return false
+			}
 		}
 		return true
 	})
 	if !ok {
-		a.Stop(a)
+		h.handlers.Detach(h)
 		return
 	}
-	if err := a.ability.CheckRequirements(a.Subject(), a.Object()); err != nil {
-		a.Stop(a)
+
+	if err := h.checkRequirements(); err != nil {
+		log.Debug(err)
+		h.handlers.Detach(h)
 		return
 	}
-	if a.IsExpired() {
-		a.perform()
+
+	if h.ability.ActivationDuration == 0 {
+		h.perform()
 		return
 	}
-	a.Publish(message{
-	// TODO pack message
-	})
+
+	h.Subject().AddEventHandler(h, EventGameTick)
+	h.Subject().AddEventHandler(h, EventDead)
+	h.Subject().AddEventHandler(h, EventDisabled)
+	h.Subject().AddEventHandler(h, EventTakenDamage)
+	if h.object != nil {
+		h.object.AddEventHandler(h, EventDead)
+	}
+	h.writer.Write(nil) // TODO
 }
 
-// OnDetach removes the EventHandlers
-func (a *Activating) OnDetach() {
-	a.Subject().RemoveEventHandler(a, EventDead)
-	a.Subject().RemoveEventHandler(a, EventDisableInterrupt)
-	a.Subject().RemoveEventHandler(a, EventGameTick)
-	a.Subject().RemoveEventHandler(a, EventResourceDecreased)
-	if a.Object() != nil {
-		a.Object().RemoveEventHandler(a, EventDead)
+// OnDetach does nothing
+func (h *Activating) OnDetach() {
+	h.Subject().RemoveEventHandler(h, EventGameTick)
+	h.Subject().RemoveEventHandler(h, EventDead)
+	h.Subject().RemoveEventHandler(h, EventDisabled)
+	h.Subject().RemoveEventHandler(h, EventTakenDamage)
+	if h.object != nil {
+		h.object.RemoveEventHandler(h, EventDead)
 	}
 }
 
-// HandleEvent handles the event
-func (a *Activating) HandleEvent(e Event) {
+// HandleEvent handles the Event
+func (h *Activating) HandleEvent(e Event) {
 	switch e {
-	case EventDead:
-		a.Stop(a)
-	case EventDisableInterrupt:
-		a.perform()
 	case EventGameTick:
-		a.perform()
-	case EventResourceDecreased:
-		a.perform()
+		if h.clock.Before(h.expirationTime) {
+			return
+		}
+		h.perform()
+	case EventDead:
+		h.handlers.Detach(h)
+		if h.Subject().IsAlive() {
+			h.writer.Write(nil) // TODO
+		}
+	case EventDisabled:
+		if err := h.checkDisable(); err != nil {
+			h.handlers.Detach(h)
+			h.writer.Write(nil) // TODO
+		}
+	case EventTakenDamage:
+		if err := h.checkResource(); err != nil {
+			h.handlers.Detach(h)
+			h.writer.Write(nil) // TODO
+		}
 	}
 }
 
-// perform performs the ability
-func (a *Activating) perform() {
-	if err := a.ability.CheckRequirements(a.Subject(), a.Object()); err != nil {
-		a.Publish(message{
-		// TODO pack message
-		})
-		a.Stop(a)
+// perform performs the Ability
+func (h *Activating) perform() {
+	if _, _, err := h.Subject().ModifyHealth(h.writer, -h.ability.HealthCost); err != nil {
+		log.Fatal(err)
 	}
-	if !a.IsExpired() {
-		return
+	if _, _, err := h.Subject().ModifyMana(h.writer, -h.ability.ManaCost); err != nil {
+		log.Fatal(err)
 	}
-	a.Publish(message{
-	// TODO pack message
+	h.ability.Perform(h.operator, h.Subject(), h.object)
+	// TODO perform ability
+	h.handlers.Detach(h)
+	h.operator.Cooldown(h.Subject(), h.ability)
+	h.writer.Write(nil) // TODO
+}
+
+// checkRequirements checks all requirements
+func (h *Activating) checkRequirements() error {
+	if err := h.checkObject(); err != nil {
+		return err
+	}
+	if err := h.checkCooldown(); err != nil {
+		return err
+	}
+	if err := h.checkDisable(); err != nil {
+		return err
+	}
+	if err := h.checkResource(); err != nil {
+		return err
+	}
+	return nil
+}
+
+// checkObject checks the Object is valid
+func (h *Activating) checkObject() error {
+	switch h.ability.TargetType {
+	case TargetTypeNone:
+		if h.object != nil {
+			return errors.New("The Object must be nil")
+		}
+	case TargetTypeFriend:
+		if h.object == nil {
+			return errors.New("The Object must be *Unit")
+		}
+		if h.object.Group() != h.Subject().Group() {
+			return errors.New("The Object must be friend")
+		}
+		if h.object.IsDead() {
+			return errors.New("The Object must be alive")
+		}
+	case TargetTypeEnemy:
+		if h.object == nil {
+			return errors.New("The Object must be *Unit")
+		}
+		if h.object.Group() == h.Subject().Group() {
+			return errors.New("The Object must be enemy")
+		}
+		if h.object.IsDead() {
+			return errors.New("The Object must be alive")
+		}
+	default:
+		return errors.New("Unknown TargetType")
+	}
+	return nil
+}
+
+// checkCooldown checks the Subject does not have to wait the Cooldown
+func (h *Activating) checkCooldown() error {
+	ok := h.handlers.BindObject(h.Subject()).Every(func(o Handler) bool {
+		switch o := o.(type) {
+		case *Cooldown:
+			if h.ability == o.Ability() {
+				return false
+			}
+		}
+		return true
 	})
-	a.Subject().ModifyHealth(a.ability.HealthCost)
-	a.Subject().ModifyMana(a.ability.ManaCost)
-	a.ability.Perform(a.UnitPair)
-	a.AttachHandler(NewCooldown(a.Subject(), a.ability))
-	a.Stop(a)
+	if ok {
+		return nil
+	}
+	return errors.New("The Object has to wait the Cooldown")
+}
+
+// checkDisable checks the Subject has not been interrupted by Disables
+func (h *Activating) checkDisable() error {
+	ok := h.handlers.BindObject(h.Subject()).Every(func(o Handler) bool {
+		switch o := o.(type) {
+		case *Disable:
+			for _, t := range h.ability.DisableTypes {
+				if o.disableType == t {
+					return false
+				}
+			}
+		}
+		return true
+	})
+	if ok {
+		return nil
+	}
+	return errors.New("The Object has been interrupted by Disables")
+}
+
+// checkResource checks the Subject has enough resource
+func (h *Activating) checkResource() error {
+	if h.Subject().Health() <= h.ability.HealthCost {
+		return errors.New("The Subject does not have enough health")
+	}
+	if h.Subject().Mana() < h.ability.ManaCost {
+		return errors.New("The Subject does not have enough mana")
+	}
+	return nil
 }

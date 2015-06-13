@@ -1,8 +1,8 @@
 package main
 
-func newClassTank() *Class {
+func NewClassTank() *Class {
 	var q, w, e, r *Ability
-	Class := &Class{
+	class := &Class{
 		Name: "Tank",
 		// TODO stats
 		Health:               1000,
@@ -29,18 +29,15 @@ func newClassTank() *Class {
 		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(up UnitPair) {
-			up.AttachHandler(NewCorrector(
-				up.Subject(),
-				UnitCorrection{
-					DamageThreatFactor: 1,
-				},
-				q.Name,
-				5,
-				10*Second,
-			))
-			// TODO handle the error
-			NewTrueDamage(up, 120).Perform()
+		Perform: func(op Operator, s Subject, o *Unit) {
+			c := UnitCorrection{
+				DamageThreatFactor: 1,
+			}
+			op.Correction(s.Subject(), c, 5, 10*Second, q.Name)
+			_, _, _, err := op.TrueDamage(s, o, 120).Perform()
+			if err != nil {
+				log.Fatal(err)
+			}
 		},
 	}
 	// Physical damage / Increasing AR & MR
@@ -54,19 +51,16 @@ func newClassTank() *Class {
 		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(up UnitPair) {
-			up.AttachHandler(NewCorrector(
-				up.Subject(),
-				UnitCorrection{
-					Armor:           50,
-					MagicResistance: 50,
-				},
-				w.Name,
-				1,
-				2*Second,
-			))
-			// TODO handle the error
-			NewPhysicalDamage(up, 200).Perform()
+		Perform: func(op Operator, s Subject, o *Unit) {
+			c := UnitCorrection{
+				Armor:           50,
+				MagicResistance: 50,
+			}
+			op.Correction(s.Subject(), c, 1, 2*Second, w.Name)
+			_, _, _, err := op.PhysicalDamage(s, o, 200).Perform()
+			if err != nil {
+				log.Fatal(err)
+			}
 		},
 	}
 	// Physical damage / Life steal
@@ -80,11 +74,12 @@ func newClassTank() *Class {
 		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(up UnitPair) {
-			// TODO handle the error
-			before, after, _, _ := NewPhysicalDamage(up, 300).Perform()
-			// TODO handle the error
-			NewPureHealing(MakeUnitPair(up.Subject(), up.Subject()), (before-after)*0.6).Perform()
+		Perform: func(op Operator, s Subject, o *Unit) {
+			before, after, _, err := op.PhysicalDamage(s, o, 300).Perform()
+			if err != nil {
+				log.Fatal(err)
+			}
+			s.Subject().ModifyHealth(op.Writer(), (before-after)*0.6)
 		},
 	}
 	// Increasing AR & MR
@@ -99,18 +94,13 @@ func newClassTank() *Class {
 			DisableTypeStun,
 			DisableTypeSilence,
 		},
-		Perform: func(up UnitPair) {
-			up.AttachHandler(NewCorrector(
-				up.Subject(),
-				UnitCorrection{
-					Armor:           150,
-					MagicResistance: 150,
-				},
-				r.Name,
-				1,
-				8*Second,
-			))
+		Perform: func(op Operator, s Subject, o *Unit) {
+			c := UnitCorrection{
+				Armor:           150,
+				MagicResistance: 150,
+			}
+			op.Correction(s.Subject(), c, 1, 8*Second, r.Name)
 		},
 	}
-	return Class
+	return class
 }

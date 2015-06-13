@@ -2,28 +2,29 @@ package main
 
 import (
 	"errors"
-
-	"github.com/Sirupsen/logrus"
 )
 
-const (
-	groupPlayer = iota
-	groupEnemy
-)
+type UnitID uint64
+type UnitGroup uint8
+type UnitPosition uint8
 
-type unitID uint64
+type Subject interface {
+	Subject() *Unit
+}
+
+type Object interface {
+	Object() *Unit
+}
 
 type Unit struct {
-	id         unitID
-	playerName string
-	unitName   string
-	group      uint8
-	seat       uint8
-	class      *Class
+	id         UnitID
+	group      UnitGroup
+	position   UnitPosition
+	class      Class
 	resource   UnitResource
 	correction UnitCorrection
-	*Game
-	*EventDispatcher
+
+	EventDispatcher
 }
 
 type UnitResource struct {
@@ -41,134 +42,116 @@ type UnitCorrection struct {
 	HealingThreatFactor  Statistic
 }
 
-// newUnit initializes a unit
-func NewUnit(game *Game, class *Class) *Unit {
-	return &Unit{
-		class:           class,
-		resource:        UnitResource{},
-		correction:      UnitCorrection{},
-		Game:            game,
-		EventDispatcher: NewEventDispatcher(),
-	}
+// Subject returns self
+func (u *Unit) Subject() *Unit {
+	return u
 }
 
+// Object returns self
+func (u *Unit) Object() *Unit {
+	return u
+}
+
+// Group returns the UnitGroup
+func (u *Unit) Group() UnitGroup {
+	return u.group
+}
+
+// Position returns the UnitPosition
+func (u *Unit) Position() UnitPosition {
+	return u.position
+}
+
+// IsAlive returns true if the Unit is alive
 func (u *Unit) IsAlive() bool {
 	return u.resource.Health > 0
 }
 
+// IsDead returns true if the Unit is Dead
 func (u *Unit) IsDead() bool {
 	return u.resource.Health <= 0
 }
 
+// Health returns amount of health
 func (u *Unit) Health() Statistic {
 	return u.resource.Health
 }
 
+// HealthMax returns maximum amount of health
 func (u *Unit) HealthMax() Statistic {
 	return u.class.Health
 }
 
+// HealthRegeneration returns regeneration speed of health
 func (u *Unit) HealthRegeneration() Statistic {
 	return u.class.HealthRegeneration
 }
 
+// Mana returns amount of mana
 func (u *Unit) Mana() Statistic {
 	return u.resource.Mana
 }
 
+// ManaMax returns maximum amount of mana
 func (u *Unit) ManaMax() Statistic {
 	return u.class.Mana
 }
 
+// ManaRegeneration return regeneration speed of mana
 func (u *Unit) ManaRegeneration() Statistic {
 	return u.class.ManaRegeneration
 }
 
+// Armor returns amount of armor
 func (u *Unit) Armor() Statistic {
 	return u.class.Armor + u.correction.Armor
 }
 
+// MagicResistance returns amount of MagicResistance
 func (u *Unit) MagicResistance() Statistic {
 	return u.class.MagicResistance + u.correction.MagicResistance
 }
 
+// PhysicalDamageReductionFactor returns damage reduction factor for physical damage
 func (u *Unit) PhysicalDamageReductionFactor() Statistic {
 	return damageReductionFactor(u.Armor())
 }
 
+// MagicDamageReductionFactor returns damage reduction factor for magic damage
 func (u *Unit) MagicDamageReductionFactor() Statistic {
 	return damageReductionFactor(u.MagicResistance())
 }
 
+// CriticalStrikeChance returns critical strike chance
 func (u *Unit) CriticalStrikeChance() Statistic {
 	return u.class.CriticalStrikeChance + u.correction.CriticalStrikeChance
 }
 
+// CriticalStrikeFactor returns critical strike factor
 func (u *Unit) CriticalStrikeFactor() Statistic {
 	return u.class.CriticalStrikeFactor + u.correction.CriticalStrikeFactor
 }
 
+// CooldownReduction returns amount of cooldown reduction
 func (u *Unit) CooldownReduction() Statistic {
 	return u.class.CooldownReduction + u.correction.CooldownReduction
 }
 
+// DamageThreatFactor returns threat factor for dealing damage
 func (u *Unit) DamageThreatFactor() Statistic {
 	return u.class.DamageThreatFactor + u.correction.DamageThreatFactor
 }
 
+// HealingThreatFactor returns threat factor for dealing healing
 func (u *Unit) HealingThreatFactor() Statistic {
 	return u.class.HealingThreatFactor + u.correction.HealingThreatFactor
 }
 
-// Ability returns the ability
-func (u *Unit) Ability(key string) *Ability {
-	return u.class.Ability(key)
-}
-
-// Friends returns the friend units
-func (u *Unit) Friends() []*Unit {
-	return u.Game.Friends(u)
-}
-
-// Enemies returns the enemy units
-func (u *Unit) Enemies() []*Unit {
-	return u.Game.Enemies(u)
-}
-
-// ForSubjectHandler calls the callback with the handler has this unit as subject
-func (u *Unit) ForSubjectHandler(callback func(Handler)) {
-	u.Game.ForSubjectHandler(u, callback)
-}
-
-// ForObjectHandler calls the callback with the handler has this unit as object
-func (u *Unit) ForObjectHandler(callback func(Handler)) {
-	u.Game.ForObjectHandler(u, callback)
-}
-
-// EverySubjectHandler returns true if all of callback results are true
-func (u *Unit) EverySubjectHandler(callback func(Handler) bool) bool {
-	return u.Game.EverySubjectHandler(u, callback)
-}
-
-// EveryObjectHandler returns true if all of callback results are true
-func (u *Unit) EveryObjectHandler(callback func(Handler) bool) bool {
-	return u.Game.EveryObjectHandler(u, callback)
-}
-
-// SomeSubjectHandler returns true if any of callback results are true
-func (u *Unit) SomeSubjectHandler(callback func(Handler) bool) bool {
-	return u.Game.SomeSubjectHandler(u, callback)
-}
-
-// SomeObjectHandler returns true if any of callback results are true
-func (u *Unit) SomeObjectHandler(callback func(Handler) bool) bool {
-	return u.Game.SomeObjectHandler(u, callback)
-}
-
-// ModifyHealth modifies the unit health and returns before/after health
-func (u *Unit) ModifyHealth(delta Statistic) (before, after Statistic, err error) {
+// ModifyHealth modifies health and returns before/after amount of health
+func (u *Unit) ModifyHealth(w GameEventWriter, delta Statistic) (before, after Statistic, err error) {
 	if u.IsDead() {
-		return u.Health(), u.Health(), errors.New("Cannot modify the health of dead unit")
+		err = errors.New("Cannot modify health of dead unit")
+		return
 	}
 	before = u.Health()
 	after = u.Health() + delta
@@ -178,23 +161,19 @@ func (u *Unit) ModifyHealth(delta Statistic) (before, after Statistic, err error
 	if after > u.HealthMax() {
 		after = u.HealthMax()
 	}
-	u.resource.Health = after
-	u.Publish(message{}) // TODO pack message
-	if delta < 0 {
-		switch {
-		case u.IsAlive():
-			u.TriggerEvent(EventResourceDecreased)
-		case u.IsDead():
-			u.TriggerEvent(EventDead)
-		}
+	if before == after {
+		return
 	}
+	u.resource.Health = after
+	w.Write(nil) // TODO
 	return
 }
 
-// ModifyMana modifies the unit mana and returns before/after mana
-func (u *Unit) ModifyMana(delta Statistic) (before, after Statistic, err error) {
+// ModifyMana modifies mana and returns before/after amount of mana
+func (u *Unit) ModifyMana(w GameEventWriter, delta Statistic) (before, after Statistic, err error) {
 	if u.IsDead() {
-		return u.Health(), u.Health(), errors.New("Cannot modify the mana of dead unit")
+		err = errors.New("Cannot modify mana of dead unit")
+		return
 	}
 	before = u.Mana()
 	after = u.Mana() + delta
@@ -204,68 +183,15 @@ func (u *Unit) ModifyMana(delta Statistic) (before, after Statistic, err error) 
 	if after > u.ManaMax() {
 		after = u.ManaMax()
 	}
-	u.resource.Mana = after
-	u.Publish(message{}) // TODO pack message
-	if delta < 0 {
-		u.TriggerEvent(EventResourceDecreased)
+	if before == after {
+		return
 	}
+	u.resource.Mana = after
+	w.Write(nil) // TODO
 	return
 }
 
-// GameTick triggers onComplete iff the handler is completed
-func (u *Unit) GameTick() {
-	if u.IsDead() {
-		return
-	}
-	u.TriggerEvent(EventGameTick)
-}
-
-// TickerTick performs regeneration and triggers eventTicker
-func (u *Unit) TickerTick() {
-	if u.IsDead() {
-		return
-	}
-	u.performHealthRegeneration()
-	u.performManaRegeneration()
-	u.TriggerEvent(EventTicker)
-}
-
-// ReloadCorrection updates the UnitCorrection
-func (u *Unit) ReloadCorrection() {
-	u.correction = UnitCorrection{}
-	u.ForSubjectHandler(func(ha Handler) {
-		switch ha := ha.(type) {
-		case *Corrector:
-			u.correction.Armor += ha.Armor()
-			u.correction.MagicResistance += ha.MagicResistance()
-			u.correction.CriticalStrikeChance += ha.CriticalStrikeChance()
-			u.correction.CriticalStrikeFactor += ha.CriticalStrikeFactor()
-			u.correction.CooldownReduction += ha.CooldownReduction()
-			u.correction.DamageThreatFactor += ha.DamageThreatFactor()
-			u.correction.HealingThreatFactor += ha.HealingThreatFactor()
-		}
-	})
-	u.Publish(message{
-	// TODO pack message
-	})
-}
-
-// performHealthRegeneration performs health regeneration
-func (u *Unit) performHealthRegeneration() {
-	_, _, err := u.ModifyHealth(u.HealthRegeneration())
-	if err != nil {
-		log.WithFields(logrus.Fields{
-			"err": err,
-		}).Panic("Failed unit.performHealthRegeneration")
-	}
-}
-
-// performManaRegeneration performs mana regeneration
-func (u *Unit) performManaRegeneration() {
-	_, _, err := u.ModifyMana(u.ManaRegeneration())
-	if err != nil {
-		log.WithFields(logrus.Fields{
-			"err": err,
-		}).Panic("Failed unit.performManaRegeneration")
-	}
+// UpdateCorrection updates the UnitCorrection
+func (u *Unit) UpdateCorrection(correction UnitCorrection) {
+	u.correction = correction
 }

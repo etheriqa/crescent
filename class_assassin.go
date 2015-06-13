@@ -1,23 +1,18 @@
 package main
 
-const assassinStack string = "Assassin Stack"
+const AssassinStackName = "Assassin Stack"
 
-func newAssassinStack(subject *Unit) *Corrector {
-	return NewCorrector(
-		subject,
-		UnitCorrection{
-			CriticalStrikeChance: 0.05,
-			CriticalStrikeFactor: 0.1,
-		},
-		assassinStack,
-		10,
-		10*Second,
-	)
+func AssassinStack(op Operator, o Object) {
+	c := UnitCorrection{
+		CriticalStrikeChance: 0.05,
+		CriticalStrikeFactor: 0.1,
+	}
+	op.Correction(o, c, 10, 10*Second, AssassinStackName)
 }
 
-func newClassAssassin() *Class {
+func NewClassAssassin() *Class {
 	var q, w, e, r *Ability
-	Class := &Class{
+	class := &Class{
 		Name: "Assassin",
 		// TODO stats
 		Health:               600,
@@ -44,8 +39,11 @@ func newClassAssassin() *Class {
 		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(up UnitPair) {
-			NewPhysicalDamage(up, 140).Perform()
+		Perform: func(op Operator, s Subject, o *Unit) {
+			_, _, _, err := op.PhysicalDamage(s, o, 140).Perform()
+			if err != nil {
+				log.Fatal(err)
+			}
 		},
 	}
 	// Physical damage / DoT / Increasing stacks
@@ -59,13 +57,12 @@ func newClassAssassin() *Class {
 		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(up UnitPair) {
-			NewPhysicalDamage(up, 80).Perform()
-			up.AttachHandler(NewTicker(
-				NewPhysicalDamage(up, 20),
-				w,
-				10*Second,
-			))
+		Perform: func(op Operator, s Subject, o *Unit) {
+			_, _, _, err := op.PhysicalDamage(s, o, 80).Perform()
+			if err != nil {
+				log.Fatal(err)
+			}
+			op.DoT(op.PhysicalDamage(s, o, 10), 10*Second, w.Name)
 		},
 	}
 	// Increasing stacks / Decreasing armor and magic resistance
@@ -79,19 +76,14 @@ func newClassAssassin() *Class {
 		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(up UnitPair) {
-			up.AttachHandler(NewCorrector(
-				up.Subject(),
-				UnitCorrection{
-					Armor:           -25,
-					MagicResistance: -25,
-				},
-				e.Name,
-				1,
-				8*Second,
-			))
+		Perform: func(op Operator, s Subject, o *Unit) {
+			c := UnitCorrection{
+				Armor:           -25,
+				MagicResistance: -25,
+			}
+			op.Correction(s.Subject(), c, 1, 8*Second, e.Name)
 			for i := 0; i < 2; i++ {
-				up.AttachHandler(newAssassinStack(up.Subject()))
+				AssassinStack(op, MakeObject(s.Subject()))
 			}
 		},
 	}
@@ -106,26 +98,29 @@ func newClassAssassin() *Class {
 		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(up UnitPair) {
+		Perform: func(op Operator, s Subject, o *Unit) {
 			stack := Statistic(0)
-			up.ForSubjectHandler(func(ha Handler) {
-				switch ha := ha.(type) {
-				case *Corrector:
-					if ha.name == assassinStack {
-						stack += Statistic(ha.Stack())
+			op.Handlers().Each(func(h Handler) {
+				switch h := h.(type) {
+				case *Correction:
+					if h.name == AssassinStackName {
+						stack += h.Stack()
 					}
 				}
 			})
-			NewPhysicalDamage(up, 400*stack*100).Perform()
-			up.ForSubjectHandler(func(ha Handler) {
-				switch ha := ha.(type) {
-				case *Corrector:
-					if ha.name == assassinStack {
-						up.DetachHandler(ha)
+			_, _, _, err := op.PhysicalDamage(s, o, 400+stack*100).Perform()
+			if err != nil {
+				log.Fatal(err)
+			}
+			op.Handlers().Each(func(h Handler) {
+				switch h := h.(type) {
+				case *Correction:
+					if h.name == AssassinStackName {
+						op.Handlers().Detach(h)
 					}
 				}
 			})
 		},
 	}
-	return Class
+	return class
 }

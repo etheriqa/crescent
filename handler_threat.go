@@ -1,54 +1,26 @@
 package main
 
 type Threat struct {
-	PartialHandler
+	UnitPair
 	threat Statistic
+
+	handlers HandlerContainer
 }
 
-// NewThreat returns a Threat handler
-func NewThreat(up UnitPair, t Statistic) *Threat {
-	return &Threat{
-		PartialHandler: MakePermanentPartialHandler(up),
-		threat:         t,
-	}
-}
-
-// NewDamageThreat initializes a threat handler with damage
-func NewDamageThreat(up UnitPair, d Statistic) *Threat {
-	return NewThreat(up, d*up.Object().DamageThreatFactor())
-}
-
-// NewHealingThreat initializes a threat handler with healing
-func NewHealingThreat(up UnitPair, h Statistic) *Threat {
-	return NewThreat(up, h*up.Object().HealingThreatFactor())
-}
-
-// OnAttach merges threat handlers they have same subject
-func (t *Threat) OnAttach() {
-	t.Subject().AddEventHandler(t, EventDead)
-	t.Object().AddEventHandler(t, EventDead)
-	t.ForSubjectHandler(func(ha Handler) {
-		switch ha := ha.(type) {
+// OnAttach merges Threat handlers
+func (h *Threat) OnAttach() {
+	h.handlers.BindSubject(h).BindObject(h).Each(func(o Handler) {
+		switch o := o.(type) {
 		case *Threat:
-			if ha == t || ha.Object() != t.Object() {
+			if o == h {
 				return
 			}
-			t.threat += ha.threat
-			ha.Stop(ha)
+			h.threat += o.threat
+			h.handlers.Detach(o)
 		}
 	})
 }
 
-// OnDetach removes the EventHandler
-func (t *Threat) OnDetach() {
-	t.Subject().RemoveEventHandler(t, EventDead)
-	t.Object().RemoveEventHandler(t, EventDead)
-}
-
-// HandleEvent handles the event
-func (t *Threat) HandleEvent(e Event) {
-	switch e {
-	case EventDead:
-		t.Stop(t)
-	}
+// OnDetach does nothing
+func (h *Threat) OnDetach() {
 }
