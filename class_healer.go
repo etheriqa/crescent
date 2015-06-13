@@ -31,7 +31,6 @@ func NewClassHealer() *Class {
 			DisableTypeStun,
 		},
 		Perform: func(op Operator, s Subject, o *Unit) {
-			// TODO handle the error
 			before, after, _, err := op.MagicDamage(s, o, 100).Perform()
 			if err != nil {
 				log.Fatal(err)
