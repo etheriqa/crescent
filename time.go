@@ -24,6 +24,26 @@ const (
 type InstanceClock interface {
 	Now() InstanceTime
 	Add(InstanceDuration) InstanceTime
-	Before(InstanceTime) bool
 	After(InstanceTime) bool
+	Before(InstanceTime) bool
+}
+
+// Now returns the InstanceTime
+func (t InstanceTime) Now() InstanceTime {
+	return t
+}
+
+// Add returns the InstanceTime t+d
+func (t InstanceTime) Add(d InstanceDuration) InstanceTime {
+	return t + InstanceTime(d)
+}
+
+// Before returns true if t is after u
+func (t InstanceTime) After(u InstanceTime) bool {
+	return t > u
+}
+
+// After returns true if t is before u
+func (t InstanceTime) Before(u InstanceTime) bool {
+	return t < u
 }
