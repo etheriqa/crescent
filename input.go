@@ -50,6 +50,9 @@ func DecodeInputFrame(p []byte) (interface{}, error) {
 	if err := json.Unmarshal(p, &f); err != nil {
 		return nil, err
 	}
+	if f.Data == nil {
+		return nil, errors.New("Input frame does not have data key")
+	}
 	var i InputChat
 	switch f.Type {
 	case "Chat":
