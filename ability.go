@@ -14,8 +14,8 @@ type Ability struct {
 	TargetType         TargetType
 	HealthCost         Statistic
 	ManaCost           Statistic
-	ActivationDuration GameDuration
-	CooldownDuration   GameDuration
+	ActivationDuration InstanceDuration
+	CooldownDuration   InstanceDuration
 	DisableTypes       []DisableType
 	Perform            func(Operator, Subject, *Unit)
 }

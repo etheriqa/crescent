@@ -4,7 +4,7 @@ type Periodical struct {
 	UnitPair
 	name           string
 	routine        func()
-	expirationTime GameTime
+	expirationTime InstanceTime
 
 	op Operator
 }

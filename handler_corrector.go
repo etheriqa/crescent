@@ -16,7 +16,7 @@ type Correction struct {
 	correction     UnitCorrection
 	stackLimit     Statistic
 	stack          Statistic
-	expirationTime GameTime
+	expirationTime InstanceTime
 
 	op Operator
 }

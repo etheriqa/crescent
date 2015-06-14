@@ -1,7 +1,7 @@
 package main
 
 type Game struct {
-	clock    GameClock
+	clock    InstanceClock
 	handlers HandlerContainer
 	units    UnitContainer
 

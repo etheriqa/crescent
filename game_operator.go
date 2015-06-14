@@ -1,7 +1,7 @@
 package main
 
 type Operator interface {
-	Clock() GameClock
+	Clock() InstanceClock
 	Handlers() HandlerContainer
 	Units() UnitContainer
 
@@ -9,12 +9,12 @@ type Operator interface {
 
 	Activating(Subject, *Unit, *Ability)
 	Cooldown(Object, *Ability)
-	Correction(Object, UnitCorrection, Statistic, GameDuration, string)
-	Disable(Object, DisableType, GameDuration)
+	Correction(Object, UnitCorrection, Statistic, InstanceDuration, string)
+	Disable(Object, DisableType, InstanceDuration)
 	DamageThreat(Subject, Object, Statistic)
 	HealingThreat(Subject, Object, Statistic)
-	DoT(*Damage, GameDuration, string)
-	HoT(*Healing, GameDuration, string)
+	DoT(*Damage, InstanceDuration, string)
+	HoT(*Healing, InstanceDuration, string)
 
 	PhysicalDamage(Subject, Object, Statistic) *Damage
 	MagicDamage(Subject, Object, Statistic) *Damage
@@ -24,8 +24,8 @@ type Operator interface {
 	Healing(Subject, Object, Statistic) *Healing
 }
 
-// Clock returns the GameClock
-func (g *Game) Clock() GameClock {
+// Clock returns the InstanceClock
+func (g *Game) Clock() InstanceClock {
 	return g.clock
 }
 
@@ -68,7 +68,7 @@ func (g *Game) Cooldown(o Object, a *Ability) {
 }
 
 // Correction attaches a Correction Handler
-func (g *Game) Correction(o Object, c UnitCorrection, l Statistic, d GameDuration, name string) {
+func (g *Game) Correction(o Object, c UnitCorrection, l Statistic, d InstanceDuration, name string) {
 	g.handlers.Attach(&Correction{
 		UnitObject:     MakeObject(o),
 		name:           name,
@@ -82,7 +82,7 @@ func (g *Game) Correction(o Object, c UnitCorrection, l Statistic, d GameDuratio
 }
 
 // Disable attaches a Disable Handler
-func (g *Game) Disable(o Object, t DisableType, d GameDuration) {
+func (g *Game) Disable(o Object, t DisableType, d InstanceDuration) {
 	g.handlers.Attach(&Disable{
 		UnitObject:     MakeObject(o),
 		disableType:    t,
@@ -113,7 +113,7 @@ func (g *Game) HealingThreat(s Subject, o Object, h Statistic) {
 }
 
 // DoT attaches a Periodical Handler
-func (g *Game) DoT(damage *Damage, d GameDuration, name string) {
+func (g *Game) DoT(damage *Damage, d InstanceDuration, name string) {
 	g.handlers.Attach(&Periodical{
 		UnitPair:       MakePair(damage, damage),
 		name:           name,
@@ -125,7 +125,7 @@ func (g *Game) DoT(damage *Damage, d GameDuration, name string) {
 }
 
 // HoT attaches a Periodical Handler
-func (g *Game) HoT(healing *Healing, d GameDuration, name string) {
+func (g *Game) HoT(healing *Healing, d InstanceDuration, name string) {
 	g.handlers.Attach(&Periodical{
 		UnitPair:       MakePair(healing, healing),
 		name:           name,

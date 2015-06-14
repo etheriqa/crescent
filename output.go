@@ -18,13 +18,13 @@ type OutputFrame struct {
 
 type OutputHello struct {
 	RealGameTick   time.Duration
-	GameTime       GameTime
+	InstanceTime       InstanceTime
 	UnitList       []OutputUnitJoin
 	AttachmentList []OutputUnitAttach
 }
 
 type OutputSync struct {
-	GameTime GameTime
+	InstanceTime InstanceTime
 }
 
 type OutputMessage struct {
@@ -56,7 +56,7 @@ type OutputUnitAttach struct {
 	UnitID         UnitID
 	AttachmentName string
 	Stack          Statistic
-	ExpirationTime GameTime
+	ExpirationTime InstanceTime
 }
 
 type OutputUnitDetach struct {
@@ -67,8 +67,8 @@ type OutputUnitDetach struct {
 type OutputUnitActivating struct {
 	UnitID             UnitID
 	AbilityName        string
-	ActivationDuration GameDuration
-	ExpirationTime     GameTime
+	ActivationDuration InstanceDuration
+	ExpirationTime     InstanceTime
 }
 
 type OutputUnitActivated struct {
@@ -80,7 +80,7 @@ type OutputUnitActivated struct {
 type OutputUnitCooldown struct {
 	UnitID         UnitID
 	AbilityName    string
-	ExpirationTime GameTime
+	ExpirationTime InstanceTime
 }
 
 type OutputUnitResource struct {

@@ -12,7 +12,7 @@ const (
 type Disable struct {
 	UnitObject
 	disableType    DisableType
-	expirationTime GameTime
+	expirationTime InstanceTime
 
 	op Operator
 }

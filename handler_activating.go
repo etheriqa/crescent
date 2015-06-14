@@ -8,7 +8,7 @@ type Activating struct {
 	UnitSubject
 	object         *Unit
 	ability        *Ability
-	expirationTime GameTime
+	expirationTime InstanceTime
 
 	op Operator
 }

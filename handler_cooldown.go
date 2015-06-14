@@ -3,7 +3,7 @@ package main
 type Cooldown struct {
 	UnitObject
 	ability        *Ability
-	expirationTime GameTime
+	expirationTime InstanceTime
 
 	op Operator
 }
