@@ -82,9 +82,9 @@ func (h *Correction) OnAttach() {
 	if h.stack > h.stackLimit {
 		h.stack = h.stackLimit
 	}
+	h.writeOutputUnitAttach()
 	h.Object().AddEventHandler(h, EventGameTick)
 	h.updateCorrection()
-	h.op.Writer().Write(nil) // TODO
 }
 
 // OnDetach updates the UnitCorrection of the Object
@@ -100,8 +100,8 @@ func (h *Correction) HandleEvent(e Event) {
 		if h.op.Clock().Before(h.expirationTime) {
 			return
 		}
+		h.writeOutputUnitDetach()
 		h.op.Handlers().Detach(h)
-		h.op.Writer().Write(nil) // TODO
 	}
 }
 
@@ -121,4 +121,22 @@ func (h *Correction) updateCorrection() {
 		}
 	})
 	h.Object().UpdateCorrection(c)
+}
+
+// writeOutputUnitAttach writes a OutputUnitAttach
+func (h *Correction) writeOutputUnitAttach() {
+	h.op.Writer().Write(OutputUnitAttach{
+		UnitID:         h.Object().ID(),
+		AttachmentName: h.name,
+		Stack:          h.stack,
+		ExpirationTime: h.expirationTime,
+	})
+}
+
+// writeOutputUnitDetach writes a OutputUnitDetach
+func (h *Correction) writeOutputUnitDetach() {
+	h.op.Writer().Write(OutputUnitDetach{
+		UnitID:         h.Object().ID(),
+		AttachmentName: h.name,
+	})
 }

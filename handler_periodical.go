@@ -29,10 +29,10 @@ func (h *Periodical) OnAttach() {
 		return
 	}
 
+	h.writeOutputUnitAttach()
 	h.Object().AddEventHandler(h, EventGameTick)
 	h.Object().AddEventHandler(h, EventPeriodicalTick)
 	h.Object().AddEventHandler(h, EventDead)
-	h.op.Writer().Write(nil) // TODO
 }
 
 // OnDetach does nothing
@@ -51,9 +51,26 @@ func (h *Periodical) HandleEvent(e Event) {
 		if h.op.Clock().Before(h.expirationTime) {
 			return
 		}
+		h.writeOutputUnitDetach()
 		h.op.Handlers().Detach(h)
-		h.op.Writer().Write(nil) // TODO
 	case EventPeriodicalTick:
 		h.routine()
 	}
+}
+
+// writeOutputUnitAttach writes a OutputUnitAttach
+func (h *Periodical) writeOutputUnitAttach() {
+	h.op.Writer().Write(OutputUnitAttach{
+		UnitID:         h.Object().ID(),
+		AttachmentName: h.name,
+		ExpirationTime: h.expirationTime,
+	})
+}
+
+// writeOutputUnitDetach writes a OutputUnitDetach
+func (h *Periodical) writeOutputUnitDetach() {
+	h.op.Writer().Write(OutputUnitDetach{
+		UnitID:         h.Object().ID(),
+		AttachmentName: h.name,
+	})
 }

@@ -71,7 +71,14 @@ type OutputUnitActivating struct {
 	ExpirationTime     GameTime
 }
 
+type OutputUnitActivated struct {
+	UnitID      UnitID
+	AbilityName string
+	OK          bool
+}
+
 type OutputUnitCooldown struct {
+	UnitID         UnitID
 	AbilityName    string
 	ExpirationTime GameTime
 }
@@ -119,6 +126,8 @@ func EncodeOutputFrame(o interface{}) ([]byte, error) {
 		f.Type = "UnitDetach"
 	case OutputUnitActivating:
 		f.Type = "UnitActivating"
+	case OutputUnitActivated:
+		f.Type = "UnitActivated"
 	case OutputUnitCooldown:
 		f.Type = "UnitCooldown"
 	case OutputUnitResource:

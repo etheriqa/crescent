@@ -52,7 +52,8 @@ func (h *Activating) OnAttach() {
 	if h.object != nil {
 		h.object.AddEventHandler(h, EventDead)
 	}
-	h.op.Writer().Write(nil) // TODO
+
+	h.writeOutputUnitActivating()
 }
 
 // OnDetach does nothing
@@ -75,25 +76,29 @@ func (h *Activating) HandleEvent(e Event) {
 		}
 		h.perform()
 	case EventDead:
+		h.writeOutputUnitActivated(false)
 		h.op.Handlers().Detach(h)
-		if h.Subject().IsAlive() {
-			h.op.Writer().Write(nil) // TODO
+		if h.Subject().IsDead() {
+			return
 		}
 	case EventDisabled:
-		if err := h.checkDisable(); err != nil {
-			h.op.Handlers().Detach(h)
-			h.op.Writer().Write(nil) // TODO
+		if err := h.checkDisable(); err == nil {
+			return
 		}
+		h.writeOutputUnitActivated(false)
+		h.op.Handlers().Detach(h)
 	case EventTakenDamage:
-		if err := h.checkResource(); err != nil {
-			h.op.Handlers().Detach(h)
-			h.op.Writer().Write(nil) // TODO
+		if err := h.checkResource(); err == nil {
+			return
 		}
+		h.writeOutputUnitActivated(false)
+		h.op.Handlers().Detach(h)
 	}
 }
 
 // perform performs the Ability
 func (h *Activating) perform() {
+	h.writeOutputUnitActivated(true)
 	if _, _, err := h.Subject().ModifyHealth(h.op.Writer(), -h.ability.HealthCost); err != nil {
 		log.Fatal(err)
 	}
@@ -101,10 +106,8 @@ func (h *Activating) perform() {
 		log.Fatal(err)
 	}
 	h.ability.Perform(h.op, h.Subject(), h.object)
-	// TODO perform ability
 	h.op.Handlers().Detach(h)
 	h.op.Cooldown(h.Subject(), h.ability)
-	h.op.Writer().Write(nil) // TODO
 }
 
 // checkRequirements checks all requirements
@@ -202,4 +205,23 @@ func (h *Activating) checkResource() error {
 		return errors.New("The Subject does not have enough mana")
 	}
 	return nil
+}
+
+// writeOutputUnitActivating writes a OutputUnitActivating
+func (h *Activating) writeOutputUnitActivating() {
+	h.op.Writer().Write(OutputUnitActivating{
+		UnitID:             h.Subject().ID(),
+		AbilityName:        h.ability.Name,
+		ActivationDuration: h.ability.ActivationDuration,
+		ExpirationTime:     h.expirationTime,
+	})
+}
+
+// writeOutputUnitActivated writes a OutputUnitActivated
+func (h *Activating) writeOutputUnitActivated(ok bool) {
+	h.op.Writer().Write(OutputUnitActivated{
+		UnitID:      h.Subject().ID(),
+		AbilityName: h.ability.Name,
+		OK:          ok,
+	})
 }

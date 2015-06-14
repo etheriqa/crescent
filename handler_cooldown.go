@@ -31,8 +31,8 @@ func (h *Cooldown) OnAttach() {
 	}
 
 	h.expirationTime = h.op.Clock().Add(h.ability.CooldownDuration)
+	h.writeOutputUnitCooldown()
 	h.Object().AddEventHandler(h, EventGameTick)
-	h.op.Writer().Write(nil) // TODO
 }
 
 // OnDetach does nothing
@@ -47,7 +47,17 @@ func (h *Cooldown) HandleEvent(e Event) {
 		if h.op.Clock().Before(h.expirationTime) {
 			return
 		}
+		h.writeOutputUnitCooldown()
 		h.op.Handlers().Detach(h)
-		h.op.Writer().Write(nil) // TODO
 	}
+}
+
+// writeOutputUnitCooldown writes a OutputUnitCooldown
+func (h *Cooldown) writeOutputUnitCooldown() {
+	// TODO write to only the object
+	h.op.Writer().Write(OutputUnitCooldown{
+		UnitID:         h.Object().ID(),
+		AbilityName:    h.ability.Name,
+		ExpirationTime: h.expirationTime,
+	})
 }

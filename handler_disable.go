@@ -37,9 +37,9 @@ func (h *Disable) OnAttach() {
 		return
 	}
 
+	h.writeOutputUnitAttach()
 	h.Object().AddEventHandler(h, EventGameTick)
 	h.Object().AddEventHandler(h, EventDead)
-	h.op.Writer().Write(nil) // TODO
 	h.Object().TriggerEvent(EventDisabled)
 }
 
@@ -56,9 +56,26 @@ func (h *Disable) HandleEvent(e Event) {
 		if h.op.Clock().Before(h.expirationTime) {
 			return
 		}
+		h.writeOutputUnitDetach()
 		h.op.Handlers().Detach(h)
-		h.op.Writer().Write(nil) // TODO
 	case EventDead:
 		h.op.Handlers().Detach(h)
 	}
+}
+
+// writeOutputUnitAttach writes a OutputUnitAttach
+func (h *Disable) writeOutputUnitAttach() {
+	h.op.Writer().Write(OutputUnitAttach{
+		UnitID:         h.Object().ID(),
+		AttachmentName: "Disable", // TODO
+		ExpirationTime: h.expirationTime,
+	})
+}
+
+// writeOutputUnitDetach writes a OutputUnitDetach
+func (h *Disable) writeOutputUnitDetach() {
+	h.op.Writer().Write(OutputUnitDetach{
+		UnitID:         h.Object().ID(),
+		AttachmentName: "Disable", // TODO
+	})
 }
