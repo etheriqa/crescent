@@ -165,7 +165,7 @@ func (u *Unit) ModifyHealth(w InstanceOutputWriter, delta Statistic) (before, af
 		return
 	}
 	u.resource.Health = after
-	w.Write(nil) // TODO
+	u.writeOutputUnitResource(w)
 	return
 }
 
@@ -187,11 +187,20 @@ func (u *Unit) ModifyMana(w InstanceOutputWriter, delta Statistic) (before, afte
 		return
 	}
 	u.resource.Mana = after
-	w.Write(nil) // TODO
+	u.writeOutputUnitResource(w)
 	return
 }
 
 // UpdateCorrection updates the UnitCorrection
 func (u *Unit) UpdateCorrection(correction UnitCorrection) {
 	u.correction = correction
+}
+
+// writeOutputUnitResource write a OutputUnitResource
+func (u *Unit) writeOutputUnitResource(w InstanceOutputWriter) {
+	w.Write(OutputUnitResource{
+		UnitID: u.id,
+		Health: u.Health(),
+		Mana:   u.Mana(),
+	})
 }
