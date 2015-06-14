@@ -22,10 +22,10 @@ func main() {
 		"addr":  *addr,
 		"debug": *debug,
 	}).Info("Start up")
-	i := make(chan Input, 1024)
-	o := make(chan Output, 1024)
-	network := NewNetwork(i, o)
+	i := MakeInstanceInput(1024)
+	o := MakeInstanceOutput(1024)
 	instance := NewInstance(i, o)
-	go network.Run(*addr)
-	instance.Run()
+	network := NewNetwork(o, i)
+	go instance.Run()
+	network.Run(*addr)
 }

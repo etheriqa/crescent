@@ -9,17 +9,17 @@ import (
 type Instance struct {
 	name map[ClientID]ClientName
 
-	ichan chan Input
-	ochan chan Output
+	r InstanceInput
+	w InstanceOutputWriter
 }
 
 // NewInstance returns a Instance
-func NewInstance(i chan Input, o chan Output) *Instance {
+func NewInstance(r InstanceInput, w InstanceOutputWriter) *Instance {
 	return &Instance{
 		name: make(map[ClientID]ClientName),
 
-		ichan: i,
-		ochan: o,
+		r: r,
+		w: w,
 	}
 }
 
@@ -27,7 +27,7 @@ func NewInstance(i chan Input, o chan Output) *Instance {
 func (i *Instance) Run() {
 	for {
 		select {
-		case input, ok := <-i.ichan:
+		case input, ok := <-i.r:
 			if !ok {
 				log.Fatal("Cannot read from the input channel")
 			}
@@ -55,17 +55,12 @@ func (i *Instance) Run() {
 func (i *Instance) connect(id ClientID, input InputConnect) {
 	i.name[id] = input.ClientName
 
-	i.ochan <- Output{
-		ClientID: id,
-		Output: OutputMessage{
-			Message: "Welcome to the Crescent!",
-		},
-	}
-	i.ochan <- Output{
-		Output: OutputMessage{
-			Message: fmt.Sprintf("%s has connected.", input.ClientName),
-		},
-	}
+	i.w.BindClientID(id).Write(OutputMessage{
+		Message: "Welcome to the Crescent!",
+	})
+	i.w.Write(OutputMessage{
+		Message: fmt.Sprintf("%s has connected.", input.ClientName),
+	})
 }
 
 // disconnect
@@ -73,11 +68,9 @@ func (i *Instance) disconnect(id ClientID, input InputDisconnect) {
 	name := i.name[id]
 	delete(i.name, id)
 
-	i.ochan <- Output{
-		Output: OutputMessage{
-			Message: fmt.Sprintf("%s has disconnected.", name),
-		},
-	}
+	i.w.Write(OutputMessage{
+		Message: fmt.Sprintf("%s has disconnected.", name),
+	})
 }
 
 // chat
@@ -85,12 +78,10 @@ func (i *Instance) chat(id ClientID, input InputChat) {
 	name := i.name[id]
 	message := input.Message
 
-	i.ochan <- Output{
-		Output: OutputChat{
-			ClientName: i.name[id],
-			Message:    input.Message,
-		},
-	}
+	i.w.Write(OutputChat{
+		ClientName: i.name[id],
+		Message:    input.Message,
+	})
 	log.WithFields(logrus.Fields{
 		"type":    "chat",
 		"name":    name,

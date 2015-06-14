@@ -17,8 +17,8 @@ type Network struct {
 	id   map[ClientID]*Client
 	name map[ClientName]bool
 
-	ichan chan Input
-	ochan chan Output
+	r InstanceOutput
+	w InstanceInputWriter
 }
 
 type Client struct {
@@ -29,15 +29,15 @@ type Client struct {
 }
 
 // NewNetwork returns a Network
-func NewNetwork(i chan Input, o chan Output) *Network {
+func NewNetwork(r InstanceOutput, w InstanceInputWriter) *Network {
 	return &Network{
 		mu:   new(sync.RWMutex),
 		seq:  0,
 		id:   make(map[ClientID]*Client),
 		name: make(map[ClientName]bool),
 
-		ichan: i,
-		ochan: o,
+		r: r,
+		w: w,
 	}
 }
 
@@ -108,12 +108,9 @@ func (n *Network) wsHandler(w http.ResponseWriter, r *http.Request) {
 func (n *Network) register(c *Client) {
 	n.id[c.id] = c
 	n.name[c.name] = true
-	n.ichan <- Input{
-		ClientID: c.id,
-		Input: InputConnect{
-			ClientName: c.name,
-		},
-	}
+	n.w.Write(c.id, InputConnect{
+		ClientName: c.name,
+	})
 	log.WithFields(logrus.Fields{
 		"id":   c.id,
 		"name": c.name,
@@ -130,10 +127,7 @@ func (n *Network) unregister(c *Client) {
 	delete(n.name, c.name)
 	close(c.buf)
 	c.ws.Close()
-	n.ichan <- Input{
-		ClientID: c.id,
-		Input:    InputDisconnect{},
-	}
+	n.w.Write(c.id, InputDisconnect{})
 	log.WithFields(logrus.Fields{
 		"id":   c.id,
 		"name": c.name,
@@ -164,10 +158,7 @@ func (n *Network) receiver(c *Client) {
 			}).Warn("Failed DecodeInputFrame()")
 			return
 		}
-		n.ichan <- Input{
-			ClientID: c.id,
-			Input:    in,
-		}
+		n.w.Write(c.id, in)
 	}
 }
 
@@ -205,7 +196,7 @@ func (n *Network) sender(c *Client) {
 func (n *Network) dispatcher() {
 	for {
 		select {
-		case out, ok := <-n.ochan:
+		case out, ok := <-n.r:
 			if !ok {
 				log.Fatal("Cannot read from the output channel")
 			}
