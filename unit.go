@@ -5,6 +5,7 @@ import (
 )
 
 type UnitID uint64
+type UnitName string
 type UnitGroup uint8
 type UnitPosition uint8
 
@@ -18,6 +19,7 @@ type Object interface {
 
 type Unit struct {
 	id         UnitID
+	name       UnitName
 	group      UnitGroup
 	position   UnitPosition
 	class      Class
@@ -55,6 +57,11 @@ func (u *Unit) Object() *Unit {
 // ID returns the UnitID
 func (u *Unit) ID() UnitID {
 	return u.id
+}
+
+// Name returns the UnitName
+func (u *Unit) Name() UnitName {
+	return u.name
 }
 
 // Group returns the UnitGroup

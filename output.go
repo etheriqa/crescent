@@ -18,7 +18,7 @@ type OutputFrame struct {
 
 type OutputHello struct {
 	RealGameTick   time.Duration
-	InstanceTime       InstanceTime
+	InstanceTime   InstanceTime
 	UnitList       []OutputUnitJoin
 	AttachmentList []OutputUnitAttach
 }
@@ -40,7 +40,7 @@ type OutputUnitJoin struct {
 	UnitID       UnitID
 	UnitGroup    UnitGroup
 	UnitPosition UnitPosition
-	UnitName     string
+	UnitName     UnitName
 	ClassName    string
 	Health       Statistic
 	HealthMax    Statistic
