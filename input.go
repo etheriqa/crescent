@@ -38,7 +38,7 @@ type InputLeave struct {
 }
 
 type InputAbility struct {
-	AblityName   string
+	AbilityName  string
 	ObjectUnitID UnitID
 }
 
