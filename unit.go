@@ -19,12 +19,12 @@ type Object interface {
 
 type Unit struct {
 	id         UnitID
-	name       UnitName
 	group      UnitGroup
 	position   UnitPosition
-	class      Class
+	name       UnitName
 	resource   UnitResource
 	correction UnitCorrection
+	class      *Class
 
 	EventDispatcher
 }
@@ -44,6 +44,22 @@ type UnitCorrection struct {
 	HealingThreatFactor  Statistic
 }
 
+// NewUnit returns a Unit
+func NewUnit(id UnitID, group UnitGroup, position UnitPosition, name UnitName, class *Class) *Unit {
+
+	return &Unit{
+		id:         id,
+		name:       name,
+		group:      group,
+		position:   position,
+		resource:   MakeUnitResource(class),
+		correction: MakeUnitCorrection(),
+		class:      class,
+
+		EventDispatcher: MakeEventHandlerSet(),
+	}
+}
+
 // Subject returns self
 func (u *Unit) Subject() *Unit {
 	return u
@@ -59,11 +75,6 @@ func (u *Unit) ID() UnitID {
 	return u.id
 }
 
-// Name returns the UnitName
-func (u *Unit) Name() UnitName {
-	return u.name
-}
-
 // Group returns the UnitGroup
 func (u *Unit) Group() UnitGroup {
 	return u.group
@@ -72,6 +83,16 @@ func (u *Unit) Group() UnitGroup {
 // Position returns the UnitPosition
 func (u *Unit) Position() UnitPosition {
 	return u.position
+}
+
+// Name returns the UnitName
+func (u *Unit) Name() UnitName {
+	return u.name
+}
+
+// ClassName returns the class name
+func (u *Unit) ClassName() string {
+	return u.class.Name
 }
 
 // IsAlive returns true if the Unit is alive
@@ -215,4 +236,17 @@ func (u *Unit) writeOutputUnitResource(w InstanceOutputWriter) {
 		Health: u.Health(),
 		Mana:   u.Mana(),
 	})
+}
+
+// MakeUnitResource returns a UnitResource
+func MakeUnitResource(class *Class) UnitResource {
+	return UnitResource{
+		Health: class.Health,
+		Mana:   class.Mana,
+	}
+}
+
+// MakeUnitCorrection returns a UnitCorrection
+func MakeUnitCorrection() UnitCorrection {
+	return UnitCorrection{}
 }

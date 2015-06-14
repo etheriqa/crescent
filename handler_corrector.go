@@ -107,7 +107,7 @@ func (h *Correction) HandleEvent(e Event) {
 
 // updateCorrection updates the UnitCorrection of the Object
 func (h *Correction) updateCorrection() {
-	c := UnitCorrection{}
+	c := MakeUnitCorrection()
 	h.op.Handlers().BindObject(h).Each(func(o Handler) {
 		switch o := o.(type) {
 		case Corrector:
