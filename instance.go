@@ -2,22 +2,28 @@ package main
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/Sirupsen/logrus"
 )
 
 type Instance struct {
+	time *InstanceTime
 	name map[ClientID]ClientName
 
+	g *Game
 	r InstanceInput
 	w InstanceOutputWriter
 }
 
 // NewInstance returns a Instance
 func NewInstance(r InstanceInput, w InstanceOutputWriter) *Instance {
+	time := new(InstanceTime)
 	return &Instance{
+		time: time,
 		name: make(map[ClientID]ClientName),
 
+		g: NewGame(time, w),
 		r: r,
 		w: w,
 	}
@@ -25,8 +31,13 @@ func NewInstance(r InstanceInput, w InstanceOutputWriter) *Instance {
 
 // Run starts the instance routine
 func (i *Instance) Run() {
+	t := time.Tick(RealGameTick)
 	for {
 		select {
+		case <-t:
+			// TODO
+			*i.time = i.time.Add(GameTick)
+			log.WithField("time", i.g.clock.Now()).Debug("tick!")
 		case input, ok := <-i.r:
 			if !ok {
 				log.Fatal("Cannot read from the input channel")

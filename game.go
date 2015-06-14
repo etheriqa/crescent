@@ -8,6 +8,15 @@ type Game struct {
 	w InstanceOutputWriter
 }
 
+// NewGame returns a Game
+func NewGame(clock InstanceClock, w InstanceOutputWriter) *Game {
+	return &Game{
+		clock: clock,
+
+		w: w,
+	}
+}
+
 // PerformRegeneration performs health regeneration and mana regeneration
 func (g *Game) PerformRegeneration() {
 	g.units.Each(func(u *Unit) {
