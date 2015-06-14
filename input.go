@@ -39,7 +39,7 @@ type InputLeave struct {
 
 type InputAbility struct {
 	AbilityName  string
-	ObjectUnitID UnitID
+	ObjectUnitID *UnitID
 }
 
 type InputInterrupt struct {

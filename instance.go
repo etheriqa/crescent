@@ -142,5 +142,9 @@ func (i *Instance) leave(id ClientID, input InputLeave) {
 func (i *Instance) ability(id ClientID, input InputAbility) {
 	// TODO WIP
 	u := i.g.units.Find(0)
-	i.g.Activating(u, i.g.units.Find(input.ObjectUnitID), u.Ability(input.AbilityName))
+	if input.ObjectUnitID == nil {
+		i.g.Activating(u, nil, u.Ability(input.AbilityName))
+	} else {
+		i.g.Activating(u, i.g.units.Find(*input.ObjectUnitID), u.Ability(input.AbilityName))
+	}
 }
