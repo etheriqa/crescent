@@ -53,27 +53,38 @@ func DecodeInputFrame(p []byte) (interface{}, error) {
 	if f.Data == nil {
 		return nil, errors.New("Input frame does not have data key")
 	}
-	var i InputChat
+	err := errors.New("Unknown input type: " + f.Type)
 	switch f.Type {
 	case "Chat":
-		i = InputChat{}
-		/*
-			case "Stage":
-				i = InputStage{}
-			case "Join":
-				i = InputJoin{}
-			case "Leave":
-				i = InputLeave{}
-			case "Ability":
-				i = InputAbility{}
-			case "Interrupt":
-				i = InputInterrupt{}
-		*/
-	default:
-		return nil, errors.New("Unknown input type: " + f.Type)
+		i := InputChat{}
+		if err := json.Unmarshal(*f.Data, &i); err == nil {
+			return i, nil
+		}
+	case "Stage":
+		i := InputStage{}
+		if err := json.Unmarshal(*f.Data, &i); err == nil {
+			return i, nil
+		}
+	case "Join":
+		i := InputJoin{}
+		if err := json.Unmarshal(*f.Data, &i); err == nil {
+			return i, nil
+		}
+	case "Leave":
+		i := InputLeave{}
+		if err := json.Unmarshal(*f.Data, &i); err == nil {
+			return i, nil
+		}
+	case "Ability":
+		i := InputAbility{}
+		if err := json.Unmarshal(*f.Data, &i); err == nil {
+			return i, nil
+		}
+	case "Interrupt":
+		i := InputInterrupt{}
+		if err := json.Unmarshal(*f.Data, &i); err == nil {
+			return i, nil
+		}
 	}
-	if err := json.Unmarshal(*f.Data, &i); err != nil {
-		return nil, err
-	}
-	return i, nil
+	return nil, err
 }
