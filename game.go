@@ -21,14 +21,22 @@ func NewGame(clock InstanceClock, w InstanceOutputWriter) *Game {
 
 // PerformGameTick performs the game tick routine
 func (g *Game) PerformGameTick() {
-	// TODO
-	log.WithField("time", g.clock.Now()).Debug("GameTick")
+	g.units.Each(func(u *Unit) {
+		if u.IsDead() {
+			return
+		}
+		u.TriggerEvent(EventGameTick)
+	})
 }
 
 // PerformPeriodicalTick performs the periodical rick routine
 func (g *Game) PerformPeriodicalTick() {
-	// TODO
-	log.WithField("time", g.clock.Now()).Debug("PeriodicalTick")
+	g.units.Each(func(u *Unit) {
+		if u.IsDead() {
+			return
+		}
+		u.TriggerEvent(EventPeriodicalTick)
+	})
 }
 
 // PerformRegenerationTick performs the regeneration tick routine
