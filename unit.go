@@ -52,6 +52,11 @@ func (u *Unit) Object() *Unit {
 	return u
 }
 
+// ID returns the UnitID
+func (u *Unit) ID() UnitID {
+	return u.id
+}
+
 // Group returns the UnitGroup
 func (u *Unit) Group() UnitGroup {
 	return u.group

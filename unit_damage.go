@@ -18,6 +18,12 @@ func (d *Damage) Perform() (before, after Statistic, crit bool, err error) {
 	}
 
 	d.op.DamageThreat(d, d, damage)
-	d.op.Writer().Write(nil) // TODO
+
+	d.op.Writer().Write(OutputDamage{
+		SubjectUnitID: d.Subject().ID(),
+		ObjectUnitID:  d.Object().ID(),
+		Damage:        damage,
+		IsCritical:    crit,
+	})
 	return
 }

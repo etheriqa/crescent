@@ -21,6 +21,11 @@ func (h *Healing) Perform() (before, after Statistic, crit bool, err error) {
 		h.op.HealingThreat(h, enemy, healing)
 	})
 
-	h.op.Writer().Write(nil) // TODO
+	h.op.Writer().Write(OutputHealing{
+		SubjectUnitID: h.Subject().ID(),
+		ObjectUnitID:  h.Object().ID(),
+		Healing:       healing,
+		IsCritical:    crit,
+	})
 	return
 }
