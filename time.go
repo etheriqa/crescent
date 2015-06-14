@@ -47,3 +47,13 @@ func (t InstanceTime) After(u InstanceTime) bool {
 func (t InstanceTime) Before(u InstanceTime) bool {
 	return t < u
 }
+
+// IsPeriodicalTick returns true if the time t is periodical tick
+func (t InstanceTime) IsPeriodicalTick() bool {
+	return InstanceDuration(t)%PeriodicalTick == 0
+}
+
+// IsRegenerationTick returns true if the time t is regeneration tick
+func (t InstanceTime) IsRegenerationTick() bool {
+	return InstanceDuration(t)%RegenerationTick == 0
+}

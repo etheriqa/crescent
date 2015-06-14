@@ -17,13 +17,20 @@ func NewGame(clock InstanceClock, w InstanceOutputWriter) *Game {
 	}
 }
 
-// PerformRegeneration performs health regeneration and mana regeneration
-func (g *Game) PerformRegeneration() {
-	g.units.Each(func(u *Unit) {
-		if u.IsDead() {
-			return
-		}
-		u.ModifyHealth(g.w, u.HealthRegeneration())
-		u.ModifyMana(g.w, u.ManaRegeneration())
-	})
+// PerformGameTick performs the game tick routine
+func (g *Game) PerformGameTick() {
+	// TODO
+	log.WithField("time", g.clock.Now()).Debug("GameTick")
+}
+
+// PerformPeriodicalTick performs the periodical rick routine
+func (g *Game) PerformPeriodicalTick() {
+	// TODO
+	log.WithField("time", g.clock.Now()).Debug("PeriodicalTick")
+}
+
+// PerformRegenerationTick performs the regeneration tick routine
+func (g *Game) PerformRegenerationTick() {
+	// TODO
+	log.WithField("time", g.clock.Now()).Debug("RegenerationTick")
 }

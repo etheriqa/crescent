@@ -35,9 +35,14 @@ func (i *Instance) Run() {
 	for {
 		select {
 		case <-t:
-			// TODO
 			*i.time = i.time.Add(GameTick)
-			log.WithField("time", i.g.clock.Now()).Debug("tick!")
+			if i.time.IsRegenerationTick() {
+				i.g.PerformRegenerationTick()
+			}
+			if i.time.IsPeriodicalTick() {
+				i.g.PerformPeriodicalTick()
+			}
+			i.g.PerformGameTick()
 		case input, ok := <-i.r:
 			if !ok {
 				log.Fatal("Cannot read from the input channel")
