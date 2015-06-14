@@ -33,6 +33,11 @@ func (g *Game) PerformPeriodicalTick() {
 
 // PerformRegenerationTick performs the regeneration tick routine
 func (g *Game) PerformRegenerationTick() {
-	// TODO
-	log.WithField("time", g.clock.Now()).Debug("RegenerationTick")
+	g.units.Each(func(u *Unit) {
+		if u.IsDead() {
+			return
+		}
+		u.ModifyHealth(g.w, u.HealthRegeneration())
+		u.ModifyMana(g.w, u.ManaRegeneration())
+	})
 }
