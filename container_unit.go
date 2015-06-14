@@ -7,6 +7,7 @@ import (
 type UnitContainer interface {
 	Join(UnitGroup, UnitName, *Class) (*Unit, error)
 	Leave(UnitID) error
+	Find(UnitID) *Unit
 	Each(func(*Unit))
 	EachFriend(*Unit, func(*Unit))
 	EachEnemy(*Unit, func(*Unit))
@@ -37,6 +38,11 @@ func (um UnitMap) Leave(id UnitID) error {
 	// TODO dtor
 	delete(um, id)
 	return nil
+}
+
+// Find finds the Unit with the UnitID
+func (um UnitMap) Find(id UnitID) *Unit {
+	return um[id]
 }
 
 // Each calls the callback function with each the Unit
