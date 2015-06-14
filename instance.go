@@ -57,7 +57,9 @@ func (i *Instance) Run() {
 				i.chat(id, input)
 			case InputStage:
 			case InputJoin:
+				i.join(id, input)
 			case InputLeave:
+				i.leave(id, input)
 			case InputAbility:
 			case InputInterrupt:
 			default:
@@ -103,4 +105,34 @@ func (i *Instance) chat(id ClientID, input InputChat) {
 		"name":    name,
 		"message": message,
 	}).Infof("%s: %s", name, message)
+}
+
+// join
+func (i *Instance) join(id ClientID, input InputJoin) {
+	// TODO WIP
+	class := NewClassHealer()
+	u, err := i.g.units.Join(0, UnitName(i.name[id]), class)
+	if err != nil {
+		return
+	}
+	i.w.Write(OutputUnitJoin{
+		UnitID:       u.ID(),
+		UnitGroup:    u.Group(),
+		UnitPosition: u.Position(),
+		UnitName:     u.Name(),
+		ClassName:    u.ClassName(),
+		Health:       u.Health(),
+		HealthMax:    u.HealthMax(),
+		Mana:         u.Mana(),
+		ManaMax:      u.ManaMax(),
+	})
+}
+
+// leave
+func (i *Instance) leave(id ClientID, input InputLeave) {
+	// TODO WIP
+	i.g.units.Leave(0)
+	i.w.Write(OutputUnitLeave{
+		UnitID: 0,
+	})
 }
