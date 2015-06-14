@@ -150,13 +150,13 @@ func (bhs BoundHandlerSet) Each(callback func(Handler)) {
 	bhs.handlers.Each(func(h Handler) {
 		subject, _ := h.(Subject)
 		object, _ := h.(Object)
-		if bhs.unit != nil && bhs.unit != subject && bhs.unit != object {
+		if subject == nil && object == nil {
 			return
 		}
-		if bhs.subject != nil && bhs.subject != subject {
+		if subject != nil && bhs.subject != nil && subject.Subject() != bhs.subject {
 			return
 		}
-		if bhs.object != nil && bhs.object != object {
+		if object != nil && bhs.object != nil && object.Object() != bhs.object {
 			return
 		}
 		callback(h)
@@ -165,36 +165,22 @@ func (bhs BoundHandlerSet) Each(callback func(Handler)) {
 
 // Every returns true if all of the callback result are true
 func (bhs BoundHandlerSet) Every(callback func(Handler) bool) bool {
-	return bhs.handlers.Every(func(h Handler) bool {
-		subject, _ := h.(Subject)
-		object, _ := h.(Object)
-		if bhs.unit != nil && bhs.unit != subject && bhs.unit != object {
-			return true
+	ok := true
+	bhs.Each(func(h Handler) {
+		if !ok || !callback(h) {
+			ok = false
 		}
-		if bhs.subject != nil && bhs.subject != subject {
-			return true
-		}
-		if bhs.object != nil && bhs.object != object {
-			return true
-		}
-		return callback(h)
 	})
+	return ok
 }
 
 // Some returns true if any of the callback result are true
 func (bhs BoundHandlerSet) Some(callback func(Handler) bool) bool {
-	return bhs.handlers.Every(func(h Handler) bool {
-		subject, _ := h.(Subject)
-		object, _ := h.(Object)
-		if bhs.unit != nil && bhs.unit != subject && bhs.unit != object {
-			return false
+	ok := false
+	bhs.Each(func(h Handler) {
+		if ok || callback(h) {
+			ok = true
 		}
-		if bhs.subject != nil && bhs.subject != subject {
-			return false
-		}
-		if bhs.object != nil && bhs.object != object {
-			return false
-		}
-		return callback(h)
 	})
+	return ok
 }
