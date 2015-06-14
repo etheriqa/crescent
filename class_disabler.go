@@ -1,7 +1,7 @@
 package main
 
 func NewClassDisabler() *Class {
-	var q, w, e, r *Ability
+	var q, w, e, r Ability
 	class := &Class{
 		Name: "Disabler",
 		// TODO stats
@@ -16,10 +16,10 @@ func NewClassDisabler() *Class {
 		CooldownReduction:    DefaultCooldownReduction,
 		DamageThreatFactor:   DefaultDamageThreatFactor,
 		HealingThreatFactor:  DefaultHealingThreatFactor,
-		Abilities:            []*Ability{q, w, e, r},
+		Abilities:            []*Ability{&q, &w, &e, &r},
 	}
 	// Physical damage / DoT / Magic resistance reduction
-	q = &Ability{
+	q = Ability{
 		Name:               "Q",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
@@ -42,7 +42,7 @@ func NewClassDisabler() *Class {
 		},
 	}
 	// Magic damage / Silence
-	w = &Ability{
+	w = Ability{
 		Name:               "W",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
@@ -62,7 +62,7 @@ func NewClassDisabler() *Class {
 		},
 	}
 	// Physical damage / Stun
-	e = &Ability{
+	e = Ability{
 		Name:               "E",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
@@ -81,7 +81,7 @@ func NewClassDisabler() *Class {
 		},
 	}
 	// Increasing critical / All
-	r = &Ability{
+	r = Ability{
 		Name:               "R",
 		TargetType:         TargetTypeNone,
 		HealthCost:         0,

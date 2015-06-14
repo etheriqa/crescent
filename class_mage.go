@@ -5,7 +5,7 @@ import (
 )
 
 func newClassMage() *Class {
-	var q, w, e, r *Ability
+	var q, w, e, r Ability
 	class := &Class{
 		Name: "Mage",
 		// TODO stats
@@ -20,10 +20,10 @@ func newClassMage() *Class {
 		CooldownReduction:    DefaultCooldownReduction,
 		DamageThreatFactor:   DefaultDamageThreatFactor,
 		HealingThreatFactor:  DefaultHealingThreatFactor,
-		Abilities:            []*Ability{q, w, e, r},
+		Abilities:            []*Ability{&q, &w, &e, &r},
 	}
 	// Magic damage / Armor reduction / Proc 10% W
-	q = &Ability{
+	q = Ability{
 		Name:               "Q",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
@@ -49,7 +49,7 @@ func newClassMage() *Class {
 			op.Handlers().BindObject(s.Subject()).Each(func(h Handler) {
 				switch h := h.(type) {
 				case *Cooldown:
-					if h.Ability() == w {
+					if h.Ability() == &w {
 						op.Handlers().Detach(h)
 					}
 				}
@@ -57,7 +57,7 @@ func newClassMage() *Class {
 		},
 	}
 	// Magic damage / DoT / Proc 20% E
-	w = &Ability{
+	w = Ability{
 		Name:               "W",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
@@ -76,7 +76,7 @@ func newClassMage() *Class {
 			op.Handlers().BindObject(s.Subject()).Each(func(h Handler) {
 				switch h := h.(type) {
 				case *Cooldown:
-					if h.Ability() == e {
+					if h.Ability() == &e {
 						op.Handlers().Detach(h)
 					}
 				}
@@ -84,7 +84,7 @@ func newClassMage() *Class {
 		},
 	}
 	// Magic damage
-	e = &Ability{
+	e = Ability{
 		Name:               "E",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
@@ -103,7 +103,7 @@ func newClassMage() *Class {
 		},
 	}
 	// Magic damage / All / DoT / Stun
-	r = &Ability{
+	r = Ability{
 		Name:               "R",
 		TargetType:         TargetTypeNone,
 		HealthCost:         0,

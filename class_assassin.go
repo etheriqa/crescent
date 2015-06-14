@@ -11,7 +11,7 @@ func AssassinStack(op Operator, o Object) {
 }
 
 func NewClassAssassin() *Class {
-	var q, w, e, r *Ability
+	var q, w, e, r Ability
 	class := &Class{
 		Name: "Assassin",
 		// TODO stats
@@ -26,10 +26,10 @@ func NewClassAssassin() *Class {
 		CooldownReduction:    DefaultCooldownReduction,
 		DamageThreatFactor:   DefaultDamageThreatFactor,
 		HealingThreatFactor:  DefaultHealingThreatFactor,
-		Abilities:            []*Ability{q, w, e, r},
+		Abilities:            []*Ability{&q, &w, &e, &r},
 	}
 	// Physical damage
-	q = &Ability{
+	q = Ability{
 		Name:               "Q",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
@@ -47,7 +47,7 @@ func NewClassAssassin() *Class {
 		},
 	}
 	// Physical damage / DoT / Increasing stacks
-	w = &Ability{
+	w = Ability{
 		Name:               "W",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
@@ -66,7 +66,7 @@ func NewClassAssassin() *Class {
 		},
 	}
 	// Increasing stacks / Decreasing armor and magic resistance
-	e = &Ability{
+	e = Ability{
 		Name:               "E",
 		TargetType:         TargetTypeNone,
 		HealthCost:         0,
@@ -88,7 +88,7 @@ func NewClassAssassin() *Class {
 		},
 	}
 	// Physical
-	r = &Ability{
+	r = Ability{
 		Name:               "R",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,

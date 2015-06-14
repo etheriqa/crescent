@@ -1,7 +1,7 @@
 package main
 
 func NewClassTank() *Class {
-	var q, w, e, r *Ability
+	var q, w, e, r Ability
 	class := &Class{
 		Name: "Tank",
 		// TODO stats
@@ -16,10 +16,10 @@ func NewClassTank() *Class {
 		CooldownReduction:    DefaultCooldownReduction,
 		DamageThreatFactor:   DefaultDamageThreatFactor,
 		HealingThreatFactor:  DefaultHealingThreatFactor,
-		Abilities:            []*Ability{q, w, e, r},
+		Abilities:            []*Ability{&q, &w, &e, &r},
 	}
 	// True damage / Increasing threat factor
-	q = &Ability{
+	q = Ability{
 		Name:               "Tank Q",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
@@ -41,7 +41,7 @@ func NewClassTank() *Class {
 		},
 	}
 	// Physical damage / Increasing AR & MR
-	w = &Ability{
+	w = Ability{
 		Name:               "Tank W",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
@@ -64,7 +64,7 @@ func NewClassTank() *Class {
 		},
 	}
 	// Physical damage / Life steal
-	e = &Ability{
+	e = Ability{
 		Name:               "Tank E",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
@@ -83,7 +83,7 @@ func NewClassTank() *Class {
 		},
 	}
 	// Increasing AR & MR
-	r = &Ability{
+	r = Ability{
 		Name:               "Tank R",
 		TargetType:         TargetTypeNone,
 		HealthCost:         0,

@@ -1,7 +1,7 @@
 package main
 
 func NewClassHealer() *Class {
-	var q, w, e, r *Ability
+	var q, w, e, r Ability
 	class := &Class{
 		Name: "Healer",
 		// TODO stats
@@ -16,10 +16,10 @@ func NewClassHealer() *Class {
 		CooldownReduction:    DefaultCooldownReduction,
 		DamageThreatFactor:   DefaultDamageThreatFactor,
 		HealingThreatFactor:  DefaultHealingThreatFactor,
-		Abilities:            []*Ability{q, w, e, r},
+		Abilities:            []*Ability{&q, &w, &e, &r},
 	}
 	// Magic damage / Mana restore
-	q = &Ability{
+	q = Ability{
 		Name:               "Healer Q",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
@@ -39,7 +39,7 @@ func NewClassHealer() *Class {
 		},
 	}
 	// HoT
-	w = &Ability{
+	w = Ability{
 		Name:               "Healer W",
 		TargetType:         TargetTypeFriend,
 		HealthCost:         0,
@@ -55,7 +55,7 @@ func NewClassHealer() *Class {
 		},
 	}
 	// Healing
-	e = &Ability{
+	e = Ability{
 		Name:               "Healer E",
 		TargetType:         TargetTypeFriend,
 		HealthCost:         0,
@@ -74,7 +74,7 @@ func NewClassHealer() *Class {
 		},
 	}
 	// HoT / Increasing critical strike chance and critical strike factor
-	r = &Ability{
+	r = Ability{
 		Name:               "Healer R",
 		TargetType:         TargetTypeNone,
 		HealthCost:         0,
