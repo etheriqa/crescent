@@ -61,6 +61,7 @@ func (i *Instance) Run() {
 			case InputLeave:
 				i.leave(id, input)
 			case InputAbility:
+				i.ability(id, input)
 			case InputInterrupt:
 			default:
 				log.Fatal("Unknown input type")
@@ -135,4 +136,11 @@ func (i *Instance) leave(id ClientID, input InputLeave) {
 	i.w.Write(OutputUnitLeave{
 		UnitID: 0,
 	})
+}
+
+// ability
+func (i *Instance) ability(id ClientID, input InputAbility) {
+	// TODO WIP
+	u := i.g.units.Find(0)
+	i.g.Activating(u, i.g.units.Find(input.ObjectUnitID), u.Ability(input.AbilityName))
 }
