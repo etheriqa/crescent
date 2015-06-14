@@ -4,7 +4,8 @@ type Game struct {
 	clock    GameClock
 	handlers HandlerContainer
 	units    UnitContainer
-	writer   GameEventWriter
+
+	w InstanceOutputWriter
 }
 
 // PerformRegeneration performs health regeneration and mana regeneration
@@ -13,7 +14,7 @@ func (g *Game) PerformRegeneration() {
 		if u.IsDead() {
 			return
 		}
-		u.ModifyHealth(g.writer, u.HealthRegeneration())
-		u.ModifyMana(g.writer, u.ManaRegeneration())
+		u.ModifyHealth(g.w, u.HealthRegeneration())
+		u.ModifyMana(g.w, u.ManaRegeneration())
 	})
 }

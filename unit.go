@@ -148,7 +148,7 @@ func (u *Unit) HealingThreatFactor() Statistic {
 }
 
 // ModifyHealth modifies health and returns before/after amount of health
-func (u *Unit) ModifyHealth(w GameEventWriter, delta Statistic) (before, after Statistic, err error) {
+func (u *Unit) ModifyHealth(w InstanceOutputWriter, delta Statistic) (before, after Statistic, err error) {
 	if u.IsDead() {
 		err = errors.New("Cannot modify health of dead unit")
 		return
@@ -170,7 +170,7 @@ func (u *Unit) ModifyHealth(w GameEventWriter, delta Statistic) (before, after S
 }
 
 // ModifyMana modifies mana and returns before/after amount of mana
-func (u *Unit) ModifyMana(w GameEventWriter, delta Statistic) (before, after Statistic, err error) {
+func (u *Unit) ModifyMana(w InstanceOutputWriter, delta Statistic) (before, after Statistic, err error) {
 	if u.IsDead() {
 		err = errors.New("Cannot modify mana of dead unit")
 		return

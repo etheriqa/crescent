@@ -18,9 +18,7 @@ type Correction struct {
 	stack          Statistic
 	expirationTime GameTime
 
-	clock    GameClock
-	handlers HandlerContainer
-	writer   GameEventWriter
+	op Operator
 }
 
 // ArmorCorrection returns amount of armor correction
@@ -65,7 +63,7 @@ func (h *Correction) Stack() Statistic {
 
 // OnAttach merges Correction handlers and updates the UnitCorrection of the Object
 func (h *Correction) OnAttach() {
-	h.handlers.BindObject(h).Each(func(o Handler) {
+	h.op.Handlers().BindObject(h).Each(func(o Handler) {
 		switch o := o.(type) {
 		case *Correction:
 			if h == o || h.name != o.name {
@@ -77,7 +75,7 @@ func (h *Correction) OnAttach() {
 			} else {
 				h.stack += o.stack
 			}
-			h.handlers.Detach(o)
+			h.op.Handlers().Detach(o)
 		}
 	})
 
@@ -86,7 +84,7 @@ func (h *Correction) OnAttach() {
 	}
 	h.Object().AddEventHandler(h, EventGameTick)
 	h.updateCorrection()
-	h.writer.Write(nil) // TODO
+	h.op.Writer().Write(nil) // TODO
 }
 
 // OnDetach updates the UnitCorrection of the Object
@@ -99,18 +97,18 @@ func (h *Correction) OnDetach() {
 func (h *Correction) HandleEvent(e Event) {
 	switch e {
 	case EventGameTick:
-		if h.clock.Before(h.expirationTime) {
+		if h.op.Clock().Before(h.expirationTime) {
 			return
 		}
-		h.handlers.Detach(h)
-		h.writer.Write(nil) // TODO
+		h.op.Handlers().Detach(h)
+		h.op.Writer().Write(nil) // TODO
 	}
 }
 
 // updateCorrection updates the UnitCorrection of the Object
 func (h *Correction) updateCorrection() {
 	c := UnitCorrection{}
-	h.handlers.BindObject(h).Each(func(o Handler) {
+	h.op.Handlers().BindObject(h).Each(func(o Handler) {
 		switch o := o.(type) {
 		case Corrector:
 			c.Armor += o.ArmorCorrection()

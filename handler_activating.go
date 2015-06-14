@@ -10,10 +10,7 @@ type Activating struct {
 	ability        *Ability
 	expirationTime GameTime
 
-	clock    GameClock
-	handlers HandlerContainer
-	operator Operator
-	writer   GameEventWriter
+	op Operator
 }
 
 // Ability returns the Ability
@@ -23,7 +20,7 @@ func (h *Activating) Ability() *Ability {
 
 // OnAttach checks requirements
 func (h *Activating) OnAttach() {
-	ok := h.handlers.BindSubject(h).Every(func(o Handler) bool {
+	ok := h.op.Handlers().BindSubject(h).Every(func(o Handler) bool {
 		switch o.(type) {
 		case *Activating:
 			if h != o {
@@ -33,13 +30,13 @@ func (h *Activating) OnAttach() {
 		return true
 	})
 	if !ok {
-		h.handlers.Detach(h)
+		h.op.Handlers().Detach(h)
 		return
 	}
 
 	if err := h.checkRequirements(); err != nil {
 		log.Debug(err)
-		h.handlers.Detach(h)
+		h.op.Handlers().Detach(h)
 		return
 	}
 
@@ -55,7 +52,7 @@ func (h *Activating) OnAttach() {
 	if h.object != nil {
 		h.object.AddEventHandler(h, EventDead)
 	}
-	h.writer.Write(nil) // TODO
+	h.op.Writer().Write(nil) // TODO
 }
 
 // OnDetach does nothing
@@ -73,41 +70,41 @@ func (h *Activating) OnDetach() {
 func (h *Activating) HandleEvent(e Event) {
 	switch e {
 	case EventGameTick:
-		if h.clock.Before(h.expirationTime) {
+		if h.op.Clock().Before(h.expirationTime) {
 			return
 		}
 		h.perform()
 	case EventDead:
-		h.handlers.Detach(h)
+		h.op.Handlers().Detach(h)
 		if h.Subject().IsAlive() {
-			h.writer.Write(nil) // TODO
+			h.op.Writer().Write(nil) // TODO
 		}
 	case EventDisabled:
 		if err := h.checkDisable(); err != nil {
-			h.handlers.Detach(h)
-			h.writer.Write(nil) // TODO
+			h.op.Handlers().Detach(h)
+			h.op.Writer().Write(nil) // TODO
 		}
 	case EventTakenDamage:
 		if err := h.checkResource(); err != nil {
-			h.handlers.Detach(h)
-			h.writer.Write(nil) // TODO
+			h.op.Handlers().Detach(h)
+			h.op.Writer().Write(nil) // TODO
 		}
 	}
 }
 
 // perform performs the Ability
 func (h *Activating) perform() {
-	if _, _, err := h.Subject().ModifyHealth(h.writer, -h.ability.HealthCost); err != nil {
+	if _, _, err := h.Subject().ModifyHealth(h.op.Writer(), -h.ability.HealthCost); err != nil {
 		log.Fatal(err)
 	}
-	if _, _, err := h.Subject().ModifyMana(h.writer, -h.ability.ManaCost); err != nil {
+	if _, _, err := h.Subject().ModifyMana(h.op.Writer(), -h.ability.ManaCost); err != nil {
 		log.Fatal(err)
 	}
-	h.ability.Perform(h.operator, h.Subject(), h.object)
+	h.ability.Perform(h.op, h.Subject(), h.object)
 	// TODO perform ability
-	h.handlers.Detach(h)
-	h.operator.Cooldown(h.Subject(), h.ability)
-	h.writer.Write(nil) // TODO
+	h.op.Handlers().Detach(h)
+	h.op.Cooldown(h.Subject(), h.ability)
+	h.op.Writer().Write(nil) // TODO
 }
 
 // checkRequirements checks all requirements
@@ -162,7 +159,7 @@ func (h *Activating) checkObject() error {
 
 // checkCooldown checks the Subject does not have to wait the Cooldown
 func (h *Activating) checkCooldown() error {
-	ok := h.handlers.BindObject(h.Subject()).Every(func(o Handler) bool {
+	ok := h.op.Handlers().BindObject(h.Subject()).Every(func(o Handler) bool {
 		switch o := o.(type) {
 		case *Cooldown:
 			if h.ability == o.Ability() {
@@ -179,7 +176,7 @@ func (h *Activating) checkCooldown() error {
 
 // checkDisable checks the Subject has not been interrupted by Disables
 func (h *Activating) checkDisable() error {
-	ok := h.handlers.BindObject(h.Subject()).Every(func(o Handler) bool {
+	ok := h.op.Handlers().BindObject(h.Subject()).Every(func(o Handler) bool {
 		switch o := o.(type) {
 		case *Disable:
 			for _, t := range h.ability.DisableTypes {

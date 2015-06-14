@@ -4,19 +4,19 @@ type Threat struct {
 	UnitPair
 	threat Statistic
 
-	handlers HandlerContainer
+	op Operator
 }
 
 // OnAttach merges Threat handlers
 func (h *Threat) OnAttach() {
-	h.handlers.BindSubject(h).BindObject(h).Each(func(o Handler) {
+	h.op.Handlers().BindSubject(h).BindObject(h).Each(func(o Handler) {
 		switch o := o.(type) {
 		case *Threat:
 			if o == h {
 				return
 			}
 			h.threat += o.threat
-			h.handlers.Detach(o)
+			h.op.Handlers().Detach(o)
 		}
 	})
 }

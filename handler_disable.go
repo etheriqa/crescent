@@ -14,14 +14,12 @@ type Disable struct {
 	disableType    DisableType
 	expirationTime GameTime
 
-	clock    GameClock
-	handlers HandlerContainer
-	writer   GameEventWriter
+	op Operator
 }
 
 // OnAttach removes duplicate Disables
 func (h *Disable) OnAttach() {
-	ok := h.handlers.BindObject(h).Every(func(o Handler) bool {
+	ok := h.op.Handlers().BindObject(h).Every(func(o Handler) bool {
 		switch o := o.(type) {
 		case *Disable:
 			if h == o || h.disableType != o.disableType {
@@ -30,18 +28,18 @@ func (h *Disable) OnAttach() {
 			if h.expirationTime <= o.expirationTime {
 				return false
 			}
-			h.handlers.Detach(o)
+			h.op.Handlers().Detach(o)
 		}
 		return true
 	})
 	if !ok {
-		h.handlers.Detach(h)
+		h.op.Handlers().Detach(h)
 		return
 	}
 
 	h.Object().AddEventHandler(h, EventGameTick)
 	h.Object().AddEventHandler(h, EventDead)
-	h.writer.Write(nil) // TODO
+	h.op.Writer().Write(nil) // TODO
 	h.Object().TriggerEvent(EventDisabled)
 }
 
@@ -55,12 +53,12 @@ func (h *Disable) OnDetach() {
 func (h *Disable) HandleEvent(e Event) {
 	switch e {
 	case EventGameTick:
-		if h.clock.Before(h.expirationTime) {
+		if h.op.Clock().Before(h.expirationTime) {
 			return
 		}
-		h.handlers.Detach(h)
-		h.writer.Write(nil) // TODO
+		h.op.Handlers().Detach(h)
+		h.op.Writer().Write(nil) // TODO
 	case EventDead:
-		h.handlers.Detach(h)
+		h.op.Handlers().Detach(h)
 	}
 }

@@ -6,14 +6,12 @@ type Periodical struct {
 	routine        func()
 	expirationTime GameTime
 
-	clock    GameClock
-	handlers HandlerContainer
-	writer   GameEventWriter
+	op Operator
 }
 
 // OnAttach removes duplicate Periodicals
 func (h *Periodical) OnAttach() {
-	ok := h.handlers.BindSubject(h).BindObject(h).Every(func(o Handler) bool {
+	ok := h.op.Handlers().BindSubject(h).BindObject(h).Every(func(o Handler) bool {
 		switch o := o.(type) {
 		case *Periodical:
 			if h == o || h.name != o.name {
@@ -22,19 +20,19 @@ func (h *Periodical) OnAttach() {
 			if h.expirationTime <= o.expirationTime {
 				return false
 			}
-			h.handlers.Detach(o)
+			h.op.Handlers().Detach(o)
 		}
 		return true
 	})
 	if !ok {
-		h.handlers.Detach(h)
+		h.op.Handlers().Detach(h)
 		return
 	}
 
 	h.Object().AddEventHandler(h, EventGameTick)
 	h.Object().AddEventHandler(h, EventPeriodicalTick)
 	h.Object().AddEventHandler(h, EventDead)
-	h.writer.Write(nil) // TODO
+	h.op.Writer().Write(nil) // TODO
 }
 
 // OnDetach does nothing
@@ -48,13 +46,13 @@ func (h *Periodical) OnDetach() {
 func (h *Periodical) HandleEvent(e Event) {
 	switch e {
 	case EventDead:
-		h.handlers.Detach(h)
+		h.op.Handlers().Detach(h)
 	case EventGameTick:
-		if h.clock.Before(h.expirationTime) {
+		if h.op.Clock().Before(h.expirationTime) {
 			return
 		}
-		h.handlers.Detach(h)
-		h.writer.Write(nil) // TODO
+		h.op.Handlers().Detach(h)
+		h.op.Writer().Write(nil) // TODO
 	case EventPeriodicalTick:
 		h.routine()
 	}

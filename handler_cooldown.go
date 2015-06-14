@@ -5,9 +5,7 @@ type Cooldown struct {
 	ability        *Ability
 	expirationTime GameTime
 
-	clock    GameClock
-	handlers HandlerContainer
-	writer   GameEventWriter
+	op Operator
 }
 
 // Ability returns the Ability
@@ -17,24 +15,24 @@ func (h *Cooldown) Ability() *Ability {
 
 // OnAttach removes other Cooldown handlers
 func (h *Cooldown) OnAttach() {
-	h.handlers.BindObject(h).Each(func(o Handler) {
+	h.op.Handlers().BindObject(h).Each(func(o Handler) {
 		switch o := o.(type) {
 		case *Cooldown:
 			if h == o {
 				return
 			}
-			h.handlers.Detach(o)
+			h.op.Handlers().Detach(o)
 		}
 	})
 
 	if h.ability.CooldownDuration == 0 {
-		h.handlers.Detach(h)
+		h.op.Handlers().Detach(h)
 		return
 	}
 
-	h.expirationTime = h.clock.Add(h.ability.CooldownDuration)
+	h.expirationTime = h.op.Clock().Add(h.ability.CooldownDuration)
 	h.Object().AddEventHandler(h, EventGameTick)
-	h.writer.Write(nil) // TODO
+	h.op.Writer().Write(nil) // TODO
 }
 
 // OnDetach does nothing
@@ -46,10 +44,10 @@ func (h *Cooldown) OnDetach() {
 func (h *Cooldown) HandleEvent(e Event) {
 	switch e {
 	case EventGameTick:
-		if h.clock.Before(h.expirationTime) {
+		if h.op.Clock().Before(h.expirationTime) {
 			return
 		}
-		h.handlers.Detach(h)
-		h.writer.Write(nil) // TODO
+		h.op.Handlers().Detach(h)
+		h.op.Writer().Write(nil) // TODO
 	}
 }
