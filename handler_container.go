@@ -15,7 +15,7 @@ type HandlerContainer interface {
 type HandlerSet map[Handler]bool
 
 type BoundHandlerSet struct {
-	handlers HandlerContainer
+	handlers HandlerSet
 	unit     *Unit
 	subject  *Unit
 	object   *Unit
