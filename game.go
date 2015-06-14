@@ -11,7 +11,9 @@ type Game struct {
 // NewGame returns a Game
 func NewGame(clock InstanceClock, w InstanceOutputWriter) *Game {
 	return &Game{
-		clock: clock,
+		clock:    clock,
+		handlers: MakeHandlerSet(),
+		units:    MakeUnitMap(),
 
 		w: w,
 	}
