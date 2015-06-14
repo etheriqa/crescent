@@ -81,6 +81,7 @@ type OutputUnitCooldown struct {
 	UnitID         UnitID
 	AbilityName    string
 	ExpirationTime InstanceTime
+	Active         bool
 }
 
 type OutputUnitResource struct {

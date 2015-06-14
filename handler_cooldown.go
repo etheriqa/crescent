@@ -44,12 +44,17 @@ func (h *Cooldown) OnDetach() {
 func (h *Cooldown) HandleEvent(e Event) {
 	switch e {
 	case EventGameTick:
-		if h.op.Clock().Before(h.expirationTime) {
+		if h.isActive() {
 			return
 		}
 		h.writeOutputUnitCooldown()
 		h.op.Handlers().Detach(h)
 	}
+}
+
+// isActive returns true if the Cooldown is active
+func (h *Cooldown) isActive() bool {
+	return h.op.Clock().Before(h.expirationTime)
 }
 
 // writeOutputUnitCooldown writes a OutputUnitCooldown
@@ -59,5 +64,6 @@ func (h *Cooldown) writeOutputUnitCooldown() {
 		UnitID:         h.Object().ID(),
 		AbilityName:    h.ability.Name,
 		ExpirationTime: h.expirationTime,
+		Active:         h.isActive(),
 	})
 }
