@@ -25,3 +25,13 @@ type Class struct {
 	HealingThreatFactor  Statistic
 	Abilities            []*Ability
 }
+
+// Ability returns the Ability
+func (c *Class) Ability(name string) *Ability {
+	for _, a := range c.Abilities {
+		if a.Name == name {
+			return a
+		}
+	}
+	return nil
+}

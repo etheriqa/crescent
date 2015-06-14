@@ -180,6 +180,11 @@ func (u *Unit) HealingThreatFactor() Statistic {
 	return u.class.HealingThreatFactor + u.correction.HealingThreatFactor
 }
 
+// Ability returns the ability
+func (u *Unit) Ability(name string) *Ability {
+	return u.class.Ability(name)
+}
+
 // ModifyHealth modifies health and returns before/after amount of health
 func (u *Unit) ModifyHealth(w InstanceOutputWriter, delta Statistic) (before, after Statistic, err error) {
 	if u.IsDead() {
