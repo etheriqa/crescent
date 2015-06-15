@@ -185,6 +185,11 @@ func (u *Unit) Ability(name string) *Ability {
 	return u.class.Ability(name)
 }
 
+// UpdateCorrection updates the UnitCorrection
+func (u *Unit) UpdateCorrection(correction UnitCorrection) {
+	u.correction = correction
+}
+
 // ModifyHealth modifies health and returns before/after amount of health
 func (u *Unit) ModifyHealth(w InstanceOutputWriter, delta Statistic) (before, after Statistic, err error) {
 	if u.IsDead() {
@@ -227,11 +232,6 @@ func (u *Unit) ModifyMana(w InstanceOutputWriter, delta Statistic) (before, afte
 	u.resource.Mana = after
 	u.writeOutputUnitResource(w)
 	return
-}
-
-// UpdateCorrection updates the UnitCorrection
-func (u *Unit) UpdateCorrection(correction UnitCorrection) {
-	u.correction = correction
 }
 
 // writeOutputUnitResource write a OutputUnitResource

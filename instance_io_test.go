@@ -4,7 +4,19 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
+
+type MockedInstanceOutputWriter struct{ mock.Mock }
+
+func (m *MockedInstanceOutputWriter) Write(d interface{}) {
+	m.Called(d)
+}
+
+func (m *MockedInstanceOutputWriter) BindClientID(id ClientID) InstanceOutputWriter {
+	args := m.Called(id)
+	return args.Get(0).(InstanceOutputWriter)
+}
 
 func TestInstanceInput(t *testing.T) {
 	assert := assert.New(t)
