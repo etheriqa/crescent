@@ -41,7 +41,7 @@ type OutputUnitJoin struct {
 	UnitGroup    UnitGroup
 	UnitPosition UnitPosition
 	UnitName     UnitName
-	ClassName    string
+	ClassName    ClassName
 	Health       Statistic
 	HealthMax    Statistic
 	Mana         Statistic

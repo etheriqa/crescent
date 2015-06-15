@@ -90,8 +90,8 @@ func (u *Unit) Name() UnitName {
 	return u.name
 }
 
-// ClassName returns the class name
-func (u *Unit) ClassName() string {
+// ClassName returns the ClassName
+func (u *Unit) ClassName() ClassName {
 	return u.class.Name
 }
 

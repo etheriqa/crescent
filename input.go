@@ -31,7 +31,7 @@ type InputStage struct {
 }
 
 type InputJoin struct {
-	ClassName string
+	ClassName ClassName
 }
 
 type InputLeave struct {

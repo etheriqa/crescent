@@ -10,8 +10,10 @@ const (
 	DefaultHealingThreatFactor  Statistic = 0.4
 )
 
+type ClassName string
+
 type Class struct {
-	Name                 string
+	Name                 ClassName
 	Health               Statistic
 	HealthRegeneration   Statistic
 	Mana                 Statistic
