@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"errors"
-	"time"
 )
 
 type Output struct {
@@ -14,17 +13,6 @@ type Output struct {
 type OutputFrame struct {
 	Type string
 	Data interface{}
-}
-
-type OutputHello struct {
-	RealGameTick   time.Duration
-	InstanceTime   InstanceTime
-	UnitList       []OutputUnitJoin
-	AttachmentList []OutputUnitAttach
-}
-
-type OutputSync struct {
-	InstanceTime InstanceTime
 }
 
 type OutputMessage struct {
@@ -109,10 +97,6 @@ func EncodeOutputFrame(o interface{}) ([]byte, error) {
 	var f OutputFrame
 	f.Data = o
 	switch o.(type) {
-	case OutputHello:
-		f.Type = "Hello"
-	case OutputSync:
-		f.Type = "Sync"
 	case OutputMessage:
 		f.Type = "Message"
 	case OutputChat:
