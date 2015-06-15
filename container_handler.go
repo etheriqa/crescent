@@ -148,15 +148,20 @@ func (bhs BoundHandlerSet) Unbind() HandlerContainer {
 // Each calls the callback function with each the Handler
 func (bhs BoundHandlerSet) Each(callback func(Handler)) {
 	bhs.handlers.Each(func(h Handler) {
-		subject, _ := h.(Subject)
-		object, _ := h.(Object)
-		if subject == nil && object == nil {
+		var subject, object *Unit
+		if _, ok := h.(Subject); ok {
+			subject = h.(Subject).Subject()
+		}
+		if _, ok := h.(Object); ok {
+			object = h.(Object).Object()
+		}
+		if bhs.unit != nil && bhs.unit != subject && bhs.unit != object {
 			return
 		}
-		if subject != nil && bhs.subject != nil && subject.Subject() != bhs.subject {
+		if bhs.subject != nil && bhs.subject != subject {
 			return
 		}
-		if object != nil && bhs.object != nil && object.Object() != bhs.object {
+		if bhs.object != nil && bhs.object != object.Object() {
 			return
 		}
 		callback(h)
