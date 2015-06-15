@@ -12,9 +12,9 @@ type Damage struct {
 // Perform performs the Damage
 func (d *Damage) Perform() (before, after Statistic, crit bool, err error) {
 	damage, crit := applyCriticalStrike(d.damage, d.criticalStrikeChance, d.criticalStrikeFactor)
-	after, before, err = d.Object().ModifyHealth(d.op.Writer(), -damage)
+	before, after, err = d.Object().ModifyHealth(d.op.Writer(), -damage)
 	if err != nil {
-		log.Fatal(err)
+		return
 	}
 
 	d.op.Writer().Write(OutputDamage{

@@ -7,9 +7,7 @@ import (
 	"github.com/stretchr/testify/mock"
 )
 
-type MockedEventHandler struct {
-	mock.Mock
-}
+type MockedEventHandler struct{ mock.Mock }
 
 func (m *MockedEventHandler) HandleEvent(e Event) {
 	m.Called(e)

@@ -12,9 +12,9 @@ type Healing struct {
 // Perform performs the Healing
 func (h *Healing) Perform() (before, after Statistic, crit bool, err error) {
 	healing, crit := applyCriticalStrike(h.healing, h.criticalStrikeChance, h.criticalStrikeFactor)
-	after, before, err = h.Object().ModifyHealth(h.op.Writer(), healing)
+	before, after, err = h.Object().ModifyHealth(h.op.Writer(), healing)
 	if err != nil {
-		log.Fatal(err)
+		return
 	}
 
 	h.op.Writer().Write(OutputHealing{
