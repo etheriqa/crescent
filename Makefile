@@ -8,7 +8,7 @@ $(TARGET): test
 	go build -o $(TARGET)
 
 test:
-	go test -v
+	go test -v -cover
 
 $(COVER): $(SRCS)
 	go test -v -covermode=count -coverprofile=$(COVER)
