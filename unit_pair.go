@@ -1,5 +1,13 @@
 package main
 
+type Subject interface {
+	Subject() *Unit
+}
+
+type Object interface {
+	Object() *Unit
+}
+
 type UnitSubject struct {
 	subject *Unit
 }

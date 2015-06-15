@@ -9,14 +9,6 @@ type UnitName string
 type UnitGroup uint8
 type UnitPosition uint8
 
-type Subject interface {
-	Subject() *Unit
-}
-
-type Object interface {
-	Object() *Unit
-}
-
 type Unit struct {
 	id         UnitID
 	group      UnitGroup
