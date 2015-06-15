@@ -17,15 +17,15 @@ func (h *Healing) Perform() (before, after Statistic, crit bool, err error) {
 		log.Fatal(err)
 	}
 
-	h.op.Units().EachEnemy(h.Subject(), func(enemy *Unit) {
-		h.op.HealingThreat(h, enemy, healing)
-	})
-
 	h.op.Writer().Write(OutputHealing{
 		SubjectUnitID: h.Subject().ID(),
 		ObjectUnitID:  h.Object().ID(),
 		Healing:       healing,
 		IsCritical:    crit,
+	})
+
+	h.op.Units().EachEnemy(h.Subject(), func(enemy *Unit) {
+		h.op.HealingThreat(h, enemy, healing)
 	})
 	return
 }

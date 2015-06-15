@@ -17,13 +17,20 @@ func (d *Damage) Perform() (before, after Statistic, crit bool, err error) {
 		log.Fatal(err)
 	}
 
-	d.op.DamageThreat(d, d, damage)
-
 	d.op.Writer().Write(OutputDamage{
 		SubjectUnitID: d.Subject().ID(),
 		ObjectUnitID:  d.Object().ID(),
 		Damage:        damage,
 		IsCritical:    crit,
 	})
+
+	if d.Object().IsDead() {
+		d.Object().TriggerEvent(EventDead)
+		return
+	}
+
+	d.Object().TriggerEvent(EventTakenDamage)
+
+	d.op.DamageThreat(d, d, damage)
 	return
 }
