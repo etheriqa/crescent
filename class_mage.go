@@ -4,7 +4,7 @@ import (
 	"math/rand"
 )
 
-func newClassMage() *Class {
+func NewClassMage() *Class {
 	var q, w, e, r Ability
 	class := &Class{
 		Name: "Mage",
