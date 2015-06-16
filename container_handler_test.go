@@ -4,7 +4,52 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/mock"
 )
+
+type MockedHandlerContainer struct{ mock.Mock }
+
+func (m *MockedHandlerContainer) Attach(h Handler) {
+	m.Called(h)
+}
+
+func (m *MockedHandlerContainer) Detach(h Handler) {
+	m.Called(h)
+}
+
+func (m *MockedHandlerContainer) Bind(u *Unit) HandlerContainer {
+	args := m.Called(u)
+	return args.Get(0).(HandlerContainer)
+}
+
+func (m *MockedHandlerContainer) BindSubject(s Subject) HandlerContainer {
+	args := m.Called(s)
+	return args.Get(0).(HandlerContainer)
+}
+
+func (m *MockedHandlerContainer) BindObject(o Object) HandlerContainer {
+	args := m.Called(o)
+	return args.Get(0).(HandlerContainer)
+}
+
+func (m *MockedHandlerContainer) Unbind() HandlerContainer {
+	args := m.Called()
+	return args.Get(0).(HandlerContainer)
+}
+
+func (m *MockedHandlerContainer) Each(f func(Handler)) {
+	m.Called(f)
+}
+
+func (m *MockedHandlerContainer) Every(f func(Handler) bool) bool {
+	args := m.Called(f)
+	return args.Bool(0)
+}
+
+func (m *MockedHandlerContainer) Some(f func(Handler) bool) bool {
+	args := m.Called(f)
+	return args.Bool(0)
+}
 
 func TestHandlerSet(t *testing.T) {
 	assert := assert.New(t)
