@@ -8,10 +8,11 @@ import (
 
 func TestDamage(t *testing.T) {
 	assert := assert.New(t)
-	s := NewUnit(0, 0, 0, "subject", &Class{})
+	s := NewUnit(0, 0, 0, "subject", &Class{
+		Health: 1,
+	})
 	o := NewUnit(1, 1, 1, "object", &Class{
 		Health: 1000,
-		Mana:   400,
 	})
 	op := new(MockedOperator)
 
@@ -27,7 +28,7 @@ func TestDamage(t *testing.T) {
 		w.On("Write", OutputUnitResource{
 			UnitID: 1,
 			Health: 900,
-			Mana:   400,
+			Mana:   0,
 		}).Return().Once()
 		w.On("Write", OutputDamage{
 			SubjectUnitID: 0,
@@ -58,7 +59,7 @@ func TestDamage(t *testing.T) {
 		w.On("Write", OutputUnitResource{
 			UnitID: 1,
 			Health: 0,
-			Mana:   400,
+			Mana:   0,
 		}).Return().Once()
 		w.On("Write", OutputDamage{
 			SubjectUnitID: 0,

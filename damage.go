@@ -27,9 +27,9 @@ func (d *Damage) Perform() (before, after Statistic, crit bool, err error) {
 	if d.Object().IsDead() {
 		d.Object().TriggerEvent(EventDead)
 		return
+	} else {
+		d.Object().TriggerEvent(EventTakenDamage)
 	}
-
-	d.Object().TriggerEvent(EventTakenDamage)
 
 	d.op.DamageThreat(d, d, damage)
 	return
