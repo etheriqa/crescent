@@ -66,6 +66,12 @@ func (n *Network) Run(addr string) {
 	}
 }
 
+// generateClientID generates a unique ClientID
+func (n *Network) generateClientID() ClientID {
+	n.seq++
+	return n.seq
+}
+
 // sync calls the callback with writing lock
 func (n *Network) sync(callback func()) {
 	n.mu.Lock()
@@ -103,8 +109,7 @@ func (n *Network) wsHandler(w http.ResponseWriter, r *http.Request) {
 			log.WithField("err", err).Warn("Failed websocket.Upgrade()")
 			return
 		}
-		n.seq++
-		c = NewClient(n.seq, name, ws)
+		c = NewClient(n.generateClientID(), name, ws)
 		ok = true
 	})
 	if !ok {
