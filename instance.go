@@ -56,6 +56,7 @@ func (i *Instance) Run() {
 			case InputChat:
 				i.chat(id, input)
 			case InputStage:
+				// TODO WIP
 			case InputJoin:
 				i.join(id, input)
 			case InputLeave:
@@ -63,6 +64,7 @@ func (i *Instance) Run() {
 			case InputAbility:
 				i.ability(id, input)
 			case InputInterrupt:
+				// TODO WIP
 			default:
 				log.Fatal("Unknown input type")
 			}
