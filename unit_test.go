@@ -24,7 +24,7 @@ func TestUnit(t *testing.T) {
 		HealingThreatFactor:  DefaultHealingThreatFactor,
 		Abilities:            []*Ability{},
 	}
-	u := NewUnit(100, 0, 1, "user", class)
+	u := NewUnit(100, 0, "user", class)
 
 	assert.Implements((*Subject)(nil), u)
 	assert.Implements((*Object)(nil), u)
@@ -33,7 +33,6 @@ func TestUnit(t *testing.T) {
 	assert.Equal(u, u.Object())
 	assert.Equal(UnitID(100), u.ID())
 	assert.Equal(UnitGroup(0), u.Group())
-	assert.Equal(UnitPosition(1), u.Position())
 	assert.Equal(UnitName("user"), u.Name())
 	assert.Equal(ClassName("Healer"), u.ClassName())
 	assert.True(u.IsAlive())

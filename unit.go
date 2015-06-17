@@ -7,12 +7,10 @@ import (
 type UnitID uint64
 type UnitName string
 type UnitGroup uint8
-type UnitPosition uint8
 
 type Unit struct {
 	id         UnitID
 	group      UnitGroup
-	position   UnitPosition
 	name       UnitName
 	resource   UnitResource
 	correction UnitCorrection
@@ -37,13 +35,12 @@ type UnitCorrection struct {
 }
 
 // NewUnit returns a Unit
-func NewUnit(id UnitID, group UnitGroup, position UnitPosition, name UnitName, class *Class) *Unit {
+func NewUnit(id UnitID, group UnitGroup, name UnitName, class *Class) *Unit {
 
 	return &Unit{
 		id:         id,
 		name:       name,
 		group:      group,
-		position:   position,
 		resource:   MakeUnitResource(class),
 		correction: MakeUnitCorrection(),
 		class:      class,
@@ -70,11 +67,6 @@ func (u *Unit) ID() UnitID {
 // Group returns the UnitGroup
 func (u *Unit) Group() UnitGroup {
 	return u.group
-}
-
-// Position returns the UnitPosition
-func (u *Unit) Position() UnitPosition {
-	return u.position
 }
 
 // Name returns the UnitName

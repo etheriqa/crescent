@@ -36,17 +36,16 @@ func TestEncodeOutputFrame(t *testing.T) {
 	}
 
 	{
-		expected := []byte(`{"Type":"UnitJoin","Data":{"UnitID":100,"UnitGroup":0,"UnitPosition":1,"UnitName":"user","ClassName":"Healer","Health":500,"HealthMax":1000,"Mana":200,"ManaMax":400}}`)
+		expected := []byte(`{"Type":"UnitJoin","Data":{"UnitID":100,"UnitGroup":0,"UnitName":"user","ClassName":"Healer","Health":500,"HealthMax":1000,"Mana":200,"ManaMax":400}}`)
 		actual, err := EncodeOutputFrame(OutputUnitJoin{
-			UnitID:       100,
-			UnitGroup:    0,
-			UnitPosition: 1,
-			UnitName:     "user",
-			ClassName:    "Healer",
-			Health:       500,
-			HealthMax:    1000,
-			Mana:         200,
-			ManaMax:      400,
+			UnitID:    100,
+			UnitGroup: 0,
+			UnitName:  "user",
+			ClassName: "Healer",
+			Health:    500,
+			HealthMax: 1000,
+			Mana:      200,
+			ManaMax:   400,
 		})
 		if assert.Nil(err) {
 			assert.Equal(expected, actual)

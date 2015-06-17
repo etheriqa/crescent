@@ -119,15 +119,14 @@ func (i *Instance) join(id ClientID, input InputJoin) {
 		return
 	}
 	i.w.Write(OutputUnitJoin{
-		UnitID:       u.ID(),
-		UnitGroup:    u.Group(),
-		UnitPosition: u.Position(),
-		UnitName:     u.Name(),
-		ClassName:    u.ClassName(),
-		Health:       u.Health(),
-		HealthMax:    u.HealthMax(),
-		Mana:         u.Mana(),
-		ManaMax:      u.ManaMax(),
+		UnitID:    u.ID(),
+		UnitGroup: u.Group(),
+		UnitName:  u.Name(),
+		ClassName: u.ClassName(),
+		Health:    u.Health(),
+		HealthMax: u.HealthMax(),
+		Mana:      u.Mana(),
+		ManaMax:   u.ManaMax(),
 	})
 }
 

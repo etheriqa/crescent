@@ -25,15 +25,14 @@ type OutputChat struct {
 }
 
 type OutputUnitJoin struct {
-	UnitID       UnitID
-	UnitGroup    UnitGroup
-	UnitPosition UnitPosition
-	UnitName     UnitName
-	ClassName    ClassName
-	Health       Statistic
-	HealthMax    Statistic
-	Mana         Statistic
-	ManaMax      Statistic
+	UnitID    UnitID
+	UnitGroup UnitGroup
+	UnitName  UnitName
+	ClassName ClassName
+	Health    Statistic
+	HealthMax Statistic
+	Mana      Statistic
+	ManaMax   Statistic
 }
 
 type OutputUnitLeave struct {

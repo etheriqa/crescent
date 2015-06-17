@@ -8,10 +8,10 @@ import (
 
 func TestDamage(t *testing.T) {
 	assert := assert.New(t)
-	s := NewUnit(0, 0, 0, "subject", &Class{
+	s := NewUnit(0, 0, "subject", &Class{
 		Health: 1,
 	})
-	o := NewUnit(1, 1, 1, "object", &Class{
+	o := NewUnit(1, 1, "object", &Class{
 		Health: 1000,
 	})
 	op := new(MockedOperator)
