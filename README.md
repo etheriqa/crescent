@@ -5,3 +5,8 @@ Crescent
 [![Coverage Status](https://coveralls.io/repos/etheriqa/crescent/badge.svg?branch=master)](https://coveralls.io/r/etheriqa/crescent?branch=master)
 
 Crescent is an experimental implementation of essential mechanics of the WoW-like raids.
+
+```sh
+make
+./crescent
+```
