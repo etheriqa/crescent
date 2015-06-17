@@ -10,6 +10,7 @@ import (
 type Instance struct {
 	time *InstanceTime
 	name map[ClientID]ClientName
+	uid  map[ClientID]UnitID
 
 	g *Game
 	r InstanceInput
@@ -22,6 +23,7 @@ func NewInstance(r InstanceInput, w InstanceOutputWriter) *Instance {
 	return &Instance{
 		time: time,
 		name: make(map[ClientID]ClientName),
+		uid:  make(map[ClientID]UnitID),
 
 		g: NewGame(time, w),
 		r: r,
@@ -47,22 +49,22 @@ func (i *Instance) Run() {
 			if !ok {
 				log.Fatal("Cannot read from the input channel")
 			}
-			id := input.ClientID
+			cid := input.ClientID
 			switch input := input.Input.(type) {
 			case InputConnect:
-				i.connect(id, input)
+				i.connect(cid, input)
 			case InputDisconnect:
-				i.disconnect(id, input)
+				i.disconnect(cid, input)
 			case InputChat:
-				i.chat(id, input)
+				i.chat(cid, input)
 			case InputStage:
 				// TODO WIP
 			case InputJoin:
-				i.join(id, input)
+				i.join(cid, input)
 			case InputLeave:
-				i.leave(id, input)
+				i.leave(cid, input)
 			case InputAbility:
-				i.ability(id, input)
+				i.ability(cid, input)
 			case InputInterrupt:
 				// TODO WIP
 			default:
@@ -73,10 +75,10 @@ func (i *Instance) Run() {
 }
 
 // connect
-func (i *Instance) connect(id ClientID, input InputConnect) {
-	i.name[id] = input.ClientName
+func (i *Instance) connect(cid ClientID, input InputConnect) {
+	i.name[cid] = input.ClientName
 
-	i.w.BindClientID(id).Write(OutputMessage{
+	i.w.BindClientID(cid).Write(OutputMessage{
 		Message: "Welcome to Crescent!",
 	})
 	i.w.Write(OutputMessage{
@@ -85,9 +87,11 @@ func (i *Instance) connect(id ClientID, input InputConnect) {
 }
 
 // disconnect
-func (i *Instance) disconnect(id ClientID, input InputDisconnect) {
-	name := i.name[id]
-	delete(i.name, id)
+func (i *Instance) disconnect(cid ClientID, input InputDisconnect) {
+	i.leave(cid, InputLeave{})
+
+	name := i.name[cid]
+	delete(i.name, cid)
 
 	i.w.Write(OutputMessage{
 		Message: fmt.Sprintf("%s has disconnected.", name),
@@ -95,12 +99,12 @@ func (i *Instance) disconnect(id ClientID, input InputDisconnect) {
 }
 
 // chat
-func (i *Instance) chat(id ClientID, input InputChat) {
-	name := i.name[id]
+func (i *Instance) chat(cid ClientID, input InputChat) {
+	name := i.name[cid]
 	message := input.Message
 
 	i.w.Write(OutputChat{
-		ClientName: i.name[id],
+		ClientName: i.name[cid],
 		Message:    input.Message,
 	})
 	log.WithFields(logrus.Fields{
@@ -111,36 +115,47 @@ func (i *Instance) chat(id ClientID, input InputChat) {
 }
 
 // join
-func (i *Instance) join(id ClientID, input InputJoin) {
-	// TODO WIP
-	class := NewClassHealer()
-	u, err := i.g.units.Join(0, UnitName(i.name[id]), class)
+func (i *Instance) join(cid ClientID, input InputJoin) {
+	// TODO disable join when a game is in progress
+	if _, ok := i.uid[cid]; ok {
+		return
+	}
+	// TODO refactor: make ClassFactory
+	var class *Class
+	switch input.ClassName {
+	case "Assassin":
+		class = NewClassAssassin()
+	case "Disabler":
+		class = NewClassDisabler()
+	case "Healer":
+		class = NewClassHealer()
+	case "Mage":
+		class = NewClassMage()
+	case "Tank":
+		class = NewClassTank()
+	default:
+		return
+	}
+	uid, err := i.g.Join(UnitGroupPlayer, UnitName(i.name[cid]), class)
 	if err != nil {
 		return
 	}
-	i.w.Write(OutputUnitJoin{
-		UnitID:    u.ID(),
-		UnitGroup: u.Group(),
-		UnitName:  u.Name(),
-		ClassName: u.ClassName(),
-		Health:    u.Health(),
-		HealthMax: u.HealthMax(),
-		Mana:      u.Mana(),
-		ManaMax:   u.ManaMax(),
-	})
+	i.uid[cid] = uid
 }
 
 // leave
-func (i *Instance) leave(id ClientID, input InputLeave) {
-	// TODO WIP
-	i.g.units.Leave(0)
-	i.w.Write(OutputUnitLeave{
-		UnitID: 0,
-	})
+func (i *Instance) leave(cid ClientID, input InputLeave) {
+	if _, ok := i.uid[cid]; !ok {
+		return
+	}
+	if err := i.g.Leave(i.uid[cid]); err != nil {
+		return
+	}
+	delete(i.uid, cid)
 }
 
 // ability
-func (i *Instance) ability(id ClientID, input InputAbility) {
+func (i *Instance) ability(cid ClientID, input InputAbility) {
 	// TODO WIP
 	u := i.g.units.Find(0)
 	if input.ObjectUnitID == nil {

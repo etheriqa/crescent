@@ -8,6 +8,12 @@ type UnitID uint64
 type UnitName string
 type UnitGroup uint8
 
+const (
+	_ UnitGroup = iota
+	UnitGroupPlayer
+	UnitGroupAI
+)
+
 type Unit struct {
 	id         UnitID
 	group      UnitGroup

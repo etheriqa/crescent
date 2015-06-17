@@ -19,6 +19,37 @@ func NewGame(clock InstanceClock, w InstanceOutputWriter) *Game {
 	}
 }
 
+// Join creates a Unit and adds it to the game
+func (g *Game) Join(group UnitGroup, name UnitName, class *Class) (id UnitID, err error) {
+	u, err := g.units.Join(group, name, class)
+	if err != nil {
+		return
+	}
+	id = u.ID()
+	g.w.Write(OutputUnitJoin{
+		UnitID:    u.ID(),
+		UnitGroup: u.Group(),
+		UnitName:  u.Name(),
+		ClassName: u.ClassName(),
+		Health:    u.Health(),
+		HealthMax: u.HealthMax(),
+		Mana:      u.Mana(),
+		ManaMax:   u.ManaMax(),
+	})
+	return
+}
+
+// Leave removes the Unit
+func (g *Game) Leave(id UnitID) (err error) {
+	if err = g.units.Leave(id); err != nil {
+		return
+	}
+	g.w.Write(OutputUnitLeave{
+		UnitID: id,
+	})
+	return
+}
+
 // PerformGameTick performs the game tick routine
 func (g *Game) PerformGameTick() {
 	g.units.Each(func(u *Unit) {
