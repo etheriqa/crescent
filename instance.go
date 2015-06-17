@@ -75,7 +75,7 @@ func (i *Instance) connect(id ClientID, input InputConnect) {
 	i.name[id] = input.ClientName
 
 	i.w.BindClientID(id).Write(OutputMessage{
-		Message: "Welcome to the Crescent!",
+		Message: "Welcome to Crescent!",
 	})
 	i.w.Write(OutputMessage{
 		Message: fmt.Sprintf("%s has connected.", input.ClientName),
