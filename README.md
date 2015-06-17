@@ -6,7 +6,10 @@ Crescent
 
 Crescent is an experimental implementation of essential mechanics of the WoW-like raids.
 
+A client application is [here](https://github.com/etheriqa/crescent-client).
+
 ```sh
+go get -t
 make
 ./crescent
 ```
