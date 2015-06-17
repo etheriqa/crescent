@@ -1,5 +1,9 @@
 package main
 
+import (
+	"errors"
+)
+
 type Game struct {
 	clock    InstanceClock
 	handlers HandlerContainer
@@ -48,6 +52,27 @@ func (g *Game) Leave(id UnitID) (err error) {
 		UnitID: id,
 	})
 	return
+}
+
+// Ability activates the ability
+func (g *Game) Ability(sid UnitID, oid *UnitID, abilityName string) error {
+	s := g.units.Find(sid)
+	if s == nil {
+		return errors.New("Unknown subject UnitID")
+	}
+	var o *Unit
+	if oid != nil {
+		o = g.units.Find(*oid)
+		if o == nil {
+			return errors.New("Unknown object UnitID")
+		}
+	}
+	a := s.Ability(abilityName)
+	if a == nil {
+		return errors.New("Unknown ability name")
+	}
+	g.Activating(s, o, a)
+	return nil
 }
 
 // PerformGameTick performs the game tick routine

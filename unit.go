@@ -42,7 +42,6 @@ type UnitCorrection struct {
 
 // NewUnit returns a Unit
 func NewUnit(id UnitID, group UnitGroup, name UnitName, class *Class) *Unit {
-
 	return &Unit{
 		id:         id,
 		name:       name,

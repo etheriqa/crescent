@@ -138,6 +138,10 @@ func (i *Instance) join(cid ClientID, input InputJoin) {
 	}
 	uid, err := i.g.Join(UnitGroupPlayer, UnitName(i.name[cid]), class)
 	if err != nil {
+		log.WithFields(logrus.Fields{
+			"cid":  cid,
+			"type": "join",
+		}).Warn(err)
 		return
 	}
 	i.uid[cid] = uid
@@ -149,6 +153,10 @@ func (i *Instance) leave(cid ClientID, input InputLeave) {
 		return
 	}
 	if err := i.g.Leave(i.uid[cid]); err != nil {
+		log.WithFields(logrus.Fields{
+			"cid":  cid,
+			"type": "leave",
+		}).Warn(err)
 		return
 	}
 	delete(i.uid, cid)
@@ -156,11 +164,8 @@ func (i *Instance) leave(cid ClientID, input InputLeave) {
 
 // ability
 func (i *Instance) ability(cid ClientID, input InputAbility) {
-	// TODO WIP
-	u := i.g.units.Find(0)
-	if input.ObjectUnitID == nil {
-		i.g.Activating(u, nil, u.Ability(input.AbilityName))
-	} else {
-		i.g.Activating(u, i.g.units.Find(*input.ObjectUnitID), u.Ability(input.AbilityName))
+	if _, ok := i.uid[cid]; !ok {
+		return
 	}
+	i.g.Ability(i.uid[cid], input.ObjectUnitID, input.AbilityName)
 }
