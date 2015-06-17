@@ -17,6 +17,8 @@ type Network struct {
 	id   map[ClientID]*Client
 	name map[ClientName]bool
 
+	upgrader websocket.Upgrader
+
 	r InstanceOutput
 	w InstanceInputWriter
 }
@@ -29,12 +31,25 @@ type Client struct {
 }
 
 // NewNetwork returns a Network
-func NewNetwork(r InstanceOutput, w InstanceInputWriter) *Network {
+func NewNetwork(origin string, r InstanceOutput, w InstanceInputWriter) *Network {
 	return &Network{
 		mu:   new(sync.RWMutex),
 		seq:  0,
 		id:   make(map[ClientID]*Client),
 		name: make(map[ClientName]bool),
+
+		upgrader: websocket.Upgrader{
+			CheckOrigin: func(r *http.Request) bool {
+				if origin == "" || origin == r.Header.Get("Origin") {
+					return true
+				}
+				log.WithFields(logrus.Fields{
+					"Origin": r.Header.Get("Origin"),
+					"Host":   r.Host,
+				}).Warn("Unacceptable Origin header")
+				return false
+			},
+		},
 
 		r: r,
 		w: w,
@@ -83,13 +98,9 @@ func (n *Network) wsHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Bad Request", 400)
 			return
 		}
-		upgrader := websocket.Upgrader{
-			CheckOrigin: func(*http.Request) bool { return true }, // FIXME
-		}
-		ws, err := upgrader.Upgrade(w, r, nil)
+		ws, err := n.upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			log.WithField("err", err).Warn("Failed websocket.Upgrade()")
-			http.Error(w, "Internal Server Error", 500)
 			return
 		}
 		n.seq++
