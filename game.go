@@ -13,7 +13,7 @@ func NewGame(clock InstanceClock, w InstanceOutputWriter) *Game {
 	return &Game{
 		clock:    clock,
 		handlers: MakeHandlerSet(),
-		units:    MakeUnitMap(),
+		units:    NewUnitMap(),
 
 		w: w,
 	}
