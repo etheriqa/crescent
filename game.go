@@ -23,6 +23,22 @@ func NewGame(clock InstanceClock, w InstanceOutputWriter) *Game {
 	}
 }
 
+// Sync sends the game state
+func (g *Game) Sync(w InstanceOutputWriter) {
+	g.units.Each(func(u *Unit) {
+		w.Write(OutputUnitJoin{
+			UnitID:    u.ID(),
+			UnitGroup: u.Group(),
+			UnitName:  u.Name(),
+			ClassName: u.ClassName(),
+			Health:    u.Health(),
+			HealthMax: u.HealthMax(),
+			Mana:      u.Mana(),
+			ManaMax:   u.ManaMax(),
+		})
+	})
+}
+
 // Join creates a Unit and adds it to the game
 func (g *Game) Join(group UnitGroup, name UnitName, class *Class) (id UnitID, err error) {
 	u, err := g.units.Join(group, name, class)
