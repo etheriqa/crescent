@@ -2,10 +2,13 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/Sirupsen/logrus"
 )
+
+type ClientName string
 
 type Instance struct {
 	time *InstanceTime
@@ -74,15 +77,20 @@ func (i *Instance) Run() {
 	}
 }
 
+func (i *Instance) generateName() ClientName {
+	return ClientName(fmt.Sprintf("user%03d", rand.Intn(1000)))
+}
+
 // connect
 func (i *Instance) connect(cid ClientID, input InputConnect) {
-	i.name[cid] = input.ClientName
+	name := i.generateName()
+	i.name[cid] = name
 
 	i.w.BindClientID(cid).Write(OutputMessage{
 		Message: "Welcome to Crescent!",
 	})
 	i.w.Write(OutputMessage{
-		Message: fmt.Sprintf("%s has joined.", input.ClientName),
+		Message: fmt.Sprintf("%s has joined.", name),
 	})
 	i.g.Sync(i.w.BindClientID(cid))
 }

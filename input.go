@@ -16,7 +16,6 @@ type InputFrame struct {
 }
 
 type InputConnect struct {
-	ClientName ClientName
 }
 
 type InputDisconnect struct {

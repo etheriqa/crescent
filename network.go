@@ -9,13 +9,11 @@ import (
 )
 
 type ClientID uint64
-type ClientName string
 
 type Network struct {
-	mu   *sync.RWMutex
-	seq  ClientID
-	id   map[ClientID]*Client
-	name map[ClientName]bool
+	mu  *sync.RWMutex
+	seq ClientID
+	id  map[ClientID]*Client
 
 	upgrader websocket.Upgrader
 
@@ -24,19 +22,17 @@ type Network struct {
 }
 
 type Client struct {
-	id   ClientID
-	name ClientName
-	ws   *websocket.Conn
-	buf  chan []byte
+	id  ClientID
+	ws  *websocket.Conn
+	buf chan []byte
 }
 
 // NewNetwork returns a Network
 func NewNetwork(origin string, r InstanceOutput, w InstanceInputWriter) *Network {
 	return &Network{
-		mu:   new(sync.RWMutex),
-		seq:  0,
-		id:   make(map[ClientID]*Client),
-		name: make(map[ClientName]bool),
+		mu:  new(sync.RWMutex),
+		seq: 0,
+		id:  make(map[ClientID]*Client),
 
 		upgrader: websocket.Upgrader{
 			CheckOrigin: func(r *http.Request) bool {
@@ -92,24 +88,15 @@ func (n *Network) wsHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method Not Allowed", 405)
 		return
 	}
-	name := ClientName(r.FormValue("name"))
-	if name == "" {
-		http.Error(w, "Bad Request", 400)
-		return
-	}
 	var c *Client
 	var ok bool
 	n.sync(func() {
-		if n.name[name] {
-			http.Error(w, "Bad Request", 400)
-			return
-		}
 		ws, err := n.upgrader.Upgrade(w, r, nil)
 		if err != nil {
 			log.WithField("err", err).Warn("Failed websocket.Upgrade()")
 			return
 		}
-		c = NewClient(n.generateClientID(), name, ws)
+		c = NewClient(n.generateClientID(), ws)
 		ok = true
 	})
 	if !ok {
@@ -123,13 +110,9 @@ func (n *Network) wsHandler(w http.ResponseWriter, r *http.Request) {
 // register registers the Client
 func (n *Network) register(c *Client) {
 	n.id[c.id] = c
-	n.name[c.name] = true
-	n.w.Write(c.id, InputConnect{
-		ClientName: c.name,
-	})
+	n.w.Write(c.id, InputConnect{})
 	log.WithFields(logrus.Fields{
 		"id":   c.id,
-		"name": c.name,
 		"addr": c.ws.RemoteAddr(),
 	}).Info("Client has been registered")
 }
@@ -140,13 +123,11 @@ func (n *Network) unregister(c *Client) {
 		return
 	}
 	delete(n.id, c.id)
-	delete(n.name, c.name)
 	close(c.buf)
 	c.ws.Close()
 	n.w.Write(c.id, InputDisconnect{})
 	log.WithFields(logrus.Fields{
 		"id":   c.id,
-		"name": c.name,
 		"addr": c.ws.RemoteAddr(),
 	}).Info("Client has been unregistered")
 }
@@ -158,19 +139,17 @@ func (n *Network) receiver(c *Client) {
 		_, p, err := c.ws.ReadMessage()
 		if err != nil {
 			log.WithFields(logrus.Fields{
-				"id":   c.id,
-				"name": c.name,
-				"err":  err,
+				"id":  c.id,
+				"err": err,
 			}).Warn("Failed websocket.ReadMessage()")
 			return
 		}
 		in, err := DecodeInputFrame(p)
 		if err != nil {
 			log.WithFields(logrus.Fields{
-				"id":   c.id,
-				"name": c.name,
-				"p":    string(p),
-				"err":  err,
+				"id":  c.id,
+				"p":   string(p),
+				"err": err,
 			}).Warn("Failed DecodeInputFrame()")
 			return
 		}
@@ -188,9 +167,8 @@ func (n *Network) sender(c *Client) {
 				err := c.ws.WriteMessage(websocket.CloseMessage, []byte{})
 				if err != nil {
 					log.WithFields(logrus.Fields{
-						"id":   c.id,
-						"name": c.name,
-						"err":  err,
+						"id":  c.id,
+						"err": err,
 					}).Warn("Failed websocket.WriteMessage()")
 				}
 				return
@@ -198,9 +176,8 @@ func (n *Network) sender(c *Client) {
 			err := c.ws.WriteMessage(websocket.TextMessage, p)
 			if err != nil {
 				log.WithFields(logrus.Fields{
-					"id":   c.id,
-					"name": c.name,
-					"err":  err,
+					"id":  c.id,
+					"err": err,
 				}).Warn("Failed websocket.WriteMessage()")
 				return
 			}
@@ -237,11 +214,10 @@ func (n *Network) dispatcher() {
 }
 
 // NewClient returns a Client
-func NewClient(id ClientID, name ClientName, ws *websocket.Conn) *Client {
+func NewClient(id ClientID, ws *websocket.Conn) *Client {
 	return &Client{
-		id:   id,
-		name: name,
-		ws:   ws,
-		buf:  make(chan []byte, 1024),
+		id:  id,
+		ws:  ws,
+		buf: make(chan []byte, 1024),
 	}
 }
