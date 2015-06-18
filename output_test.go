@@ -25,9 +25,9 @@ func TestEncodeOutputFrame(t *testing.T) {
 	}
 
 	{
-		expected := []byte(`{"Type":"Chat","Data":{"ClientName":"user","Message":"hi all"}}`)
+		expected := []byte(`{"Type":"Chat","Data":{"UserName":"user","Message":"hi all"}}`)
 		actual, err := EncodeOutputFrame(OutputChat{
-			ClientName: "user",
+			UserName: "user",
 			Message:    "hi all",
 		})
 		if assert.Nil(err) {

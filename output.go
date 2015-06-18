@@ -20,7 +20,7 @@ type OutputMessage struct {
 }
 
 type OutputChat struct {
-	ClientName ClientName
+	UserName UserName
 	Message    string
 }
 

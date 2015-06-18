@@ -8,11 +8,11 @@ import (
 	"github.com/Sirupsen/logrus"
 )
 
-type ClientName string
+type UserName string
 
 type Instance struct {
 	time *InstanceTime
-	name map[ClientID]ClientName
+	name map[ClientID]UserName
 	uid  map[ClientID]UnitID
 
 	g *Game
@@ -25,7 +25,7 @@ func NewInstance(r InstanceInput, w InstanceOutputWriter) *Instance {
 	time := new(InstanceTime)
 	return &Instance{
 		time: time,
-		name: make(map[ClientID]ClientName),
+		name: make(map[ClientID]UserName),
 		uid:  make(map[ClientID]UnitID),
 
 		g: NewGame(time, w),
@@ -58,6 +58,8 @@ func (i *Instance) Run() {
 				i.connect(cid, input)
 			case InputDisconnect:
 				i.disconnect(cid, input)
+			case InputProfile:
+				i.profile(cid, input)
 			case InputChat:
 				i.chat(cid, input)
 			case InputStage:
@@ -77,8 +79,8 @@ func (i *Instance) Run() {
 	}
 }
 
-func (i *Instance) generateName() ClientName {
-	return ClientName(fmt.Sprintf("user%03d", rand.Intn(1000)))
+func (i *Instance) generateName() UserName {
+	return UserName(fmt.Sprintf("user%03d", rand.Intn(1000)))
 }
 
 // connect
@@ -107,14 +109,27 @@ func (i *Instance) disconnect(cid ClientID, input InputDisconnect) {
 	})
 }
 
+// profile
+func (i *Instance) profile(cid ClientID, input InputProfile) {
+	// TODO validation
+	before := i.name[cid]
+	after := input.UserName
+
+	i.name[cid] = after
+
+	i.w.Write(OutputMessage{
+		Message: fmt.Sprintf("%s has changed the name to %s.", before, after),
+	})
+}
+
 // chat
 func (i *Instance) chat(cid ClientID, input InputChat) {
 	name := i.name[cid]
 	message := input.Message
 
 	i.w.Write(OutputChat{
-		ClientName: i.name[cid],
-		Message:    input.Message,
+		UserName: i.name[cid],
+		Message:  input.Message,
 	})
 	log.WithFields(logrus.Fields{
 		"type":    "chat",

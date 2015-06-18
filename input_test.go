@@ -34,6 +34,14 @@ func TestDecodeInputFrame(t *testing.T) {
 	}
 
 	{
+		json := []byte(`{"Type":"Profile","Data":{"UserName":"etheriqa"}}`)
+		input, err := DecodeInputFrame(json)
+		if assert.Nil(err) && assert.IsType(InputProfile{}, input) {
+			assert.Equal(UserName("etheriqa"), input.(InputProfile).UserName)
+		}
+	}
+
+	{
 		json := []byte(`{"Type":"Chat","Data":{"Message":"hi all"}}`)
 		input, err := DecodeInputFrame(json)
 		if assert.Nil(err) && assert.IsType(InputChat{}, input) {

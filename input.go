@@ -21,6 +21,10 @@ type InputConnect struct {
 type InputDisconnect struct {
 }
 
+type InputProfile struct {
+	UserName UserName
+}
+
 type InputChat struct {
 	Message string
 }
@@ -55,6 +59,11 @@ func DecodeInputFrame(p []byte) (interface{}, error) {
 	}
 	err := errors.New("Unknown input type: " + f.Type)
 	switch f.Type {
+	case "Profile":
+		i := InputProfile{}
+		if err := json.Unmarshal(*f.Data, &i); err == nil {
+			return i, nil
+		}
 	case "Chat":
 		i := InputChat{}
 		if err := json.Unmarshal(*f.Data, &i); err == nil {

@@ -39,7 +39,7 @@ func TestInstanceOutput(t *testing.T) {
 	assert.Implements((*InstanceOutputWriter)(nil), w)
 
 	w.Write(OutputChat{
-		ClientName: "user",
+		UserName: "user",
 		Message:    "hi all",
 	})
 	assert.NotPanics(func() {
