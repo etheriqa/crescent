@@ -82,8 +82,9 @@ func (i *Instance) connect(cid ClientID, input InputConnect) {
 		Message: "Welcome to Crescent!",
 	})
 	i.w.Write(OutputMessage{
-		Message: fmt.Sprintf("%s has connected.", input.ClientName),
+		Message: fmt.Sprintf("%s has joined.", input.ClientName),
 	})
+	i.g.Sync(i.w.BindClientID(cid))
 }
 
 // disconnect
@@ -94,7 +95,7 @@ func (i *Instance) disconnect(cid ClientID, input InputDisconnect) {
 	delete(i.name, cid)
 
 	i.w.Write(OutputMessage{
-		Message: fmt.Sprintf("%s has disconnected.", name),
+		Message: fmt.Sprintf("%s has left.", name),
 	})
 }
 
