@@ -119,6 +119,9 @@ func NewClassMage() *Class {
 				if err != nil {
 					log.Fatal(err)
 				}
+				if enemy.IsDead() {
+					return
+				}
 				op.DoT(op.MagicDamage(s, enemy, 10), 10*Second, r.Name)
 			})
 		},

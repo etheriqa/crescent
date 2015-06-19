@@ -37,6 +37,9 @@ func NewClassDisabler() *Class {
 			if err != nil {
 				log.Fatal(err)
 			}
+			if o.IsDead() {
+				return
+			}
 			op.DoT(op.PhysicalDamage(s, o, 20), 4*Second, q.Name)
 		},
 	}
@@ -57,6 +60,9 @@ func NewClassDisabler() *Class {
 			if err != nil {
 				log.Fatal(err)
 			}
+			if o.IsDead() {
+				return
+			}
 			op.Disable(o, DisableTypeSilence, Second/2)
 		},
 	}
@@ -75,6 +81,9 @@ func NewClassDisabler() *Class {
 			_, _, _, err := op.MagicDamage(s, o, 430).Perform()
 			if err != nil {
 				log.Fatal(err)
+			}
+			if o.IsDead() {
+				return
 			}
 			op.Disable(o, DisableTypeStun, 2*Second)
 		},
@@ -96,6 +105,9 @@ func NewClassDisabler() *Class {
 				CriticalStrikeFactor: 0.5,
 			}
 			op.Units().EachFriend(s.Subject(), func(u *Unit) {
+				if u.IsDead() {
+					return
+				}
 				op.Correction(u, c, 1, 10*Second, r.Name)
 			})
 		},

@@ -40,6 +40,9 @@ func NewClassAssassin() *Class {
 		},
 		Perform: func(op Operator, s Subject, o *Unit) {
 			for i := 0; i < 3; i++ {
+				if o.IsDead() {
+					return
+				}
 				_, _, crit, err := op.PhysicalDamage(s, o, 45).Perform()
 				if err != nil {
 					log.Fatal(err)
@@ -68,6 +71,9 @@ func NewClassAssassin() *Class {
 			}
 			if crit {
 				AssassinStack(op, MakeObject(s.Subject()))
+			}
+			if o.IsDead() {
+				return
 			}
 			op.DoT(op.PhysicalDamage(s, o, 10), 10*Second, w.Name)
 		},
@@ -119,7 +125,6 @@ func NewClassAssassin() *Class {
 			if err != nil {
 				log.Fatal(err)
 			}
-			op.Disable(o, DisableTypeSilence, Second)
 			op.Handlers().Each(func(h Handler) {
 				switch h := h.(type) {
 				case *Correction:
@@ -128,6 +133,10 @@ func NewClassAssassin() *Class {
 					}
 				}
 			})
+			if o.IsDead() {
+				return
+			}
+			op.Disable(o, DisableTypeSilence, Second)
 		},
 	}
 	return class

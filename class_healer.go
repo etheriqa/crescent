@@ -91,6 +91,9 @@ func NewClassHealer() *Class {
 			}
 			op.Correction(s.Subject(), c, 1, 8*Second, r.Name)
 			op.Units().EachFriend(s.Subject(), func(friend *Unit) {
+				if friend.IsDead() {
+					return
+				}
 				_, _, _, err := op.Healing(s.Subject(), friend, 425).Perform()
 				if err != nil {
 					log.Fatal(err)
