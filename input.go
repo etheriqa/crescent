@@ -61,37 +61,37 @@ func DecodeInputFrame(p []byte) (interface{}, error) {
 	switch f.Type {
 	case "Profile":
 		i := InputProfile{}
-		if err := json.Unmarshal(*f.Data, &i); err == nil {
+		if err = json.Unmarshal(*f.Data, &i); err == nil {
 			return i, nil
 		}
 	case "Chat":
 		i := InputChat{}
-		if err := json.Unmarshal(*f.Data, &i); err == nil {
+		if err = json.Unmarshal(*f.Data, &i); err == nil {
 			return i, nil
 		}
 	case "Stage":
 		i := InputStage{}
-		if err := json.Unmarshal(*f.Data, &i); err == nil {
+		if err = json.Unmarshal(*f.Data, &i); err == nil {
 			return i, nil
 		}
 	case "Join":
 		i := InputJoin{}
-		if err := json.Unmarshal(*f.Data, &i); err == nil {
+		if err = json.Unmarshal(*f.Data, &i); err == nil {
 			return i, nil
 		}
 	case "Leave":
 		i := InputLeave{}
-		if err := json.Unmarshal(*f.Data, &i); err == nil {
+		if err = json.Unmarshal(*f.Data, &i); err == nil {
 			return i, nil
 		}
 	case "Ability":
 		i := InputAbility{}
-		if err := json.Unmarshal(*f.Data, &i); err == nil {
+		if err = json.Unmarshal(*f.Data, &i); err == nil {
 			return i, nil
 		}
 	case "Interrupt":
 		i := InputInterrupt{}
-		if err := json.Unmarshal(*f.Data, &i); err == nil {
+		if err = json.Unmarshal(*f.Data, &i); err == nil {
 			return i, nil
 		}
 	}
