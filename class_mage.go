@@ -7,12 +7,11 @@ import (
 func NewClassMage() *Class {
 	var q, w, e, r Ability
 	class := &Class{
-		Name: "Mage",
-		// TODO stats
+		Name:                 "Mage",
 		Health:               600,
-		HealthRegeneration:   2,
+		HealthRegeneration:   14,
 		Mana:                 400,
-		ManaRegeneration:     6,
+		ManaRegeneration:     28,
 		Armor:                DefaultArmor,
 		MagicResistance:      DefaultMagicResistance,
 		CriticalStrikeChance: DefaultCriticalStrikeChance,
@@ -22,9 +21,9 @@ func NewClassMage() *Class {
 		HealingThreatFactor:  DefaultHealingThreatFactor,
 		Abilities:            []*Ability{&q, &w, &e, &r},
 	}
-	// Magic damage / Armor reduction / Proc 10% W
 	q = Ability{
-		Name:               "Q",
+		Name:               "Frost Bolt",
+		Description:        "Deals magic damage / Reduces 10 armor for 8 seconds to target / 20% chance to reset cooldown for Icicle",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
 		ManaCost:           0,
@@ -39,7 +38,7 @@ func NewClassMage() *Class {
 				Armor: -10,
 			}
 			op.Correction(o, c, 1, 8*Second, q.Name)
-			_, _, _, err := op.MagicDamage(s, o, 120).Perform()
+			_, _, _, err := op.MagicDamage(s, o, 155).Perform()
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -56,9 +55,9 @@ func NewClassMage() *Class {
 			})
 		},
 	}
-	// Magic damage / DoT / Proc 20% E
 	w = Ability{
-		Name:               "W",
+		Name:               "Icicle",
+		Description:        "Grants a magic damage over time effect for 10 seconds to target / 20% chance to reset cooldown for Absolute Zero",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
 		ManaCost:           20,
@@ -69,7 +68,7 @@ func NewClassMage() *Class {
 			DisableTypeStun,
 		},
 		Perform: func(op Operator, s Subject, o *Unit) {
-			op.DoT(op.MagicDamage(s, o, 30), 10*Second, w.Name)
+			op.DoT(op.MagicDamage(s, o, 15), 10*Second, w.Name)
 			if rand.Float64() > 0.2 {
 				return
 			}
@@ -83,9 +82,9 @@ func NewClassMage() *Class {
 			})
 		},
 	}
-	// Magic damage
 	e = Ability{
-		Name:               "E",
+		Name:               "Absolute Zero",
+		Description:        "Deals magic damage",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
 		ManaCost:           60,
@@ -96,15 +95,15 @@ func NewClassMage() *Class {
 			DisableTypeStun,
 		},
 		Perform: func(op Operator, s Subject, o *Unit) {
-			_, _, _, err := op.MagicDamage(s, o, 400).Perform()
+			_, _, _, err := op.MagicDamage(s, o, 420).Perform()
 			if err != nil {
 				log.Fatal(err)
 			}
 		},
 	}
-	// Magic damage / All / DoT / Stun
 	r = Ability{
-		Name:               "R",
+		Name:               "Bllizard",
+		Description:        "Deals magic damage to all enemies / Grants magic damage over time effects to all enemies",
 		TargetType:         TargetTypeNone,
 		HealthCost:         0,
 		ManaCost:           200,
@@ -116,12 +115,11 @@ func NewClassMage() *Class {
 		},
 		Perform: func(op Operator, s Subject, o *Unit) {
 			op.Units().EachEnemy(s.Subject(), func(enemy *Unit) {
-				_, _, _, err := op.MagicDamage(s, enemy, 400).Perform()
+				_, _, _, err := op.MagicDamage(s, enemy, 600).Perform()
 				if err != nil {
 					log.Fatal(err)
 				}
-				op.DoT(op.MagicDamage(s, enemy, 20), 10*Second, r.Name)
-				op.Disable(enemy, DisableTypeStun, Second)
+				op.DoT(op.MagicDamage(s, enemy, 10), 10*Second, r.Name)
 			})
 		},
 	}

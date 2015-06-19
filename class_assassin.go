@@ -1,11 +1,11 @@
 package main
 
-const AssassinStackName = "Assassin Stack"
+const AssassinStackName = "Tenecity"
 
 func AssassinStack(op Operator, o Object) {
 	c := UnitCorrection{
 		CriticalStrikeChance: 0.05,
-		CriticalStrikeFactor: 0.1,
+		CriticalStrikeFactor: 0.05,
 	}
 	op.Correction(o, c, 10, 10*Second, AssassinStackName)
 }
@@ -13,12 +13,11 @@ func AssassinStack(op Operator, o Object) {
 func NewClassAssassin() *Class {
 	var q, w, e, r Ability
 	class := &Class{
-		Name: "Assassin",
-		// TODO stats
+		Name:                 "Assassin",
 		Health:               600,
-		HealthRegeneration:   2,
+		HealthRegeneration:   11,
 		Mana:                 200,
-		ManaRegeneration:     3,
+		ManaRegeneration:     14,
 		Armor:                DefaultArmor,
 		MagicResistance:      DefaultMagicResistance,
 		CriticalStrikeChance: DefaultCriticalStrikeChance + 0.05,
@@ -28,9 +27,9 @@ func NewClassAssassin() *Class {
 		HealingThreatFactor:  DefaultHealingThreatFactor,
 		Abilities:            []*Ability{&q, &w, &e, &r},
 	}
-	// Physical damage
 	q = Ability{
-		Name:               "Q",
+		Name:               "Triple Cleave",
+		Description:        "Deals physical damage three times",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
 		ManaCost:           0,
@@ -40,15 +39,20 @@ func NewClassAssassin() *Class {
 			DisableTypeStun,
 		},
 		Perform: func(op Operator, s Subject, o *Unit) {
-			_, _, _, err := op.PhysicalDamage(s, o, 140).Perform()
-			if err != nil {
-				log.Fatal(err)
+			for i := 0; i < 3; i++ {
+				_, _, crit, err := op.PhysicalDamage(s, o, 45).Perform()
+				if err != nil {
+					log.Fatal(err)
+				}
+				if crit {
+					AssassinStack(op, MakeObject(s.Subject()))
+				}
 			}
 		},
 	}
-	// Physical damage / DoT / Increasing stacks
 	w = Ability{
-		Name:               "W",
+		Name:               "Poison Dart",
+		Description:        "Deals physcical damage / Grants a physical damage over time effect for 10 seconds to target",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
 		ManaCost:           20,
@@ -58,16 +62,19 @@ func NewClassAssassin() *Class {
 			DisableTypeStun,
 		},
 		Perform: func(op Operator, s Subject, o *Unit) {
-			_, _, _, err := op.PhysicalDamage(s, o, 80).Perform()
+			_, _, crit, err := op.PhysicalDamage(s, o, 80).Perform()
 			if err != nil {
 				log.Fatal(err)
+			}
+			if crit {
+				AssassinStack(op, MakeObject(s.Subject()))
 			}
 			op.DoT(op.PhysicalDamage(s, o, 10), 10*Second, w.Name)
 		},
 	}
-	// Increasing stacks / Decreasing armor and magic resistance
 	e = Ability{
-		Name:               "E",
+		Name:               "Tenacity",
+		Description:        "Gains three Tenacity effects / Loses armor and magic resistance for 8 seconds / Tenecity effect increases critical strike chance and critical strike damage",
 		TargetType:         TargetTypeNone,
 		HealthCost:         0,
 		ManaCost:           40,
@@ -82,14 +89,14 @@ func NewClassAssassin() *Class {
 				MagicResistance: -25,
 			}
 			op.Correction(s.Subject(), c, 1, 8*Second, e.Name)
-			for i := 0; i < 2; i++ {
+			for i := 0; i < 3; i++ {
 				AssassinStack(op, MakeObject(s.Subject()))
 			}
 		},
 	}
-	// Physical
-	r = Ability{
-		Name:               "R",
+	w = Ability{
+		Name:               "Lethal Weapon",
+		Description:        "Deals pure damage / Silences target for 1 second / Consumes all Tenecity effects",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
 		ManaCost:           120,
@@ -108,10 +115,11 @@ func NewClassAssassin() *Class {
 					}
 				}
 			})
-			_, _, _, err := op.PhysicalDamage(s, o, 400+stack*100).Perform()
+			_, _, _, err := op.PureDamage(s, o, 400+stack*100).Perform()
 			if err != nil {
 				log.Fatal(err)
 			}
+			op.Disable(o, DisableTypeSilence, Second)
 			op.Handlers().Each(func(h Handler) {
 				switch h := h.(type) {
 				case *Correction:

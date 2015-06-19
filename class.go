@@ -7,7 +7,7 @@ const (
 	DefaultCriticalStrikeFactor Statistic = 0.5
 	DefaultCooldownReduction    Statistic = 0.0
 	DefaultDamageThreatFactor   Statistic = 1.0
-	DefaultHealingThreatFactor  Statistic = 0.4
+	DefaultHealingThreatFactor  Statistic = 0.6
 )
 
 type ClassName string

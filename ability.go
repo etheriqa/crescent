@@ -11,6 +11,7 @@ const (
 
 type Ability struct {
 	Name               string
+	Description        string
 	TargetType         TargetType
 	HealthCost         Statistic
 	ManaCost           Statistic
