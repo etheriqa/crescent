@@ -151,7 +151,7 @@ func (i *Instance) chat(cid ClientID, input InputChat) {
 // stage
 func (i *Instance) stage(cid ClientID, input InputStage) {
 	// WIP
-	i.g = NewGame(i.time, i.w)
+	i.g.Clear()
 	i.g.Join(UnitGroupAI, "MOB", NewClassTank())
 	i.w.Write(OutputStage{})
 }

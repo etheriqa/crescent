@@ -23,6 +23,12 @@ func NewGame(clock InstanceClock, w InstanceOutputWriter) *Game {
 	}
 }
 
+// Clear clears the game state
+func (g *Game) Clear() {
+	g.handlers = MakeHandlerSet()
+	g.units.Clear()
+}
+
 // SyncGame sends the game state
 func (g *Game) SyncGame(w InstanceOutputWriter) {
 	g.units.Each(func(u *Unit) {

@@ -7,6 +7,7 @@ import (
 const GroupCapacity = 5
 
 type UnitContainer interface {
+	Clear()
 	Join(UnitGroup, UnitName, *Class) (*Unit, error)
 	Leave(UnitID) error
 	Find(UnitID) *Unit
@@ -26,6 +27,11 @@ func NewUnitMap() *UnitMap {
 		seq: 0,
 		id:  make(map[UnitID]*Unit),
 	}
+}
+
+// Clear clears all units
+func (um *UnitMap) Clear() {
+	um.id = make(map[UnitID]*Unit)
 }
 
 // Join creates a Unit and adds it
