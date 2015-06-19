@@ -42,10 +42,10 @@ func (i *Instance) Run() {
 		case <-t:
 			*i.time = i.time.Add(GameTick)
 			if i.time.IsRegenerationTick() {
+				i.sync(i.w)
 				i.g.PerformRegenerationTick()
 			}
 			if i.time.IsPeriodicalTick() {
-				i.sync(i.w)
 				i.g.PerformPeriodicalTick()
 			}
 			i.g.PerformGameTick()
