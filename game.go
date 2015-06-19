@@ -23,8 +23,8 @@ func NewGame(clock InstanceClock, w InstanceOutputWriter) *Game {
 	}
 }
 
-// Sync sends the game state
-func (g *Game) Sync(w InstanceOutputWriter) {
+// SyncGame sends the game state
+func (g *Game) SyncGame(w InstanceOutputWriter) {
 	g.units.Each(func(u *Unit) {
 		w.Write(OutputUnitJoin{
 			UnitID:    u.ID(),

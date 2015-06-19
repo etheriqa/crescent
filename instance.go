@@ -94,7 +94,7 @@ func (i *Instance) connect(cid ClientID, input InputConnect) {
 	i.w.Write(OutputMessage{
 		Message: fmt.Sprintf("%s has joined.", name),
 	})
-	i.g.Sync(i.w.BindClientID(cid))
+	i.g.SyncGame(i.w.BindClientID(cid))
 }
 
 // disconnect
