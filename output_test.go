@@ -28,7 +28,7 @@ func TestEncodeOutputFrame(t *testing.T) {
 		expected := []byte(`{"Type":"Chat","Data":{"UserName":"user","Message":"hi all"}}`)
 		actual, err := EncodeOutputFrame(OutputChat{
 			UserName: "user",
-			Message:    "hi all",
+			Message:  "hi all",
 		})
 		if assert.Nil(err) {
 			assert.Equal(expected, actual)
@@ -87,12 +87,12 @@ func TestEncodeOutputFrame(t *testing.T) {
 	}
 
 	{
-		expected := []byte(`{"Type":"UnitActivating","Data":{"UnitID":100,"AbilityName":"Q","ActivationDuration":20,"ExpirationTime":2000}}`)
+		expected := []byte(`{"Type":"UnitActivating","Data":{"UnitID":100,"AbilityName":"Q","StartTime":2000,"EndTime":2020}}`)
 		actual, err := EncodeOutputFrame(OutputUnitActivating{
-			UnitID:             100,
-			AbilityName:        "Q",
-			ActivationDuration: 20,
-			ExpirationTime:     2000,
+			UnitID:      100,
+			AbilityName: "Q",
+			StartTime:   2000,
+			EndTime:     2020,
 		})
 		if assert.Nil(err) {
 			assert.Equal(expected, actual)

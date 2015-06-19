@@ -210,10 +210,10 @@ func (h *Activating) checkResource() error {
 // writeOutputUnitActivating writes a OutputUnitActivating
 func (h *Activating) writeOutputUnitActivating() {
 	h.op.Writer().Write(OutputUnitActivating{
-		UnitID:             h.Subject().ID(),
-		AbilityName:        h.ability.Name,
-		ActivationDuration: h.ability.ActivationDuration,
-		ExpirationTime:     h.expirationTime,
+		UnitID:      h.Subject().ID(),
+		AbilityName: h.ability.Name,
+		StartTime:   h.op.Clock().Now(),
+		EndTime:     h.expirationTime,
 	})
 }
 

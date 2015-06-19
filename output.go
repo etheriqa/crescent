@@ -21,7 +21,7 @@ type OutputMessage struct {
 
 type OutputChat struct {
 	UserName UserName
-	Message    string
+	Message  string
 }
 
 type OutputUnitJoin struct {
@@ -52,10 +52,10 @@ type OutputUnitDetach struct {
 }
 
 type OutputUnitActivating struct {
-	UnitID             UnitID
-	AbilityName        string
-	ActivationDuration InstanceDuration
-	ExpirationTime     InstanceTime
+	UnitID      UnitID
+	AbilityName string
+	StartTime   InstanceTime
+	EndTime     InstanceTime
 }
 
 type OutputUnitActivated struct {
