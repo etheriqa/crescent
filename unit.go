@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"math"
 )
 
 type UnitID uint64
@@ -186,7 +187,7 @@ func (u *Unit) ModifyHealth(w InstanceOutputWriter, delta Statistic) (before, af
 		return
 	}
 	before = u.Health()
-	after = u.Health() + delta
+	after = u.Health() + Statistic(math.Floor(float64(delta)))
 	if after < 0 {
 		after = 0
 	}
@@ -208,7 +209,7 @@ func (u *Unit) ModifyMana(w InstanceOutputWriter, delta Statistic) (before, afte
 		return
 	}
 	before = u.Mana()
-	after = u.Mana() + delta
+	after = u.Mana() + Statistic(math.Floor(float64(delta)))
 	if after < 0 {
 		after = 0
 	}
