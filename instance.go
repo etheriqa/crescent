@@ -64,7 +64,7 @@ func (i *Instance) Run() {
 			case InputChat:
 				i.chat(cid, input)
 			case InputStage:
-				// TODO WIP
+				i.stage(cid, input)
 			case InputJoin:
 				i.join(cid, input)
 			case InputLeave:
@@ -146,6 +146,14 @@ func (i *Instance) chat(cid ClientID, input InputChat) {
 		"name":    name,
 		"message": message,
 	}).Infof("%s: %s", name, message)
+}
+
+// stage
+func (i *Instance) stage(cid ClientID, input InputStage) {
+	// WIP
+	i.g = NewGame(i.time, i.w)
+	i.g.Join(UnitGroupAI, "MOB", NewClassTank())
+	i.w.Write(OutputStage{})
 }
 
 // join

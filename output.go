@@ -28,6 +28,9 @@ type OutputChat struct {
 	Message  string
 }
 
+type OutputStage struct {
+}
+
 type OutputUnitJoin struct {
 	UnitID    UnitID
 	UnitGroup UnitGroup
@@ -106,6 +109,8 @@ func EncodeOutputFrame(o interface{}) ([]byte, error) {
 		f.Type = "Message"
 	case OutputChat:
 		f.Type = "Chat"
+	case OutputStage:
+		f.Type = "Stage"
 	case OutputUnitJoin:
 		f.Type = "UnitJoin"
 	case OutputUnitLeave:
