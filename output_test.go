@@ -15,6 +15,16 @@ func TestEncodeOutputFrame(t *testing.T) {
 	}
 
 	{
+		expected := []byte(`{"Type":"Sync","Data":{"InstanceTime":2000}}`)
+		actual, err := EncodeOutputFrame(OutputSync{
+			InstanceTime: 2000,
+		})
+		if assert.Nil(err) {
+			assert.Equal(expected, actual)
+		}
+	}
+
+	{
 		expected := []byte(`{"Type":"Message","Data":{"Message":"welcome"}}`)
 		actual, err := EncodeOutputFrame(OutputMessage{
 			Message: "welcome",

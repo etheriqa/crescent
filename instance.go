@@ -45,6 +45,7 @@ func (i *Instance) Run() {
 				i.g.PerformRegenerationTick()
 			}
 			if i.time.IsPeriodicalTick() {
+				i.sync(i.w)
 				i.g.PerformPeriodicalTick()
 			}
 			i.g.PerformGameTick()
@@ -79,8 +80,16 @@ func (i *Instance) Run() {
 	}
 }
 
+// generateName returns a random user name
 func (i *Instance) generateName() UserName {
 	return UserName(fmt.Sprintf("user%03d", rand.Intn(1000)))
+}
+
+// sync sends a OutputSync message
+func (i *Instance) sync(w InstanceOutputWriter) {
+	w.Write(OutputSync{
+		InstanceTime: *i.time,
+	})
 }
 
 // connect
@@ -88,6 +97,7 @@ func (i *Instance) connect(cid ClientID, input InputConnect) {
 	name := i.generateName()
 	i.name[cid] = name
 
+	i.sync(i.w.BindClientID(cid))
 	i.w.BindClientID(cid).Write(OutputMessage{
 		Message: "Welcome to Crescent!",
 	})

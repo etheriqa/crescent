@@ -15,6 +15,10 @@ type OutputFrame struct {
 	Data interface{}
 }
 
+type OutputSync struct {
+	InstanceTime InstanceTime
+}
+
 type OutputMessage struct {
 	Message string
 }
@@ -96,6 +100,8 @@ func EncodeOutputFrame(o interface{}) ([]byte, error) {
 	var f OutputFrame
 	f.Data = o
 	switch o.(type) {
+	case OutputSync:
+		f.Type = "Sync"
 	case OutputMessage:
 		f.Type = "Message"
 	case OutputChat:
