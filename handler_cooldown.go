@@ -21,6 +21,9 @@ func (h *Cooldown) OnAttach() {
 			if h == o {
 				return
 			}
+			if h.ability != o.ability {
+				return
+			}
 			h.op.Handlers().Detach(o)
 		}
 	})
