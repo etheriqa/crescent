@@ -152,6 +152,7 @@ func (i *Instance) chat(cid ClientID, input InputChat) {
 func (i *Instance) stage(cid ClientID, input InputStage) {
 	// WIP
 	i.w.Write(OutputStage{})
+	i.uid = make(map[ClientID]UnitID)
 	i.g.Clear()
 	i.g.Join(UnitGroupAI, "MOB", NewClassTank())
 }
