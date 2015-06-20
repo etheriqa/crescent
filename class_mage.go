@@ -102,7 +102,7 @@ func NewClassMage() *Class {
 		},
 	}
 	r = Ability{
-		Name:               "Bllizard",
+		Name:               "Blizzard",
 		Description:        "Deals magic damage to all enemies / Grants magic damage over time effects to all enemies",
 		TargetType:         TargetTypeNone,
 		HealthCost:         0,
