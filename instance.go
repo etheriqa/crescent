@@ -187,6 +187,7 @@ func (i *Instance) join(cid ClientID, input InputJoin) {
 		return
 	}
 	i.uid[cid] = uid
+	i.g.SyncUnit(i.w.BindClientID(cid), uid)
 }
 
 // leave

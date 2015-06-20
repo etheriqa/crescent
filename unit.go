@@ -170,6 +170,11 @@ func (u *Unit) HealingThreatFactor() Statistic {
 	return u.class.HealingThreatFactor + u.correction.HealingThreatFactor
 }
 
+// Abilities returns the ability
+func (u *Unit) Abilities() []*Ability {
+	return u.class.Abilities
+}
+
 // Ability returns the ability
 func (u *Unit) Ability(name string) *Ability {
 	return u.class.Ability(name)

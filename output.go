@@ -31,6 +31,25 @@ type OutputChat struct {
 type OutputStage struct {
 }
 
+type OutputPlayer struct {
+	UnitID UnitID
+	Q      OutputPlayerAbility
+	W      OutputPlayerAbility
+	E      OutputPlayerAbility
+	R      OutputPlayerAbility
+}
+
+type OutputPlayerAbility struct {
+	Name               string
+	Description        string
+	TargetType         TargetType
+	HealthCost         Statistic
+	ManaCost           Statistic
+	ActivationDuration InstanceDuration
+	CooldownDuration   InstanceDuration
+	DisableTypes       []string
+}
+
 type OutputUnitJoin struct {
 	UnitID    UnitID
 	UnitGroup UnitGroup
@@ -111,6 +130,8 @@ func EncodeOutputFrame(o interface{}) ([]byte, error) {
 		f.Type = "Chat"
 	case OutputStage:
 		f.Type = "Stage"
+	case OutputPlayer:
+		f.Type = "Player"
 	case OutputUnitJoin:
 		f.Type = "UnitJoin"
 	case OutputUnitLeave:

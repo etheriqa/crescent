@@ -45,6 +45,45 @@ func (g *Game) SyncGame(w InstanceOutputWriter) {
 	})
 }
 
+// SyncUnit sends the unit information
+func (g *Game) SyncUnit(w InstanceOutputWriter, id UnitID) {
+	// TODO refactor
+	u := g.units.Find(id)
+	// TODO handle the error
+	if u == nil {
+		return
+	}
+	as := make([]OutputPlayerAbility, 4)
+	for i := 0; i < 4; i++ {
+		dts := make([]string, 0)
+		for _, dt := range u.Abilities()[i].DisableTypes {
+			switch dt {
+			case DisableTypeSilence:
+				dts = append(dts, "Silence")
+			case DisableTypeStun:
+				dts = append(dts, "Stun")
+			}
+		}
+		as[i] = OutputPlayerAbility{
+			Name:               u.Abilities()[i].Name,
+			Description:        u.Abilities()[i].Description,
+			TargetType:         u.Abilities()[i].TargetType,
+			HealthCost:         u.Abilities()[i].HealthCost,
+			ManaCost:           u.Abilities()[i].ManaCost,
+			ActivationDuration: u.Abilities()[i].ActivationDuration,
+			CooldownDuration:   u.Abilities()[i].CooldownDuration,
+			DisableTypes:       dts,
+		}
+	}
+	w.Write(OutputPlayer{
+		UnitID: id,
+		Q:      as[0],
+		W:      as[1],
+		E:      as[2],
+		R:      as[3],
+	})
+}
+
 // Join creates a Unit and adds it to the game
 func (g *Game) Join(group UnitGroup, name UnitName, class *Class) (id UnitID, err error) {
 	u, err := g.units.Join(group, name, class)
