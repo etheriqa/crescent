@@ -128,11 +128,19 @@ func (g *Game) Ability(sid UnitID, oid *UnitID, abilityName string) error {
 			return errors.New("Unknown object UnitID")
 		}
 	}
-	a := s.Ability(abilityName)
-	if a == nil {
+	// TODO refactor
+	switch abilityName {
+	case "Q":
+		g.Activating(s, o, s.Abilities()[0])
+	case "W":
+		g.Activating(s, o, s.Abilities()[1])
+	case "E":
+		g.Activating(s, o, s.Abilities()[2])
+	case "R":
+		g.Activating(s, o, s.Abilities()[3])
+	default:
 		return errors.New("Unknown ability name")
 	}
-	g.Activating(s, o, a)
 	return nil
 }
 
