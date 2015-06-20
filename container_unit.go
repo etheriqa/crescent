@@ -71,7 +71,7 @@ func (um *UnitMap) Each(callback func(*Unit)) {
 func (um *UnitMap) EachFriend(u *Unit, callback func(*Unit)) {
 	for _, v := range um.id {
 		if u.Group() == v.Group() {
-			callback(u)
+			callback(v)
 		}
 	}
 }
@@ -80,7 +80,7 @@ func (um *UnitMap) EachFriend(u *Unit, callback func(*Unit)) {
 func (um *UnitMap) EachEnemy(u *Unit, callback func(*Unit)) {
 	for _, v := range um.id {
 		if u.Group() != v.Group() {
-			callback(u)
+			callback(v)
 		}
 	}
 }
