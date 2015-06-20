@@ -100,7 +100,7 @@ func NewClassAssassin() *Class {
 			}
 		},
 	}
-	w = Ability{
+	r = Ability{
 		Name:               "Lethal Weapon",
 		Description:        "Deals pure damage / Silences target for 1 second / Consumes all Tenecity effects",
 		TargetType:         TargetTypeEnemy,
