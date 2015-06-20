@@ -4,10 +4,10 @@ func NewClassTank() *Class {
 	var q, w, e, r Ability
 	class := &Class{
 		Name:                 "Tank",
-		Health:               1200,
-		HealthRegeneration:   32,
-		Mana:                 200,
-		ManaRegeneration:     14,
+		Health:               1740,
+		HealthRegeneration:   41,
+		Mana:                 340,
+		ManaRegeneration:     16,
 		Armor:                DefaultArmor,
 		MagicResistance:      DefaultMagicResistance,
 		CriticalStrikeChance: DefaultCriticalStrikeChance,
@@ -44,7 +44,7 @@ func NewClassTank() *Class {
 		Description:        "Deals physical damage / Increases armor and magic resistance for 4 seconds",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
-		ManaCost:           15,
+		ManaCost:           9,
 		ActivationDuration: 1 * Second,
 		CooldownDuration:   10 * Second,
 		DisableTypes: []DisableType{
@@ -67,7 +67,7 @@ func NewClassTank() *Class {
 		Description:        "Deals physical damage / Drains health",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
-		ManaCost:           50,
+		ManaCost:           33,
 		ActivationDuration: 0,
 		CooldownDuration:   15 * Second,
 		DisableTypes: []DisableType{
@@ -86,7 +86,7 @@ func NewClassTank() *Class {
 		Description:        "Increases armor and magic resistance for 5 seconds",
 		TargetType:         TargetTypeNone,
 		HealthCost:         0,
-		ManaCost:           120,
+		ManaCost:           61,
 		ActivationDuration: 1 * Second,
 		CooldownDuration:   60 * Second,
 		DisableTypes: []DisableType{

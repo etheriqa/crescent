@@ -4,10 +4,10 @@ func NewClassDisabler() *Class {
 	var q, w, e, r Ability
 	class := &Class{
 		Name:                 "Disabler",
-		Health:               800,
-		HealthRegeneration:   25,
-		Mana:                 300,
-		ManaRegeneration:     19,
+		Health:               1190,
+		HealthRegeneration:   28,
+		Mana:                 410,
+		ManaRegeneration:     21,
 		Armor:                DefaultArmor,
 		MagicResistance:      DefaultMagicResistance,
 		CriticalStrikeChance: DefaultCriticalStrikeChance,
@@ -48,7 +48,7 @@ func NewClassDisabler() *Class {
 		Description:        "Deals physical damage / Silences target for 0.5 seconds",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
-		ManaCost:           40,
+		ManaCost:           25,
 		ActivationDuration: 0,
 		CooldownDuration:   10 * Second,
 		DisableTypes: []DisableType{
@@ -71,7 +71,7 @@ func NewClassDisabler() *Class {
 		Description:        "Deals magic damage / Stuns target for 2 seconds",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
-		ManaCost:           60,
+		ManaCost:           45,
 		ActivationDuration: 2 * Second,
 		CooldownDuration:   18 * Second,
 		DisableTypes: []DisableType{
@@ -93,7 +93,7 @@ func NewClassDisabler() *Class {
 		Description:        "Increases critical strike chance and critical strike factor for 10 seconds to all party members",
 		TargetType:         TargetTypeNone,
 		HealthCost:         0,
-		ManaCost:           120,
+		ManaCost:           88,
 		ActivationDuration: 0,
 		CooldownDuration:   60 * Second,
 		DisableTypes: []DisableType{

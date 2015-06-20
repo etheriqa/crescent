@@ -8,10 +8,10 @@ func NewClassMage() *Class {
 	var q, w, e, r Ability
 	class := &Class{
 		Name:                 "Mage",
-		Health:               600,
-		HealthRegeneration:   14,
-		Mana:                 400,
-		ManaRegeneration:     28,
+		Health:               930,
+		HealthRegeneration:   23,
+		Mana:                 580,
+		ManaRegeneration:     33,
 		Armor:                DefaultArmor,
 		MagicResistance:      DefaultMagicResistance,
 		CriticalStrikeChance: DefaultCriticalStrikeChance,
@@ -60,7 +60,7 @@ func NewClassMage() *Class {
 		Description:        "Grants a magic damage over time effect for 10 seconds to target / 20% chance to reset cooldown for Absolute Zero",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
-		ManaCost:           20,
+		ManaCost:           31,
 		ActivationDuration: 2 * Second,
 		CooldownDuration:   8 * Second,
 		DisableTypes: []DisableType{
@@ -87,7 +87,7 @@ func NewClassMage() *Class {
 		Description:        "Deals magic damage",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
-		ManaCost:           60,
+		ManaCost:           49,
 		ActivationDuration: 2 * Second,
 		CooldownDuration:   18 * Second,
 		DisableTypes: []DisableType{
@@ -106,7 +106,7 @@ func NewClassMage() *Class {
 		Description:        "Deals magic damage to all enemies / Grants magic damage over time effects to all enemies",
 		TargetType:         TargetTypeNone,
 		HealthCost:         0,
-		ManaCost:           200,
+		ManaCost:           252,
 		ActivationDuration: 2 * Second,
 		CooldownDuration:   60 * Second,
 		DisableTypes: []DisableType{
@@ -115,7 +115,7 @@ func NewClassMage() *Class {
 		},
 		Perform: func(op Operator, s Subject, o *Unit) {
 			op.Units().EachEnemy(s.Subject(), func(enemy *Unit) {
-				_, _, _, err := op.MagicDamage(s, enemy, 600).Perform()
+				_, _, _, err := op.MagicDamage(s, enemy, 800).Perform()
 				if err != nil {
 					log.Fatal(err)
 				}

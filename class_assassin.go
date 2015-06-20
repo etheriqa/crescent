@@ -14,10 +14,10 @@ func NewClassAssassin() *Class {
 	var q, w, e, r Ability
 	class := &Class{
 		Name:                 "Assassin",
-		Health:               600,
-		HealthRegeneration:   11,
-		Mana:                 200,
-		ManaRegeneration:     14,
+		Health:               880,
+		HealthRegeneration:   21,
+		Mana:                 280,
+		ManaRegeneration:     15,
 		Armor:                DefaultArmor,
 		MagicResistance:      DefaultMagicResistance,
 		CriticalStrikeChance: DefaultCriticalStrikeChance + 0.05,
@@ -58,7 +58,7 @@ func NewClassAssassin() *Class {
 		Description:        "Deals physcical damage / Grants a physical damage over time effect for 10 seconds to target",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
-		ManaCost:           20,
+		ManaCost:           15,
 		ActivationDuration: 0,
 		CooldownDuration:   8 * Second,
 		DisableTypes: []DisableType{
@@ -83,7 +83,7 @@ func NewClassAssassin() *Class {
 		Description:        "Gains three Tenacity effects / Loses armor and magic resistance for 8 seconds / Tenecity effect increases critical strike chance and critical strike damage",
 		TargetType:         TargetTypeNone,
 		HealthCost:         0,
-		ManaCost:           40,
+		ManaCost:           32,
 		ActivationDuration: 0,
 		CooldownDuration:   20 * Second,
 		DisableTypes: []DisableType{
@@ -105,7 +105,7 @@ func NewClassAssassin() *Class {
 		Description:        "Deals pure damage / Silences target for 1 second / Consumes all Tenecity effects",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
-		ManaCost:           120,
+		ManaCost:           58,
 		ActivationDuration: 0,
 		CooldownDuration:   60 * Second,
 		DisableTypes: []DisableType{

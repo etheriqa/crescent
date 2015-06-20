@@ -4,10 +4,10 @@ func NewClassHealer() *Class {
 	var q, w, e, r Ability
 	class := &Class{
 		Name:                 "Healer",
-		Health:               700,
-		HealthRegeneration:   15,
-		Mana:                 400,
-		ManaRegeneration:     33,
+		Health:               1030,
+		HealthRegeneration:   24,
+		Mana:                 570,
+		ManaRegeneration:     31,
 		Armor:                DefaultArmor,
 		MagicResistance:      DefaultMagicResistance,
 		CriticalStrikeChance: DefaultCriticalStrikeChance,
@@ -42,7 +42,7 @@ func NewClassHealer() *Class {
 		Description:        "Restores target's health",
 		TargetType:         TargetTypeFriend,
 		HealthCost:         0,
-		ManaCost:           40,
+		ManaCost:           19,
 		ActivationDuration: 2 * Second,
 		CooldownDuration:   1 * Second,
 		DisableTypes: []DisableType{
@@ -61,7 +61,7 @@ func NewClassHealer() *Class {
 		Description:        "Grants a healing over time effect for 8 seconds to target",
 		TargetType:         TargetTypeFriend,
 		HealthCost:         0,
-		ManaCost:           80,
+		ManaCost:           31,
 		ActivationDuration: 3 * Second,
 		CooldownDuration:   7 * Second,
 		DisableTypes: []DisableType{
@@ -77,7 +77,7 @@ func NewClassHealer() *Class {
 		Description:        "Restores health to all party members / Grunt healing over time effects for 8 seconds to all party members / Increases critical strike chance and critical strike factor for 8 seconds",
 		TargetType:         TargetTypeNone,
 		HealthCost:         0,
-		ManaCost:           200,
+		ManaCost:           135,
 		ActivationDuration: 4 * Second,
 		CooldownDuration:   60 * Second,
 		DisableTypes: []DisableType{
