@@ -131,9 +131,12 @@ func (h *Activating) checkRequirements() error {
 func (h *Activating) checkObject() error {
 	switch h.ability.TargetType {
 	case TargetTypeNone:
-		if h.object != nil {
-			return errors.New("The Object must be nil")
-		}
+		// TODO WIP
+		/*
+			if h.object != nil {
+				return errors.New("The Object must be nil")
+			}
+		*/
 	case TargetTypeFriend:
 		if h.object == nil {
 			return errors.New("The Object must be *Unit")
