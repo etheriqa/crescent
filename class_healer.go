@@ -59,7 +59,7 @@ func NewClassHealer() *Class {
 	e = Ability{
 		Name:               "Embrace",
 		Description:        "Grants a healing over time effect for 8 seconds to target",
-		TargetType:         TargetTypeEnemy,
+		TargetType:         TargetTypeFriend,
 		HealthCost:         0,
 		ManaCost:           80,
 		ActivationDuration: 3 * Second,
