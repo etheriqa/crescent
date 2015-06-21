@@ -45,14 +45,7 @@ func NewClassMage() *Class {
 			if rand.Float64() > 0.1 {
 				return
 			}
-			op.Handlers().BindObject(s.Subject()).Each(func(h Handler) {
-				switch h := h.(type) {
-				case *Cooldown:
-					if h.Ability() == &w {
-						op.Handlers().Detach(h)
-					}
-				}
-			})
+			op.ResetCooldown(s.Subject(), &w)
 		},
 	}
 	w = Ability{
@@ -72,14 +65,7 @@ func NewClassMage() *Class {
 			if rand.Float64() > 0.2 {
 				return
 			}
-			op.Handlers().BindObject(s.Subject()).Each(func(h Handler) {
-				switch h := h.(type) {
-				case *Cooldown:
-					if h.Ability() == &e {
-						op.Handlers().Detach(h)
-					}
-				}
-			})
+			op.ResetCooldown(s.Subject(), &e)
 		},
 	}
 	e = Ability{

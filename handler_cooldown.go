@@ -28,13 +28,13 @@ func (h *Cooldown) OnAttach() {
 		}
 	})
 
-	if h.ability.CooldownDuration == 0 {
+	h.writeOutputUnitCooldown()
+
+	if !h.isActive() {
 		h.op.Handlers().Detach(h)
 		return
 	}
 
-	h.expirationTime = h.op.Clock().Add(h.ability.CooldownDuration)
-	h.writeOutputUnitCooldown()
 	h.Object().AddEventHandler(h, EventGameTick)
 }
 

@@ -9,6 +9,7 @@ type Operator interface {
 
 	Activating(Subject, *Unit, *Ability)
 	Cooldown(Object, *Ability)
+	ResetCooldown(Object, *Ability)
 	Correction(Object, UnitCorrection, Statistic, InstanceDuration, string)
 	Disable(Object, DisableType, InstanceDuration)
 	DamageThreat(Subject, Object, Statistic)
@@ -62,6 +63,17 @@ func (g *Game) Cooldown(o Object, a *Ability) {
 		UnitObject:     MakeObject(o),
 		ability:        a,
 		expirationTime: g.clock.Add(a.CooldownDuration),
+
+		op: g,
+	})
+}
+
+// ResetCooldown detaches Cooldown handlers
+func (g *Game) ResetCooldown(o Object, a *Ability) {
+	g.handlers.Attach(&Cooldown{
+		UnitObject:     MakeObject(o),
+		ability:        a,
+		expirationTime: g.clock.Now(),
 
 		op: g,
 	})
