@@ -101,6 +101,12 @@ func (i *Instance) connect(cid ClientID, input InputConnect) {
 	i.w.BindClientID(cid).Write(OutputMessage{
 		Message: "Welcome to Crescent!",
 	})
+	i.w.BindClientID(cid).Write(OutputMessage{
+		Message: "/profile <name> : change your name",
+	})
+	i.w.BindClientID(cid).Write(OutputMessage{
+		Message: "/stage 1 : reset stage",
+	})
 	i.w.Write(OutputMessage{
 		Message: fmt.Sprintf("%s has joined.", name),
 	})
