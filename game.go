@@ -5,7 +5,9 @@ import (
 )
 
 type Game struct {
-	clock    InstanceClock
+	clock InstanceClock
+
+	stage    Stage
 	handlers HandlerContainer
 	units    UnitContainer
 
@@ -13,20 +15,18 @@ type Game struct {
 }
 
 // NewGame returns a Game
-func NewGame(clock InstanceClock, w InstanceOutputWriter) *Game {
-	return &Game{
-		clock:    clock,
+func NewGame(clock InstanceClock, stage Stage, w InstanceOutputWriter) *Game {
+	g := &Game{
+		clock: clock,
+
+		stage:    stage,
 		handlers: MakeHandlerSet(),
 		units:    NewUnitMap(),
 
 		w: w,
 	}
-}
-
-// Clear clears the game state
-func (g *Game) Clear() {
-	g.handlers = MakeHandlerSet()
-	g.units.Clear()
+	stage.Initialize(g)
+	return g
 }
 
 // SyncGame sends the game state
@@ -146,6 +146,7 @@ func (g *Game) Ability(sid UnitID, oid *UnitID, abilityName string) error {
 
 // PerformGameTick performs the game tick routine
 func (g *Game) PerformGameTick() {
+	g.stage.OnTick(g)
 	g.units.Each(func(u *Unit) {
 		if u.IsDead() {
 			return

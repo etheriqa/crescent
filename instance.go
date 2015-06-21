@@ -28,7 +28,7 @@ func NewInstance(r InstanceInput, w InstanceOutputWriter) *Instance {
 		name: make(map[ClientID]UserName),
 		uid:  make(map[ClientID]UnitID),
 
-		g: NewGame(time, w),
+		g: NewGame(time, NewStagePrototype(), w),
 		r: r,
 		w: w,
 	}
@@ -150,11 +150,10 @@ func (i *Instance) chat(cid ClientID, input InputChat) {
 
 // stage
 func (i *Instance) stage(cid ClientID, input InputStage) {
-	// WIP
+	// TODO WIP
 	i.w.Write(OutputStage{})
 	i.uid = make(map[ClientID]UnitID)
-	i.g.Clear()
-	i.g.Join(UnitGroupAI, "MOB", NewClassTank())
+	i.g = NewGame(i.time, NewStagePrototype(), i.w)
 }
 
 // join

@@ -7,6 +7,9 @@ type Operator interface {
 
 	Writer() InstanceOutputWriter
 
+	Join(UnitGroup, UnitName, *Class) (UnitID, error)
+	Leave(UnitID) error
+
 	Activating(Subject, *Unit, *Ability)
 	Cooldown(Object, *Ability)
 	ResetCooldown(Object, *Ability)
