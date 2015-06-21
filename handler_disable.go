@@ -9,6 +9,17 @@ const (
 	DisableTypeStun
 )
 
+func (d DisableType) String() string {
+	switch d {
+	case DisableTypeSilence:
+		return "Silence"
+	case DisableTypeStun:
+		return "Stun"
+	default:
+		return ""
+	}
+}
+
 type Disable struct {
 	UnitObject
 	disableType    DisableType
@@ -67,7 +78,7 @@ func (h *Disable) HandleEvent(e Event) {
 func (h *Disable) writeOutputUnitAttach() {
 	h.op.Writer().Write(OutputUnitAttach{
 		UnitID:         h.Object().ID(),
-		AttachmentName: "Disable", // TODO
+		AttachmentName: h.disableType.String(),
 		ExpirationTime: h.expirationTime,
 	})
 }
@@ -76,6 +87,6 @@ func (h *Disable) writeOutputUnitAttach() {
 func (h *Disable) writeOutputUnitDetach() {
 	h.op.Writer().Write(OutputUnitDetach{
 		UnitID:         h.Object().ID(),
-		AttachmentName: "Disable", // TODO
+		AttachmentName: h.disableType.String(),
 	})
 }
