@@ -10,18 +10,22 @@ type EventDispatcher interface {
 	Dispatch(interface{})
 }
 
-type EventHandlerBared func(interface{})
+type EventHandlerBared struct {
+	handler *func(interface{})
+}
 
 type EventHandlerSet map[EventHandler]bool
 
 // MakeEventHandler returns a EventHandlerBared
 func MakeEventHandler(h func(interface{})) EventHandlerBared {
-	return h
+	return EventHandlerBared{
+		handler: &h,
+	}
 }
 
 // Handle handles the payload
 func (hb EventHandlerBared) Handle(p interface{}) {
-	hb(p)
+	(*hb.handler)(p)
 }
 
 // MakeEventDispatcher returns a EventHandlerSet
