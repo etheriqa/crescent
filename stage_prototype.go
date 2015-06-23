@@ -159,13 +159,13 @@ func (s *StagePrototype) actSilver(op Operator) {
 		return
 	}
 	if !s.silverInitialized {
-		op.Cooldown(s.silver, s.iron.Ability("Stun"))
-		op.Cooldown(s.silver, s.iron.Ability("Silver"))
+		op.Cooldown(s.silver, s.silver.Ability("Stun"))
+		op.Cooldown(s.silver, s.silver.Ability("Silver"))
 		s.silverInitialized = true
 		return
 	}
 	var o *Unit
-	op.Units().EachEnemy(s.iron, func(u *Unit) {
+	op.Units().EachEnemy(s.silver, func(u *Unit) {
 		if o == nil || u.ClassName() == "Tank" {
 			o = u
 		}
@@ -379,7 +379,7 @@ func NewClassStageSilver() (class *Class) {
 		},
 	}
 	silver = Ability{
-		Name:               "Iron",
+		Name:               "Silver",
 		TargetType:         TargetTypeEnemy,
 		ActivationDuration: 1 * Second,
 		CooldownDuration:   5 * Second,
