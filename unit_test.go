@@ -24,7 +24,7 @@ func TestUnit(t *testing.T) {
 		HealingThreatFactor:  DefaultHealingThreatFactor,
 		Abilities:            []*Ability{},
 	}
-	u := NewUnit(100, 0, "user", class)
+	u := NewUnit(100, 0, "user", class, MakeEventDispatcher())
 
 	assert.Implements((*Subject)(nil), u)
 	assert.Implements((*Object)(nil), u)

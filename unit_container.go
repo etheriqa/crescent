@@ -39,7 +39,7 @@ func (um *UnitMap) Clear() {
 
 // Join creates a Unit and adds it
 func (um *UnitMap) Join(group UnitGroup, name UnitName, class *Class) (*Unit, error) {
-	u := NewUnit(um.generateUnitID(), group, name, class)
+	u := NewUnit(um.generateUnitID(), group, name, class, MakeEventDispatcher())
 	n := 0
 	um.EachFriend(u, func(*Unit) { n++ })
 	if n >= GroupCapacity {

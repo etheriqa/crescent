@@ -23,7 +23,7 @@ type Unit struct {
 	correction UnitCorrection
 	class      *Class
 
-	EventDispatcher
+	dispatcher EventDispatcher
 }
 
 type UnitResource struct {
@@ -42,7 +42,7 @@ type UnitCorrection struct {
 }
 
 // NewUnit returns a Unit
-func NewUnit(id UnitID, group UnitGroup, name UnitName, class *Class) *Unit {
+func NewUnit(id UnitID, group UnitGroup, name UnitName, class *Class, dispatcher EventDispatcher) *Unit {
 	return &Unit{
 		id:         id,
 		name:       name,
@@ -51,7 +51,7 @@ func NewUnit(id UnitID, group UnitGroup, name UnitName, class *Class) *Unit {
 		correction: MakeUnitCorrection(),
 		class:      class,
 
-		EventDispatcher: MakeEventDispatcher(),
+		dispatcher: dispatcher,
 	}
 }
 
@@ -63,6 +63,21 @@ func (u *Unit) Subject() *Unit {
 // Object returns self
 func (u *Unit) Object() *Unit {
 	return u
+}
+
+// Register adds the EventHandler
+func (u *Unit) Register(h EventHandler) {
+	u.dispatcher.Register(h)
+}
+
+// Unregister removes the EventHandler
+func (u *Unit) Unregister(h EventHandler) {
+	u.dispatcher.Unregister(h)
+}
+
+// Dispatch calls Handle with the payload
+func (u *Unit) Dispatch(p interface{}) {
+	u.dispatcher.Dispatch(p)
 }
 
 // ID returns the UnitID
