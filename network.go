@@ -55,7 +55,7 @@ func NewNetwork(origin string, r InstanceOutput, w InstanceInputWriter) *Network
 // Run starts the network routine
 func (n *Network) Run(addr string) {
 	go n.dispatcher()
-	http.HandleFunc("/", n.wsHandler)
+	http.HandleFunc("/", n.wsEffect)
 	err := http.ListenAndServe(addr, nil)
 	if err != nil {
 		log.WithField("err", err).Fatal("Failed http.ListenAndServe()")
@@ -82,8 +82,8 @@ func (n *Network) syncR(callback func()) {
 	n.mu.RUnlock()
 }
 
-// wsHandler handles a HTTP request
-func (n *Network) wsHandler(w http.ResponseWriter, r *http.Request) {
+// wsEffect handles a HTTP request
+func (n *Network) wsEffect(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Method Not Allowed", 405)
 		return

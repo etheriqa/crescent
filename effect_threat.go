@@ -7,16 +7,16 @@ type Threat struct {
 	op Operator
 }
 
-// OnAttach merges Threat handlers
+// OnAttach merges Threat effects
 func (h *Threat) OnAttach() {
-	h.op.Handlers().BindSubject(h).BindObject(h).Each(func(o Handler) {
+	h.op.Effects().BindSubject(h).BindObject(h).Each(func(o Effect) {
 		switch o := o.(type) {
 		case *Threat:
 			if o == h {
 				return
 			}
 			h.threat += o.threat
-			h.op.Handlers().Detach(o)
+			h.op.Effects().Detach(o)
 		}
 	})
 }

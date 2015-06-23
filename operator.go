@@ -2,7 +2,7 @@ package main
 
 type Operator interface {
 	Clock() InstanceClock
-	Handlers() HandlerContainer
+	Effects() EffectContainer
 	Units() UnitContainer
 
 	Writer() InstanceOutputWriter
@@ -33,9 +33,9 @@ func (g *Game) Clock() InstanceClock {
 	return g.clock
 }
 
-// Handlers returns the HandlerContainer {
-func (g *Game) Handlers() HandlerContainer {
-	return g.handlers
+// Effects returns the EffectContainer {
+func (g *Game) Effects() EffectContainer {
+	return g.effects
 }
 
 // Units returns the UnitContainer {
@@ -48,9 +48,9 @@ func (g *Game) Writer() InstanceOutputWriter {
 	return g.w
 }
 
-// Activating attaches a Activating Handler
+// Activating attaches a Activating Effect
 func (g *Game) Activating(s Subject, o *Unit, a *Ability) {
-	g.handlers.Attach(&Activating{
+	g.effects.Attach(&Activating{
 		UnitSubject:    MakeSubject(s),
 		object:         o,
 		ability:        a,
@@ -60,9 +60,9 @@ func (g *Game) Activating(s Subject, o *Unit, a *Ability) {
 	})
 }
 
-// Cooldown attaches a Cooldown Handler
+// Cooldown attaches a Cooldown Effect
 func (g *Game) Cooldown(o Object, a *Ability) {
-	g.handlers.Attach(&Cooldown{
+	g.effects.Attach(&Cooldown{
 		UnitObject:     MakeObject(o),
 		ability:        a,
 		expirationTime: g.clock.Add(a.CooldownDuration),
@@ -71,9 +71,9 @@ func (g *Game) Cooldown(o Object, a *Ability) {
 	})
 }
 
-// ResetCooldown detaches Cooldown handlers
+// ResetCooldown detaches Cooldown effects
 func (g *Game) ResetCooldown(o Object, a *Ability) {
-	g.handlers.Attach(&Cooldown{
+	g.effects.Attach(&Cooldown{
 		UnitObject:     MakeObject(o),
 		ability:        a,
 		expirationTime: g.clock.Now(),
@@ -82,9 +82,9 @@ func (g *Game) ResetCooldown(o Object, a *Ability) {
 	})
 }
 
-// Correction attaches a Correction Handler
+// Correction attaches a Correction Effect
 func (g *Game) Correction(o Object, c UnitCorrection, l Statistic, d InstanceDuration, name string) {
-	g.handlers.Attach(&Correction{
+	g.effects.Attach(&Correction{
 		UnitObject:     MakeObject(o),
 		name:           name,
 		correction:     c,
@@ -96,9 +96,9 @@ func (g *Game) Correction(o Object, c UnitCorrection, l Statistic, d InstanceDur
 	})
 }
 
-// Disable attaches a Disable Handler
+// Disable attaches a Disable Effect
 func (g *Game) Disable(o Object, t DisableType, d InstanceDuration) {
-	g.handlers.Attach(&Disable{
+	g.effects.Attach(&Disable{
 		UnitObject:     MakeObject(o),
 		disableType:    t,
 		expirationTime: g.clock.Add(d),
@@ -107,9 +107,9 @@ func (g *Game) Disable(o Object, t DisableType, d InstanceDuration) {
 	})
 }
 
-// DamageThreat attaches a Threat Handler
+// DamageThreat attaches a Threat Effect
 func (g *Game) DamageThreat(s Subject, o Object, d Statistic) {
-	g.handlers.Attach(&Threat{
+	g.effects.Attach(&Threat{
 		UnitPair: MakePair(s, o),
 		threat:   d * s.Subject().DamageThreatFactor(),
 
@@ -117,9 +117,9 @@ func (g *Game) DamageThreat(s Subject, o Object, d Statistic) {
 	})
 }
 
-// HealingThreat attaches a Threat Handler
+// HealingThreat attaches a Threat Effect
 func (g *Game) HealingThreat(s Subject, o Object, h Statistic) {
-	g.handlers.Attach(&Threat{
+	g.effects.Attach(&Threat{
 		UnitPair: MakePair(s, o),
 		threat:   h * s.Subject().HealingThreatFactor(),
 
@@ -127,9 +127,9 @@ func (g *Game) HealingThreat(s Subject, o Object, h Statistic) {
 	})
 }
 
-// DoT attaches a Periodical Handler
+// DoT attaches a Periodical Effect
 func (g *Game) DoT(damage *Damage, d InstanceDuration, name string) {
-	g.handlers.Attach(&Periodical{
+	g.effects.Attach(&Periodical{
 		UnitPair:       MakePair(damage, damage),
 		name:           name,
 		routine:        func() { damage.Perform() },
@@ -139,9 +139,9 @@ func (g *Game) DoT(damage *Damage, d InstanceDuration, name string) {
 	})
 }
 
-// HoT attaches a Periodical Handler
+// HoT attaches a Periodical Effect
 func (g *Game) HoT(healing *Healing, d InstanceDuration, name string) {
-	g.handlers.Attach(&Periodical{
+	g.effects.Attach(&Periodical{
 		UnitPair:       MakePair(healing, healing),
 		name:           name,
 		routine:        func() { healing.Perform() },

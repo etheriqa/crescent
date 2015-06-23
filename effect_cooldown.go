@@ -13,9 +13,9 @@ func (h *Cooldown) Ability() *Ability {
 	return h.ability
 }
 
-// OnAttach removes other Cooldown handlers
+// OnAttach removes other Cooldown effects
 func (h *Cooldown) OnAttach() {
-	h.op.Handlers().BindObject(h).Each(func(o Handler) {
+	h.op.Effects().BindObject(h).Each(func(o Effect) {
 		switch o := o.(type) {
 		case *Cooldown:
 			if h == o {
@@ -24,14 +24,14 @@ func (h *Cooldown) OnAttach() {
 			if h.ability != o.ability {
 				return
 			}
-			h.op.Handlers().Detach(o)
+			h.op.Effects().Detach(o)
 		}
 	})
 
 	h.writeOutputUnitCooldown()
 
 	if !h.isActive() {
-		h.op.Handlers().Detach(h)
+		h.op.Effects().Detach(h)
 		return
 	}
 
@@ -51,7 +51,7 @@ func (h *Cooldown) Handle(p interface{}) {
 			return
 		}
 		h.writeOutputUnitCooldown()
-		h.op.Handlers().Detach(h)
+		h.op.Effects().Detach(h)
 	}
 }
 

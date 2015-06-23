@@ -8,7 +8,7 @@ type Game struct {
 	clock InstanceClock
 
 	stage    Stage
-	handlers HandlerContainer
+	effects EffectContainer
 	units    UnitContainer
 
 	w InstanceOutputWriter
@@ -20,7 +20,7 @@ func NewGame(clock InstanceClock, stage Stage, w InstanceOutputWriter) *Game {
 		clock: clock,
 
 		stage:    stage,
-		handlers: MakeHandlerSet(),
+		effects: MakeEffectSet(),
 		units:    NewUnitMap(),
 
 		w: w,

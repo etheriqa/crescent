@@ -20,7 +20,7 @@ func (h *Activating) Ability() *Ability {
 
 // OnAttach checks requirements
 func (h *Activating) OnAttach() {
-	ok := h.op.Handlers().BindSubject(h).Every(func(o Handler) bool {
+	ok := h.op.Effects().BindSubject(h).Every(func(o Effect) bool {
 		switch o.(type) {
 		case *Activating:
 			if h != o {
@@ -30,13 +30,13 @@ func (h *Activating) OnAttach() {
 		return true
 	})
 	if !ok {
-		h.op.Handlers().Detach(h)
+		h.op.Effects().Detach(h)
 		return
 	}
 
 	if err := h.checkRequirements(); err != nil {
 		log.Debug(err)
-		h.op.Handlers().Detach(h)
+		h.op.Effects().Detach(h)
 		return
 	}
 
@@ -71,7 +71,7 @@ func (h *Activating) Handle(p interface{}) {
 		h.perform()
 	case *EventDead:
 		h.writeOutputUnitActivated(false)
-		h.op.Handlers().Detach(h)
+		h.op.Effects().Detach(h)
 		if h.Subject().IsDead() {
 			return
 		}
@@ -80,13 +80,13 @@ func (h *Activating) Handle(p interface{}) {
 			return
 		}
 		h.writeOutputUnitActivated(false)
-		h.op.Handlers().Detach(h)
+		h.op.Effects().Detach(h)
 	case *EventTakenDamage:
 		if err := h.checkResource(); err == nil {
 			return
 		}
 		h.writeOutputUnitActivated(false)
-		h.op.Handlers().Detach(h)
+		h.op.Effects().Detach(h)
 	}
 }
 
@@ -100,7 +100,7 @@ func (h *Activating) perform() {
 		log.Fatal(err)
 	}
 	h.ability.Perform(h.op, h.Subject(), h.object)
-	h.op.Handlers().Detach(h)
+	h.op.Effects().Detach(h)
 	h.op.Cooldown(h.Subject(), h.ability)
 }
 
@@ -159,7 +159,7 @@ func (h *Activating) checkObject() error {
 
 // checkCooldown checks the Subject does not have to wait the Cooldown
 func (h *Activating) checkCooldown() error {
-	ok := h.op.Handlers().BindObject(h.Subject()).Every(func(o Handler) bool {
+	ok := h.op.Effects().BindObject(h.Subject()).Every(func(o Effect) bool {
 		switch o := o.(type) {
 		case *Cooldown:
 			if h.ability == o.Ability() {
@@ -176,7 +176,7 @@ func (h *Activating) checkCooldown() error {
 
 // checkDisable checks the Subject has not been interrupted by Disables
 func (h *Activating) checkDisable() error {
-	ok := h.op.Handlers().BindObject(h.Subject()).Every(func(o Handler) bool {
+	ok := h.op.Effects().BindObject(h.Subject()).Every(func(o Effect) bool {
 		switch o := o.(type) {
 		case *Disable:
 			for _, t := range h.ability.DisableTypes {

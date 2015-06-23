@@ -11,7 +11,7 @@ type Periodical struct {
 
 // OnAttach removes duplicate Periodicals
 func (h *Periodical) OnAttach() {
-	ok := h.op.Handlers().BindSubject(h).BindObject(h).Every(func(o Handler) bool {
+	ok := h.op.Effects().BindSubject(h).BindObject(h).Every(func(o Effect) bool {
 		switch o := o.(type) {
 		case *Periodical:
 			if h == o || h.name != o.name {
@@ -20,12 +20,12 @@ func (h *Periodical) OnAttach() {
 			if h.expirationTime <= o.expirationTime {
 				return false
 			}
-			h.op.Handlers().Detach(o)
+			h.op.Effects().Detach(o)
 		}
 		return true
 	})
 	if !ok {
-		h.op.Handlers().Detach(h)
+		h.op.Effects().Detach(h)
 		return
 	}
 
@@ -42,13 +42,13 @@ func (h *Periodical) OnDetach() {
 func (h *Periodical) Handle(p interface{}) {
 	switch p.(type) {
 	case *EventDead:
-		h.op.Handlers().Detach(h)
+		h.op.Effects().Detach(h)
 	case *EventGameTick:
 		if h.op.Clock().Before(h.expirationTime) {
 			return
 		}
 		h.writeOutputUnitDetach()
-		h.op.Handlers().Detach(h)
+		h.op.Effects().Detach(h)
 	case *EventPeriodicalTick:
 		h.routine()
 	}

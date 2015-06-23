@@ -30,7 +30,7 @@ type Disable struct {
 
 // OnAttach removes duplicate Disables
 func (h *Disable) OnAttach() {
-	ok := h.op.Handlers().BindObject(h).Every(func(o Handler) bool {
+	ok := h.op.Effects().BindObject(h).Every(func(o Effect) bool {
 		switch o := o.(type) {
 		case *Disable:
 			if h == o || h.disableType != o.disableType {
@@ -39,12 +39,12 @@ func (h *Disable) OnAttach() {
 			if h.expirationTime <= o.expirationTime {
 				return false
 			}
-			h.op.Handlers().Detach(o)
+			h.op.Effects().Detach(o)
 		}
 		return true
 	})
 	if !ok {
-		h.op.Handlers().Detach(h)
+		h.op.Effects().Detach(h)
 		return
 	}
 
@@ -66,9 +66,9 @@ func (h *Disable) Handle(p interface{}) {
 			return
 		}
 		h.writeOutputUnitDetach()
-		h.op.Handlers().Detach(h)
+		h.op.Effects().Detach(h)
 	case *EventDead:
-		h.op.Handlers().Detach(h)
+		h.op.Effects().Detach(h)
 	}
 }
 

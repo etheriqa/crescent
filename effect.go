@@ -1,6 +1,6 @@
 package main
 
-type Handler interface {
+type Effect interface {
 	OnAttach()
 	OnDetach()
 }

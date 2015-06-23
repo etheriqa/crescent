@@ -175,7 +175,7 @@ func (s *StagePrototype) actSilver(op Operator) {
 }
 
 func (s *StagePrototype) isActivating(op Operator, u *Unit) bool {
-	return op.Handlers().BindSubject(u).Some(func(h Handler) bool {
+	return op.Effects().BindSubject(u).Some(func(h Effect) bool {
 		switch h.(type) {
 		case *Activating:
 			return true
@@ -187,7 +187,7 @@ func (s *StagePrototype) isActivating(op Operator, u *Unit) bool {
 func (s *StagePrototype) maxThreatEnemy(op Operator) *Unit {
 	var u *Unit
 	var threat Statistic
-	op.Handlers().BindObject(s.prototype).Each(func(h Handler) {
+	op.Effects().BindObject(s.prototype).Each(func(h Effect) {
 		switch h := h.(type) {
 		case *Threat:
 			if h.Subject().IsDead() {

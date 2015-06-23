@@ -11,9 +11,9 @@ func (m *MockedOperator) Clock() InstanceClock {
 	return args.Get(0).(InstanceClock)
 }
 
-func (m *MockedOperator) Handlers() HandlerContainer {
+func (m *MockedOperator) Effects() EffectContainer {
 	args := m.Called()
-	return args.Get(0).(HandlerContainer)
+	return args.Get(0).(EffectContainer)
 }
 
 func (m *MockedOperator) Units() UnitContainer {

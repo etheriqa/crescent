@@ -113,7 +113,7 @@ func NewClassAssassin() *Class {
 		},
 		Perform: func(op Operator, s Subject, o *Unit) {
 			stack := Statistic(0)
-			op.Handlers().Each(func(h Handler) {
+			op.Effects().Each(func(h Effect) {
 				switch h := h.(type) {
 				case *Correction:
 					if h.name == AssassinStackName {
@@ -125,11 +125,11 @@ func NewClassAssassin() *Class {
 			if err != nil {
 				log.Fatal(err)
 			}
-			op.Handlers().Each(func(h Handler) {
+			op.Effects().Each(func(h Effect) {
 				switch h := h.(type) {
 				case *Correction:
 					if h.name == AssassinStackName {
-						op.Handlers().Detach(h)
+						op.Effects().Detach(h)
 					}
 				}
 			})
