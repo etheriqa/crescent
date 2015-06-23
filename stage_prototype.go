@@ -321,8 +321,8 @@ func NewClassStageIron() (class *Class) {
 		HealthRegeneration:   50,
 		Mana:                 100,
 		ManaRegeneration:     0,
-		Armor:                DefaultArmor,
-		MagicResistance:      1000,
+		Armor:                300,
+		MagicResistance:      DefaultMagicResistance,
 		CriticalStrikeChance: DefaultCriticalStrikeChance,
 		CriticalStrikeFactor: DefaultCriticalStrikeFactor,
 		DamageThreatFactor:   DefaultDamageThreatFactor,
@@ -330,13 +330,13 @@ func NewClassStageIron() (class *Class) {
 		Abilities:            []*Ability{&silence, &iron},
 	}
 	silence = Ability{
-		Name:               "Silence",
+		Name:               "Stun",
 		TargetType:         TargetTypeEnemy,
 		ActivationDuration: 1 * Second,
 		CooldownDuration:   8 * Second,
 		DisableTypes:       []DisableType{},
 		Perform: func(op Operator, s Subject, o *Unit) {
-			op.Disable(o, DisableTypeSilence, 3*Second)
+			op.Disable(o, DisableTypeStun, 3*Second)
 		},
 	}
 	iron = Ability{
@@ -360,8 +360,8 @@ func NewClassStageSilver() (class *Class) {
 		HealthRegeneration:   100,
 		Mana:                 100,
 		ManaRegeneration:     0,
-		Armor:                1000,
-		MagicResistance:      DefaultMagicResistance,
+		Armor:                DefaultArmor,
+		MagicResistance:      300,
 		CriticalStrikeChance: DefaultCriticalStrikeChance,
 		CriticalStrikeFactor: DefaultCriticalStrikeFactor,
 		DamageThreatFactor:   DefaultDamageThreatFactor,
@@ -369,13 +369,13 @@ func NewClassStageSilver() (class *Class) {
 		Abilities:            []*Ability{&stun, &silver},
 	}
 	stun = Ability{
-		Name:               "Stun",
+		Name:               "Silence",
 		TargetType:         TargetTypeEnemy,
 		ActivationDuration: 1 * Second,
 		CooldownDuration:   8 * Second,
 		DisableTypes:       []DisableType{},
 		Perform: func(op Operator, s Subject, o *Unit) {
-			op.Disable(o, DisableTypeStun, 3*Second)
+			op.Disable(o, DisableTypeSilence, 3*Second)
 		},
 	}
 	silver = Ability{
