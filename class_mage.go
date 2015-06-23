@@ -100,7 +100,7 @@ func NewClassMage() *Class {
 			DisableTypeStun,
 		},
 		Perform: func(g Game, s Subject, o *Unit) {
-			g.Units().EachEnemy(s.Subject(), func(enemy *Unit) {
+			g.UnitQuery().EachEnemy(s.Subject(), func(enemy *Unit) {
 				_, _, _, err := g.MagicDamage(s, enemy, 800).Perform()
 				if err != nil {
 					log.Fatal(err)

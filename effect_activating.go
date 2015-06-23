@@ -19,8 +19,8 @@ func (h *Activating) Ability() *Ability {
 }
 
 // EffectDidAttach checks requirements
-func (h *Activating) EffectDidAttach() error {
-	ok := h.g.Effects().BindSubject(h).Every(func(o Effect) bool {
+func (h *Activating) EffectDidAttach(g Game) error {
+	ok := g.EffectQuery().BindSubject(h).Every(func(o Effect) bool {
 		switch o.(type) {
 		case *Activating:
 			if h != o {
@@ -30,13 +30,13 @@ func (h *Activating) EffectDidAttach() error {
 		return true
 	})
 	if !ok {
-		h.g.Effects().Detach(h)
+		g.DetachEffect(h)
 		return nil
 	}
 
 	if err := h.checkRequirements(); err != nil {
 		log.Debug(err)
-		h.g.Effects().Detach(h)
+		h.g.DetachEffect(h)
 		return nil
 	}
 
@@ -73,7 +73,7 @@ func (h *Activating) Handle(p interface{}) {
 		h.perform()
 	case *EventDead:
 		h.writeOutputUnitActivated(false)
-		h.g.Effects().Detach(h)
+		h.g.DetachEffect(h)
 		if h.Subject().IsDead() {
 			return
 		}
@@ -82,13 +82,13 @@ func (h *Activating) Handle(p interface{}) {
 			return
 		}
 		h.writeOutputUnitActivated(false)
-		h.g.Effects().Detach(h)
+		h.g.DetachEffect(h)
 	case *EventTakenDamage:
 		if err := h.checkResource(); err == nil {
 			return
 		}
 		h.writeOutputUnitActivated(false)
-		h.g.Effects().Detach(h)
+		h.g.DetachEffect(h)
 	}
 }
 
@@ -102,7 +102,7 @@ func (h *Activating) perform() {
 		log.Fatal(err)
 	}
 	h.ability.Perform(h.g, h.Subject(), h.object)
-	h.g.Effects().Detach(h)
+	h.g.DetachEffect(h)
 	h.g.Cooldown(h.Subject(), h.ability)
 }
 
@@ -161,7 +161,7 @@ func (h *Activating) checkObject() error {
 
 // checkCooldown checks the Subject does not have to wait the Cooldown
 func (h *Activating) checkCooldown() error {
-	ok := h.g.Effects().BindObject(h.Subject()).Every(func(o Effect) bool {
+	ok := h.g.EffectQuery().BindObject(h.Subject()).Every(func(o Effect) bool {
 		switch o := o.(type) {
 		case *Cooldown:
 			if h.ability == o.Ability() {
@@ -178,7 +178,7 @@ func (h *Activating) checkCooldown() error {
 
 // checkDisable checks the Subject has not been interrupted by Disables
 func (h *Activating) checkDisable() error {
-	ok := h.g.Effects().BindObject(h.Subject()).Every(func(o Effect) bool {
+	ok := h.g.EffectQuery().BindObject(h.Subject()).Every(func(o Effect) bool {
 		switch o := o.(type) {
 		case *Disable:
 			for _, t := range h.ability.DisableTypes {

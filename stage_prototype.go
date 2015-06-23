@@ -23,7 +23,7 @@ func (s *StagePrototype) Initialize(g Game) error {
 	if err != nil {
 		return err
 	}
-	s.prototype = g.Units().Find(id)
+	s.prototype = g.UnitQuery().Find(id)
 	s.prototypeCooldownTime = g.Clock().Now()
 	return nil
 }
@@ -36,7 +36,7 @@ func (s *StagePrototype) OnTick(g Game) {
 }
 
 func (s *StagePrototype) syncMinion(g Game) {
-	g.Units().EachFriend(s.prototype, func(u *Unit) {
+	g.UnitQuery().EachFriend(s.prototype, func(u *Unit) {
 		switch u.ClassName() {
 		case ClassName("Iron"):
 			s.iron = u
@@ -145,7 +145,7 @@ func (s *StagePrototype) actIron(g Game) {
 		return
 	}
 	var o *Unit
-	g.Units().EachEnemy(s.iron, func(u *Unit) {
+	g.UnitQuery().EachEnemy(s.iron, func(u *Unit) {
 		if o == nil || u.ClassName() == "Healer" {
 			o = u
 		}
@@ -165,7 +165,7 @@ func (s *StagePrototype) actSilver(g Game) {
 		return
 	}
 	var o *Unit
-	g.Units().EachEnemy(s.silver, func(u *Unit) {
+	g.UnitQuery().EachEnemy(s.silver, func(u *Unit) {
 		if o == nil || u.ClassName() == "Tank" {
 			o = u
 		}
@@ -175,7 +175,7 @@ func (s *StagePrototype) actSilver(g Game) {
 }
 
 func (s *StagePrototype) isActivating(g Game, u *Unit) bool {
-	return g.Effects().BindSubject(u).Some(func(h Effect) bool {
+	return g.EffectQuery().BindSubject(u).Some(func(h Effect) bool {
 		switch h.(type) {
 		case *Activating:
 			return true
@@ -187,7 +187,7 @@ func (s *StagePrototype) isActivating(g Game, u *Unit) bool {
 func (s *StagePrototype) maxThreatEnemy(g Game) *Unit {
 	var u *Unit
 	var threat Statistic
-	g.Effects().BindObject(s.prototype).Each(func(h Effect) {
+	g.EffectQuery().BindObject(s.prototype).Each(func(h Effect) {
 		switch h := h.(type) {
 		case *Threat:
 			if h.Subject().IsDead() {
@@ -292,7 +292,7 @@ func NewClassStagePrototype() (class *Class) {
 			DisableTypeSilence,
 		},
 		Perform: func(g Game, s Subject, o *Unit) {
-			g.Units().EachEnemy(s.Subject(), func(enemy *Unit) {
+			g.UnitQuery().EachEnemy(s.Subject(), func(enemy *Unit) {
 				if enemy.IsDead() {
 					return
 				}

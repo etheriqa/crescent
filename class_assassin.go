@@ -113,11 +113,11 @@ func NewClassAssassin() *Class {
 		},
 		Perform: func(g Game, s Subject, o *Unit) {
 			stack := Statistic(0)
-			g.Effects().Each(func(h Effect) {
-				switch h := h.(type) {
+			g.EffectQuery().Each(func(e Effect) {
+				switch e := e.(type) {
 				case *Correction:
-					if h.name == AssassinStackName {
-						stack += h.Stack()
+					if e.name == AssassinStackName {
+						stack += e.Stack()
 					}
 				}
 			})
@@ -125,11 +125,11 @@ func NewClassAssassin() *Class {
 			if err != nil {
 				log.Fatal(err)
 			}
-			g.Effects().Each(func(h Effect) {
-				switch h := h.(type) {
+			g.EffectQuery().Each(func(e Effect) {
+				switch e := e.(type) {
 				case *Correction:
-					if h.name == AssassinStackName {
-						g.Effects().Detach(h)
+					if e.name == AssassinStackName {
+						g.DetachEffect(e)
 					}
 				}
 			})

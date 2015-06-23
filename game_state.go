@@ -8,8 +8,8 @@ type GameState struct {
 	clock InstanceClock
 
 	stage   Stage
-	effects EffectContainer
-	units   UnitContainer
+	effects EffectSet
+	units   *UnitMap
 
 	w InstanceOutputWriter
 }
@@ -82,37 +82,6 @@ func (g *GameState) SyncUnit(w InstanceOutputWriter, id UnitID) {
 		E:      as[2],
 		R:      as[3],
 	})
-}
-
-// Join creates a Unit and adds it to the game
-func (g *GameState) Join(group UnitGroup, name UnitName, class *Class) (id UnitID, err error) {
-	u, err := g.units.Join(group, name, class)
-	if err != nil {
-		return
-	}
-	id = u.ID()
-	g.w.Write(OutputUnitJoin{
-		UnitID:    u.ID(),
-		UnitGroup: u.Group(),
-		UnitName:  u.Name(),
-		ClassName: u.ClassName(),
-		Health:    u.Health(),
-		HealthMax: u.HealthMax(),
-		Mana:      u.Mana(),
-		ManaMax:   u.ManaMax(),
-	})
-	return
-}
-
-// Leave removes the Unit
-func (g *GameState) Leave(id UnitID) (err error) {
-	if err = g.units.Leave(id); err != nil {
-		return
-	}
-	g.w.Write(OutputUnitLeave{
-		UnitID: id,
-	})
-	return
 }
 
 // Ability activates the ability

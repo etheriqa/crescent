@@ -90,7 +90,7 @@ func NewClassHealer() *Class {
 				CriticalStrikeFactor: 1.5,
 			}
 			g.Correction(s.Subject(), c, 1, 8*Second, r.Name)
-			g.Units().EachFriend(s.Subject(), func(friend *Unit) {
+			g.UnitQuery().EachFriend(s.Subject(), func(friend *Unit) {
 				if friend.IsDead() {
 					return
 				}

@@ -63,7 +63,7 @@ func (h *Correction) Stack() Statistic {
 
 // EffectDidAttach merges Correction effects and updates the UnitCorrection of the Object
 func (h *Correction) EffectDidAttach() error {
-	h.g.Effects().BindObject(h).Each(func(o Effect) {
+	h.g.EffectQuery().BindObject(h).Each(func(o Effect) {
 		switch o := o.(type) {
 		case *Correction:
 			if h == o || h.name != o.name {
@@ -75,7 +75,7 @@ func (h *Correction) EffectDidAttach() error {
 			} else {
 				h.stack += o.stack
 			}
-			h.g.Effects().Detach(o)
+			h.g.DetachEffect(o)
 		}
 	})
 
@@ -103,14 +103,14 @@ func (h *Correction) Handle(p interface{}) {
 			return
 		}
 		h.writeOutputUnitDetach()
-		h.g.Effects().Detach(h)
+		h.g.DetachEffect(h)
 	}
 }
 
 // updateCorrection updates the UnitCorrection of the Object
 func (h *Correction) updateCorrection() {
 	c := MakeUnitCorrection()
-	h.g.Effects().BindObject(h).Each(func(o Effect) {
+	h.g.EffectQuery().BindObject(h).Each(func(o Effect) {
 		switch o := o.(type) {
 		case Corrector:
 			c.Armor += o.ArmorCorrection()

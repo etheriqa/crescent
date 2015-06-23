@@ -14,8 +14,8 @@ func (h *Cooldown) Ability() *Ability {
 }
 
 // EffectDidAttach removes other Cooldown effects
-func (h *Cooldown) EffectDidAttach() error {
-	h.g.Effects().BindObject(h).Each(func(o Effect) {
+func (h *Cooldown) EffectDidAttach(g Game) error {
+	h.g.EffectQuery().BindObject(h).Each(func(o Effect) {
 		switch o := o.(type) {
 		case *Cooldown:
 			if h == o {
@@ -24,14 +24,14 @@ func (h *Cooldown) EffectDidAttach() error {
 			if h.ability != o.ability {
 				return
 			}
-			h.g.Effects().Detach(o)
+			h.g.DetachEffect(o)
 		}
 	})
 
 	h.writeOutputUnitCooldown()
 
 	if !h.isActive() {
-		h.g.Effects().Detach(h)
+		h.g.DetachEffect(h)
 		return nil
 	}
 
@@ -40,7 +40,7 @@ func (h *Cooldown) EffectDidAttach() error {
 }
 
 // EffectDidDetach does nothing
-func (h *Cooldown) EffectDidDetach() error {
+func (h *Cooldown) EffectDidDetach(g Game) error {
 	h.Object().Unregister(h)
 	return nil
 }
@@ -53,7 +53,7 @@ func (h *Cooldown) Handle(p interface{}) {
 			return
 		}
 		h.writeOutputUnitCooldown()
-		h.g.Effects().Detach(h)
+		h.g.DetachEffect(h)
 	}
 }
 

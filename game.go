@@ -2,13 +2,15 @@ package main
 
 type Game interface {
 	Clock() InstanceClock
-	Effects() EffectContainer
-	Units() UnitContainer
-
 	Writer() InstanceOutputWriter
 
 	Join(UnitGroup, UnitName, *Class) (UnitID, error)
 	Leave(UnitID) error
+	UnitQuery() UnitQueryable
+
+	AttachEffect(Effect) error
+	DetachEffect(Effect) error
+	EffectQuery() EffectQueryable
 
 	Activating(Subject, *Unit, *Ability)
 	Cooldown(Object, *Ability)
@@ -33,24 +35,65 @@ func (g *GameState) Clock() InstanceClock {
 	return g.clock
 }
 
-// Effects returns the EffectContainer {
-func (g *GameState) Effects() EffectContainer {
-	return g.effects
-}
-
-// Units returns the UnitContainer {
-func (g *GameState) Units() UnitContainer {
-	return g.units
-}
-
 // Writer returns the InstanceOutputWriter
 func (g *GameState) Writer() InstanceOutputWriter {
 	return g.w
 }
 
+// Join creates a Unit and adds it to the game
+func (g *GameState) Join(group UnitGroup, name UnitName, class *Class) (id UnitID, err error) {
+	u, err := g.units.Join(group, name, class)
+	if err != nil {
+		return
+	}
+	id = u.ID()
+	g.w.Write(OutputUnitJoin{
+		UnitID:    u.ID(),
+		UnitGroup: u.Group(),
+		UnitName:  u.Name(),
+		ClassName: u.ClassName(),
+		Health:    u.Health(),
+		HealthMax: u.HealthMax(),
+		Mana:      u.Mana(),
+		ManaMax:   u.ManaMax(),
+	})
+	return
+}
+
+// Leave removes the Unit
+func (g *GameState) Leave(id UnitID) (err error) {
+	if err = g.units.Leave(id); err != nil {
+		return
+	}
+	g.w.Write(OutputUnitLeave{
+		UnitID: id,
+	})
+	return
+}
+
+// UnitQuery returns a UnitQueryable
+func (g *GameState) UnitQuery() UnitQueryable {
+	return g.units
+}
+
+// AddEffect adds the effect
+func (g *GameState) AttachEffect(e Effect) error {
+	return g.effects.Attach(g, e)
+}
+
+// RemoveEffect removes the effect
+func (g *GameState) DetachEffect(e Effect) error {
+	return g.effects.Detach(g, e)
+}
+
+// EffectQuery returns a EffectQueryable
+func (g *GameState) EffectQuery() EffectQueryable {
+	return g.effects
+}
+
 // Activating attaches a Activating Effect
 func (g *GameState) Activating(s Subject, o *Unit, a *Ability) {
-	g.effects.Attach(&Activating{
+	g.AttachEffect(&Activating{
 		UnitSubject:    MakeSubject(s),
 		object:         o,
 		ability:        a,
@@ -62,7 +105,7 @@ func (g *GameState) Activating(s Subject, o *Unit, a *Ability) {
 
 // Cooldown attaches a Cooldown Effect
 func (g *GameState) Cooldown(o Object, a *Ability) {
-	g.effects.Attach(&Cooldown{
+	g.AttachEffect(&Cooldown{
 		UnitObject:     MakeObject(o),
 		ability:        a,
 		expirationTime: g.clock.Add(a.CooldownDuration),
@@ -73,7 +116,7 @@ func (g *GameState) Cooldown(o Object, a *Ability) {
 
 // ResetCooldown detaches Cooldown effects
 func (g *GameState) ResetCooldown(o Object, a *Ability) {
-	g.effects.Attach(&Cooldown{
+	g.AttachEffect(&Cooldown{
 		UnitObject:     MakeObject(o),
 		ability:        a,
 		expirationTime: g.clock.Now(),
@@ -84,7 +127,7 @@ func (g *GameState) ResetCooldown(o Object, a *Ability) {
 
 // Correction attaches a Correction Effect
 func (g *GameState) Correction(o Object, c UnitCorrection, l Statistic, d InstanceDuration, name string) {
-	g.effects.Attach(&Correction{
+	g.AttachEffect(&Correction{
 		UnitObject:     MakeObject(o),
 		name:           name,
 		correction:     c,
@@ -98,7 +141,7 @@ func (g *GameState) Correction(o Object, c UnitCorrection, l Statistic, d Instan
 
 // Disable attaches a Disable Effect
 func (g *GameState) Disable(o Object, t DisableType, d InstanceDuration) {
-	g.effects.Attach(&Disable{
+	g.AttachEffect(&Disable{
 		UnitObject:     MakeObject(o),
 		disableType:    t,
 		expirationTime: g.clock.Add(d),
@@ -109,7 +152,7 @@ func (g *GameState) Disable(o Object, t DisableType, d InstanceDuration) {
 
 // DamageThreat attaches a Threat Effect
 func (g *GameState) DamageThreat(s Subject, o Object, d Statistic) {
-	g.effects.Attach(&Threat{
+	g.AttachEffect(&Threat{
 		UnitPair: MakePair(s, o),
 		threat:   d * s.Subject().DamageThreatFactor(),
 
@@ -119,7 +162,7 @@ func (g *GameState) DamageThreat(s Subject, o Object, d Statistic) {
 
 // HealingThreat attaches a Threat Effect
 func (g *GameState) HealingThreat(s Subject, o Object, h Statistic) {
-	g.effects.Attach(&Threat{
+	g.AttachEffect(&Threat{
 		UnitPair: MakePair(s, o),
 		threat:   h * s.Subject().HealingThreatFactor(),
 
@@ -129,7 +172,7 @@ func (g *GameState) HealingThreat(s Subject, o Object, h Statistic) {
 
 // DoT attaches a Periodical Effect
 func (g *GameState) DoT(damage *Damage, d InstanceDuration, name string) {
-	g.effects.Attach(&Periodical{
+	g.AttachEffect(&Periodical{
 		UnitPair:       MakePair(damage, damage),
 		name:           name,
 		routine:        func() { damage.Perform() },
@@ -141,7 +184,7 @@ func (g *GameState) DoT(damage *Damage, d InstanceDuration, name string) {
 
 // HoT attaches a Periodical Effect
 func (g *GameState) HoT(healing *Healing, d InstanceDuration, name string) {
-	g.effects.Attach(&Periodical{
+	g.AttachEffect(&Periodical{
 		UnitPair:       MakePair(healing, healing),
 		name:           name,
 		routine:        func() { healing.Perform() },

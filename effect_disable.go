@@ -30,7 +30,7 @@ type Disable struct {
 
 // EffectDidAttach removes duplicate Disables
 func (h *Disable) EffectDidAttach() error {
-	ok := h.g.Effects().BindObject(h).Every(func(o Effect) bool {
+	ok := h.g.EffectQuery().BindObject(h).Every(func(o Effect) bool {
 		switch o := o.(type) {
 		case *Disable:
 			if h == o || h.disableType != o.disableType {
@@ -39,12 +39,12 @@ func (h *Disable) EffectDidAttach() error {
 			if h.expirationTime <= o.expirationTime {
 				return false
 			}
-			h.g.Effects().Detach(o)
+			h.g.DetachEffect(o)
 		}
 		return true
 	})
 	if !ok {
-		h.g.Effects().Detach(h)
+		h.g.DetachEffect(h)
 		return nil
 	}
 
@@ -68,9 +68,9 @@ func (h *Disable) Handle(p interface{}) {
 			return
 		}
 		h.writeOutputUnitDetach()
-		h.g.Effects().Detach(h)
+		h.g.DetachEffect(h)
 	case *EventDead:
-		h.g.Effects().Detach(h)
+		h.g.DetachEffect(h)
 	}
 }
 

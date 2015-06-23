@@ -3,17 +3,17 @@ package main
 type Effect interface{}
 
 type EffectWillAttach interface {
-	EffectWillAttach() error
+	EffectWillAttach(Game) error
 }
 
 type EffectDidAttach interface {
-	EffectDidAttach() error
+	EffectDidAttach(Game) error
 }
 
 type EffectWillDetach interface {
-	EffectWillDetach() error
+	EffectWillDetach(Game) error
 }
 
 type EffectDidDetach interface {
-	EffectDidDetach() error
+	EffectDidDetach(Game) error
 }

@@ -24,7 +24,7 @@ func (h *Healing) Perform() (before, after Statistic, crit bool, err error) {
 		IsCritical:    crit,
 	})
 
-	h.g.Units().EachEnemy(h.Subject(), func(enemy *Unit) {
+	h.g.UnitQuery().EachEnemy(h.Subject(), func(enemy *Unit) {
 		h.g.HealingThreat(h, enemy, healing)
 	})
 	return

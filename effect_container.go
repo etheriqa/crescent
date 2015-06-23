@@ -5,12 +5,15 @@ import (
 )
 
 type EffectContainer interface {
-	Attach(Effect) error
-	Detach(Effect) error
-	Bind(*Unit) EffectContainer
-	BindSubject(Subject) EffectContainer
-	BindObject(Object) EffectContainer
-	Unbind() EffectContainer
+	Attach(Game, Effect) error
+	Detach(Game, Effect) error
+}
+
+type EffectQueryable interface {
+	Bind(*Unit) EffectQueryable
+	BindSubject(Subject) EffectQueryable
+	BindObject(Object) EffectQueryable
+	Unbind() EffectQueryable
 	Each(func(Effect))
 	Every(func(Effect) bool) bool
 	Some(func(Effect) bool) bool
@@ -30,38 +33,38 @@ func MakeEffectSet() EffectSet {
 	return make(map[Effect]bool)
 }
 
-// Attach adds the Effect if not exists
-func (es EffectSet) Attach(e Effect) error {
+// Attach adds the Effect if not contains
+func (es EffectSet) Attach(g Game, e Effect) error {
 	if es[e] {
 		return errors.New("Already attached")
 	}
 	if e, ok := e.(EffectWillAttach); ok {
-		if err := e.EffectWillAttach(); err != nil {
+		if err := e.EffectWillAttach(g); err != nil {
 			return err
 		}
 	}
 	es[e] = true
 	if e, ok := e.(EffectDidAttach); ok {
-		if err := e.EffectDidAttach(); err != nil {
+		if err := e.EffectDidAttach(g); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-// Detach removes the Effect if exists
-func (es EffectSet) Detach(e Effect) error {
+// Detach removes the Effect if contains
+func (es EffectSet) Detach(g Game, e Effect) error {
 	if !es[e] {
 		return errors.New("Never attached")
 	}
 	if e, ok := e.(EffectWillDetach); ok {
-		if err := e.EffectWillDetach(); err != nil {
+		if err := e.EffectWillDetach(g); err != nil {
 			return err
 		}
 	}
 	delete(es, e)
 	if e, ok := e.(EffectDidDetach); ok {
-		if err := e.EffectDidDetach(); err != nil {
+		if err := e.EffectDidDetach(g); err != nil {
 			return err
 		}
 	}
@@ -69,7 +72,7 @@ func (es EffectSet) Detach(e Effect) error {
 }
 
 // Bind binds the Unit
-func (es EffectSet) Bind(u *Unit) EffectContainer {
+func (es EffectSet) Bind(u *Unit) EffectQueryable {
 	return BoundEffectSet{
 		effects: es,
 		unit:    u,
@@ -77,7 +80,7 @@ func (es EffectSet) Bind(u *Unit) EffectContainer {
 }
 
 // BindSubject binds the Subject
-func (es EffectSet) BindSubject(s Subject) EffectContainer {
+func (es EffectSet) BindSubject(s Subject) EffectQueryable {
 	return BoundEffectSet{
 		effects: es,
 		subject: s.Subject(),
@@ -85,7 +88,7 @@ func (es EffectSet) BindSubject(s Subject) EffectContainer {
 }
 
 // BindObject binds the Object
-func (es EffectSet) BindObject(o Object) EffectContainer {
+func (es EffectSet) BindObject(o Object) EffectQueryable {
 	return BoundEffectSet{
 		effects: es,
 		object:  o.Object(),
@@ -93,7 +96,7 @@ func (es EffectSet) BindObject(o Object) EffectContainer {
 }
 
 // Unbind unbinds the Units
-func (es EffectSet) Unbind() EffectContainer {
+func (es EffectSet) Unbind() EffectQueryable {
 	return es
 }
 
@@ -125,17 +128,17 @@ func (es EffectSet) Some(callback func(Effect) bool) bool {
 }
 
 // Attach adds the Effect if not exists
-func (bes BoundEffectSet) Attach(e Effect) error {
-	return bes.effects.Attach(e)
+func (bes BoundEffectSet) Attach(g Game, e Effect) error {
+	return bes.effects.Attach(g, e)
 }
 
 // Detach removes the Effect if exists
-func (bes BoundEffectSet) Detach(e Effect) error {
-	return bes.effects.Detach(e)
+func (bes BoundEffectSet) Detach(g Game, e Effect) error {
+	return bes.effects.Detach(g, e)
 }
 
 // Bind binds the Unit
-func (bes BoundEffectSet) Bind(u *Unit) EffectContainer {
+func (bes BoundEffectSet) Bind(u *Unit) EffectQueryable {
 	return BoundEffectSet{
 		effects: bes.effects,
 		unit:    u,
@@ -145,7 +148,7 @@ func (bes BoundEffectSet) Bind(u *Unit) EffectContainer {
 }
 
 // BindSubject binds the Subject
-func (bes BoundEffectSet) BindSubject(s Subject) EffectContainer {
+func (bes BoundEffectSet) BindSubject(s Subject) EffectQueryable {
 	return BoundEffectSet{
 		effects: bes.effects,
 		unit:    bes.unit,
@@ -155,7 +158,7 @@ func (bes BoundEffectSet) BindSubject(s Subject) EffectContainer {
 }
 
 // BindObject binds the Object
-func (bes BoundEffectSet) BindObject(o Object) EffectContainer {
+func (bes BoundEffectSet) BindObject(o Object) EffectQueryable {
 	return BoundEffectSet{
 		effects: bes.effects,
 		unit:    bes.unit,
@@ -165,7 +168,7 @@ func (bes BoundEffectSet) BindObject(o Object) EffectContainer {
 }
 
 // Unbind unbinds the Units
-func (bes BoundEffectSet) Unbind() EffectContainer {
+func (bes BoundEffectSet) Unbind() EffectQueryable {
 	return bes.effects
 }
 

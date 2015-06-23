@@ -104,7 +104,7 @@ func NewClassDisabler() *Class {
 				CriticalStrikeChance: 0.2,
 				CriticalStrikeFactor: 0.5,
 			}
-			g.Units().EachFriend(s.Subject(), func(u *Unit) {
+			g.UnitQuery().EachFriend(s.Subject(), func(u *Unit) {
 				if u.IsDead() {
 					return
 				}

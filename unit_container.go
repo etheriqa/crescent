@@ -10,6 +10,9 @@ type UnitContainer interface {
 	Clear()
 	Join(UnitGroup, UnitName, *Class) (*Unit, error)
 	Leave(UnitID) error
+}
+
+type UnitQueryable interface {
 	Find(UnitID) *Unit
 	Each(func(*Unit))
 	EachFriend(*Unit, func(*Unit))
