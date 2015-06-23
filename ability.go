@@ -1,4 +1,4 @@
-package main
+package crescent
 
 type TargetType uint8
 

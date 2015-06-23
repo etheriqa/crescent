@@ -1,4 +1,4 @@
-package main
+package crescent
 
 func NewClassDisabler() *Class {
 	var q, w, e, r Ability

@@ -1,4 +1,4 @@
-package main
+package crescent
 
 func NewClassHealer() *Class {
 	var q, w, e, r Ability

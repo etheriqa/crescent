@@ -1,4 +1,4 @@
-package main
+package crescent
 
 const AssassinStackName = "Tenacity"
 

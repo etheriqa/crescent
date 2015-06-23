@@ -1,4 +1,4 @@
-package main
+package crescent
 
 type Subject interface {
 	Subject() *Unit

@@ -1,4 +1,4 @@
-package main
+package crescent
 
 const (
 	DefaultArmor                Statistic = 25

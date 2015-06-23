@@ -1,4 +1,4 @@
-package main
+package crescent
 
 type Cooldown struct {
 	UnitObject

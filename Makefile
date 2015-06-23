@@ -7,7 +7,7 @@ SRCS = $(shell find . -name '*.go')
 all: test $(TARGET)
 
 $(TARGET): $(SRCS)
-	go build -o $(TARGET)
+	go build -o $(TARGET) github.com/etheriqa/crescent/app
 
 test:
 	go test -v

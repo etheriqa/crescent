@@ -1,4 +1,4 @@
-package main
+package crescent
 
 import (
 	"github.com/stretchr/testify/mock"

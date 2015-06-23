@@ -1,4 +1,4 @@
-package main
+package crescent
 
 type Corrector interface {
 	ArmorCorrection() Statistic
