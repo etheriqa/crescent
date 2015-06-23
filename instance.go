@@ -48,7 +48,7 @@ func (i *Instance) Run() {
 			if i.time.IsPeriodicalTick() {
 				i.g.PerformPeriodicalTick()
 			}
-			i.g.PerformGameStateTick()
+			i.g.PerformGameTick()
 		case input, ok := <-i.r:
 			if !ok {
 				log.Fatal("Cannot read from the input channel")

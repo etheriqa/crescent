@@ -1,8 +1,6 @@
 package main
 
-type EventHandler interface {
-	Handle(interface{})
-}
+type EventHandler *func(interface{})
 
 type EventDispatcher interface {
 	Register(EventHandler)
@@ -30,6 +28,6 @@ func (hs EventHandlerSet) Unregister(h EventHandler) {
 // Dispatch calls Handle with the payload
 func (hs EventHandlerSet) Dispatch(p interface{}) {
 	for h := range hs {
-		h.Handle(p)
+		(*h)(p)
 	}
 }

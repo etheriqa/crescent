@@ -37,7 +37,7 @@ func NewClassMage() *Class {
 			c := UnitCorrection{
 				Armor: -10,
 			}
-			g.Correction(o, c, 1, 8*Second, q.Name)
+			g.Correction(o, c, q.Name, 1, 8*Second)
 			_, _, _, err := g.MagicDamage(s, o, 155).Perform()
 			if err != nil {
 				log.Fatal(err)
@@ -61,7 +61,7 @@ func NewClassMage() *Class {
 			DisableTypeStun,
 		},
 		Perform: func(g Game, s Subject, o *Unit) {
-			g.DoT(g.MagicDamage(s, o, 15), 10*Second, w.Name)
+			g.DoT(g.MagicDamage(s, o, 15), w.Name, 10*Second)
 			if rand.Float64() > 0.2 {
 				return
 			}
@@ -108,7 +108,7 @@ func NewClassMage() *Class {
 				if enemy.IsDead() {
 					return
 				}
-				g.DoT(g.MagicDamage(s, enemy, 10), 10*Second, r.Name)
+				g.DoT(g.MagicDamage(s, enemy, 10), r.Name, 10*Second)
 			})
 		},
 	}

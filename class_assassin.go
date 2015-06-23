@@ -7,7 +7,7 @@ func AssassinStack(g Game, o Object) {
 		CriticalStrikeChance: 0.05,
 		CriticalStrikeFactor: 0.05,
 	}
-	g.Correction(o, c, 10, 10*Second, AssassinStackName)
+	g.Correction(o, c, AssassinStackName, 10, 10*Second)
 }
 
 func NewClassAssassin() *Class {
@@ -75,7 +75,7 @@ func NewClassAssassin() *Class {
 			if o.IsDead() {
 				return
 			}
-			g.DoT(g.PhysicalDamage(s, o, 10), 10*Second, w.Name)
+			g.DoT(g.PhysicalDamage(s, o, 10), w.Name, 10*Second)
 		},
 	}
 	e = Ability{
@@ -94,7 +94,7 @@ func NewClassAssassin() *Class {
 				Armor:           -25,
 				MagicResistance: -25,
 			}
-			g.Correction(s.Subject(), c, 1, 8*Second, e.Name)
+			g.Correction(s.Subject(), c, e.Name, 1, 8*Second)
 			for i := 0; i < 3; i++ {
 				AssassinStack(g, MakeObject(s.Subject()))
 			}

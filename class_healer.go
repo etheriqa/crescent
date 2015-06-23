@@ -69,7 +69,7 @@ func NewClassHealer() *Class {
 			DisableTypeStun,
 		},
 		Perform: func(g Game, s Subject, o *Unit) {
-			g.HoT(g.Healing(s.Subject(), o, 65), 8*Second, e.Name)
+			g.HoT(g.Healing(s.Subject(), o, 65), e.Name, 8*Second)
 		},
 	}
 	r = Ability{
@@ -89,7 +89,7 @@ func NewClassHealer() *Class {
 				CriticalStrikeChance: 0.5,
 				CriticalStrikeFactor: 1.5,
 			}
-			g.Correction(s.Subject(), c, 1, 8*Second, r.Name)
+			g.Correction(s.Subject(), c, r.Name, 1, 8*Second)
 			g.UnitQuery().EachFriend(s.Subject(), func(friend *Unit) {
 				if friend.IsDead() {
 					return
@@ -98,7 +98,7 @@ func NewClassHealer() *Class {
 				if err != nil {
 					log.Fatal(err)
 				}
-				g.HoT(g.Healing(s.Subject(), friend, 25), 8*Second, r.Name)
+				g.HoT(g.Healing(s.Subject(), friend, 25), r.Name, 8*Second)
 			})
 		},
 	}

@@ -32,7 +32,7 @@ func NewClassDisabler() *Class {
 			c := UnitCorrection{
 				MagicResistance: -15,
 			}
-			g.Correction(o, c, 1, 12*Second, q.Name)
+			g.Correction(o, c, q.Name, 1, 12*Second)
 			_, _, _, err := g.PhysicalDamage(s, o, 160).Perform()
 			if err != nil {
 				log.Fatal(err)
@@ -40,7 +40,7 @@ func NewClassDisabler() *Class {
 			if o.IsDead() {
 				return
 			}
-			g.DoT(g.PhysicalDamage(s, o, 20), 4*Second, q.Name)
+			g.DoT(g.PhysicalDamage(s, o, 20), q.Name, 4*Second)
 		},
 	}
 	w = Ability{
@@ -108,7 +108,7 @@ func NewClassDisabler() *Class {
 				if u.IsDead() {
 					return
 				}
-				g.Correction(u, c, 1, 10*Second, r.Name)
+				g.Correction(u, c, r.Name, 1, 10*Second)
 			})
 		},
 	}

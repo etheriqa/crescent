@@ -32,7 +32,7 @@ func NewClassTank() *Class {
 			c := UnitCorrection{
 				DamageThreatFactor: 0.4,
 			}
-			g.Correction(s.Subject(), c, 5, 8*Second, q.Name)
+			g.Correction(s.Subject(), c, q.Name, 5, 8*Second)
 			_, _, _, err := g.TrueDamage(s, o, 120).Perform()
 			if err != nil {
 				log.Fatal(err)
@@ -55,7 +55,7 @@ func NewClassTank() *Class {
 				Armor:           50,
 				MagicResistance: 50,
 			}
-			g.Correction(s.Subject(), c, 1, 4*Second, w.Name)
+			g.Correction(s.Subject(), c, w.Name, 1, 4*Second)
 			_, _, _, err := g.PhysicalDamage(s, o, 200).Perform()
 			if err != nil {
 				log.Fatal(err)
@@ -98,7 +98,7 @@ func NewClassTank() *Class {
 				Armor:           150,
 				MagicResistance: 150,
 			}
-			g.Correction(s.Subject(), c, 1, 5*Second, r.Name)
+			g.Correction(s.Subject(), c, r.Name, 1, 5*Second)
 		},
 	}
 	return class

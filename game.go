@@ -15,12 +15,12 @@ type Game interface {
 	Activating(Subject, *Unit, *Ability)
 	Cooldown(Object, *Ability)
 	ResetCooldown(Object, *Ability)
-	Correction(Object, UnitCorrection, Statistic, InstanceDuration, string)
+	Correction(Object, UnitCorrection, string, Statistic, InstanceDuration)
 	Disable(Object, DisableType, InstanceDuration)
 	DamageThreat(Subject, Object, Statistic)
 	HealingThreat(Subject, Object, Statistic)
-	DoT(*Damage, InstanceDuration, string)
-	HoT(*Healing, InstanceDuration, string)
+	DoT(*Damage, string, InstanceDuration)
+	HoT(*Healing, string, InstanceDuration)
 
 	PhysicalDamage(Subject, Object, Statistic) *Damage
 	MagicDamage(Subject, Object, Statistic) *Damage
@@ -93,105 +93,47 @@ func (g *GameState) EffectQuery() EffectQueryable {
 
 // Activating attaches a Activating Effect
 func (g *GameState) Activating(s Subject, o *Unit, a *Ability) {
-	g.AttachEffect(&Activating{
-		UnitSubject:    MakeSubject(s),
-		object:         o,
-		ability:        a,
-		expirationTime: g.clock.Add(a.ActivationDuration),
-
-		g: g,
-	})
+	g.AttachEffect(NewActivating(g, s, o, a, g.clock.Add(a.ActivationDuration)))
 }
 
 // Cooldown attaches a Cooldown Effect
 func (g *GameState) Cooldown(o Object, a *Ability) {
-	g.AttachEffect(&Cooldown{
-		UnitObject:     MakeObject(o),
-		ability:        a,
-		expirationTime: g.clock.Add(a.CooldownDuration),
-
-		g: g,
-	})
+	g.AttachEffect(NewCooldown(g, o, a, g.clock.Add(a.CooldownDuration)))
 }
 
 // ResetCooldown detaches Cooldown effects
 func (g *GameState) ResetCooldown(o Object, a *Ability) {
-	g.AttachEffect(&Cooldown{
-		UnitObject:     MakeObject(o),
-		ability:        a,
-		expirationTime: g.clock.Now(),
-
-		g: g,
-	})
+	g.AttachEffect(NewCooldown(g, o, a, g.clock.Now()))
 }
 
 // Correction attaches a Correction Effect
-func (g *GameState) Correction(o Object, c UnitCorrection, l Statistic, d InstanceDuration, name string) {
-	g.AttachEffect(&Correction{
-		UnitObject:     MakeObject(o),
-		name:           name,
-		correction:     c,
-		stackLimit:     l,
-		stack:          1,
-		expirationTime: g.clock.Add(d),
-
-		g: g,
-	})
+func (g *GameState) Correction(o Object, c UnitCorrection, name string, l Statistic, d InstanceDuration) {
+	g.AttachEffect(NewCorrection(g, o, c, name, l, g.clock.Add(d)))
 }
 
 // Disable attaches a Disable Effect
-func (g *GameState) Disable(o Object, t DisableType, d InstanceDuration) {
-	g.AttachEffect(&Disable{
-		UnitObject:     MakeObject(o),
-		disableType:    t,
-		expirationTime: g.clock.Add(d),
-
-		g: g,
-	})
+func (g *GameState) Disable(o Object, dt DisableType, d InstanceDuration) {
+	g.AttachEffect(NewDisable(g, o, dt, g.clock.Add(d)))
 }
 
 // DamageThreat attaches a Threat Effect
 func (g *GameState) DamageThreat(s Subject, o Object, d Statistic) {
-	g.AttachEffect(&Threat{
-		UnitPair: MakePair(s, o),
-		threat:   d * s.Subject().DamageThreatFactor(),
-
-		g: g,
-	})
+	g.AttachEffect(NewThreat(g, s, o, d*s.Subject().DamageThreatFactor()))
 }
 
 // HealingThreat attaches a Threat Effect
 func (g *GameState) HealingThreat(s Subject, o Object, h Statistic) {
-	g.AttachEffect(&Threat{
-		UnitPair: MakePair(s, o),
-		threat:   h * s.Subject().HealingThreatFactor(),
-
-		g: g,
-	})
+	g.AttachEffect(NewThreat(g, s, o, h*s.Subject().HealingThreatFactor()))
 }
 
 // DoT attaches a Periodical Effect
-func (g *GameState) DoT(damage *Damage, d InstanceDuration, name string) {
-	g.AttachEffect(&Periodical{
-		UnitPair:       MakePair(damage, damage),
-		name:           name,
-		routine:        func() { damage.Perform() },
-		expirationTime: g.clock.Add(d),
-
-		g: g,
-	})
+func (g *GameState) DoT(damage *Damage, name string, d InstanceDuration) {
+	g.AttachEffect(NewPeriodical(g, damage, damage, name, func() { damage.Perform() }, g.clock.Add(d)))
 }
 
 // HoT attaches a Periodical Effect
-func (g *GameState) HoT(healing *Healing, d InstanceDuration, name string) {
-	g.AttachEffect(&Periodical{
-		UnitPair:       MakePair(healing, healing),
-		name:           name,
-		routine:        func() { healing.Perform() },
-		expirationTime: g.clock.Add(d),
-
-		g: g,
-	})
+func (g *GameState) HoT(healing *Healing, name string, d InstanceDuration) {
+	g.AttachEffect(NewPeriodical(g, healing, healing, name, func() { healing.Perform() }, g.clock.Add(d)))
 }
 
 // PhysicalDamage returns a Damage

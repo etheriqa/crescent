@@ -1,5 +1,9 @@
 package main
 
+import (
+	"errors"
+)
+
 type DisableType uint8
 
 const (
@@ -25,68 +29,83 @@ type Disable struct {
 	disableType    DisableType
 	expirationTime InstanceTime
 
-	g Game
+	handler EventHandler
 }
 
-// EffectDidAttach removes duplicate Disables
-func (h *Disable) EffectDidAttach() error {
-	ok := h.g.EffectQuery().BindObject(h).Every(func(o Effect) bool {
-		switch o := o.(type) {
+// NewDisable returns a Disable
+func NewDisable(g Game, o Object, d DisableType, t InstanceTime) *Disable {
+	e := &Disable{
+		UnitObject:     MakeObject(o),
+		disableType:    d,
+		expirationTime: t,
+		handler:        new(func(interface{})),
+	}
+	*e.handler = func(p interface{}) { e.handle(g, p) }
+	return e
+}
+
+// EffectWillAttach removes duplicate Disables
+func (e *Disable) EffectWillAttach(g Game) error {
+	ok := g.EffectQuery().BindObject(e).Every(func(f Effect) bool {
+		switch f := f.(type) {
 		case *Disable:
-			if h == o || h.disableType != o.disableType {
+			if e.disableType != f.disableType {
 				return true
 			}
-			if h.expirationTime <= o.expirationTime {
+			if e.expirationTime <= f.expirationTime {
 				return false
 			}
-			h.g.DetachEffect(o)
+			g.DetachEffect(f)
 		}
 		return true
 	})
 	if !ok {
-		h.g.DetachEffect(h)
-		return nil
+		return errors.New("Already disabled")
 	}
+	return nil
+}
 
-	h.writeOutputUnitAttach()
-	h.Object().Register(h)
-	h.Object().Dispatch(EventDisabled{})
+// EffectDidAttach dispatches a EventDisabled
+func (e *Disable) EffectDidAttach(g Game) error {
+	e.writeOutputUnitAttach(g)
+	e.Object().Register(e.handler)
+	e.Object().Dispatch(EventDisabled{})
 	return nil
 }
 
 // EffectDidDetach does nothing
-func (h *Disable) EffectDidDetach() error {
-	h.Object().Unregister(h)
+func (e *Disable) EffectDidDetach(g Game) error {
+	e.Object().Unregister(e.handler)
 	return nil
 }
 
-// Handle handles the Event
-func (h *Disable) Handle(p interface{}) {
+// handle handles the payload
+func (e *Disable) handle(g Game, p interface{}) {
 	switch p.(type) {
-	case *EventGameTick:
-		if h.g.Clock().Before(h.expirationTime) {
+	case EventGameTick:
+		if g.Clock().Before(e.expirationTime) {
 			return
 		}
-		h.writeOutputUnitDetach()
-		h.g.DetachEffect(h)
-	case *EventDead:
-		h.g.DetachEffect(h)
+		e.writeOutputUnitDetach(g)
+		g.DetachEffect(e)
+	case EventDead:
+		g.DetachEffect(e)
 	}
 }
 
 // writeOutputUnitAttach writes a OutputUnitAttach
-func (h *Disable) writeOutputUnitAttach() {
-	h.g.Writer().Write(OutputUnitAttach{
-		UnitID:         h.Object().ID(),
-		AttachmentName: h.disableType.String(),
-		ExpirationTime: h.expirationTime,
+func (e *Disable) writeOutputUnitAttach(g Game) {
+	g.Writer().Write(OutputUnitAttach{
+		UnitID:         e.Object().ID(),
+		AttachmentName: e.disableType.String(),
+		ExpirationTime: e.expirationTime,
 	})
 }
 
 // writeOutputUnitDetach writes a OutputUnitDetach
-func (h *Disable) writeOutputUnitDetach() {
-	h.g.Writer().Write(OutputUnitDetach{
-		UnitID:         h.Object().ID(),
-		AttachmentName: h.disableType.String(),
+func (e *Disable) writeOutputUnitDetach(g Game) {
+	g.Writer().Write(OutputUnitDetach{
+		UnitID:         e.Object().ID(),
+		AttachmentName: e.disableType.String(),
 	})
 }

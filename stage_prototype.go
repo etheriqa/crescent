@@ -139,7 +139,7 @@ func (s *StagePrototype) actIron(g Game) {
 		return
 	}
 	if !s.ironInitialized {
-		g.Cooldown(s.iron, s.iron.Ability("Silence"))
+		g.Cooldown(s.iron, s.iron.Ability("Stun"))
 		g.Cooldown(s.iron, s.iron.Ability("Iron"))
 		s.ironInitialized = true
 		return
@@ -150,7 +150,7 @@ func (s *StagePrototype) actIron(g Game) {
 			o = u
 		}
 	})
-	g.Activating(s.iron, o, s.iron.Ability("Silence"))
+	g.Activating(s.iron, o, s.iron.Ability("Stun"))
 	g.Activating(s.iron, o, s.iron.Ability("Iron"))
 }
 
@@ -159,7 +159,7 @@ func (s *StagePrototype) actSilver(g Game) {
 		return
 	}
 	if !s.silverInitialized {
-		g.Cooldown(s.silver, s.silver.Ability("Stun"))
+		g.Cooldown(s.silver, s.silver.Ability("Silence"))
 		g.Cooldown(s.silver, s.silver.Ability("Silver"))
 		s.silverInitialized = true
 		return
@@ -170,7 +170,7 @@ func (s *StagePrototype) actSilver(g Game) {
 			o = u
 		}
 	})
-	g.Activating(s.silver, o, s.silver.Ability("Stun"))
+	g.Activating(s.silver, o, s.silver.Ability("Silence"))
 	g.Activating(s.silver, o, s.silver.Ability("Silver"))
 }
 
@@ -280,7 +280,7 @@ func NewClassStagePrototype() (class *Class) {
 			if o.IsDead() {
 				return
 			}
-			g.DoT(g.MagicDamage(s, o, 35), 10*Second, ray.Name)
+			g.DoT(g.MagicDamage(s, o, 35), ray.Name, 10*Second)
 		},
 	}
 	bell = Ability{

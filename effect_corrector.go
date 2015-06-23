@@ -18,127 +18,147 @@ type Correction struct {
 	stack          Statistic
 	expirationTime InstanceTime
 
-	g Game
+	handler EventHandler
+}
+
+// NewCorrection returns a Correction
+func NewCorrection(g Game, o Object, c UnitCorrection, name string, l Statistic, t InstanceTime) *Correction {
+	e := &Correction{
+		UnitObject:     MakeObject(o),
+		name:           name,
+		correction:     c,
+		stackLimit:     l,
+		stack:          1,
+		expirationTime: t,
+		handler:        new(func(interface{})),
+	}
+	*e.handler = func(p interface{}) { e.handle(g, p) }
+	return e
 }
 
 // ArmorCorrection returns amount of armor correction
-func (h *Correction) ArmorCorrection() Statistic {
-	return h.correction.Armor
+func (e *Correction) ArmorCorrection() Statistic {
+	return e.correction.Armor
 }
 
 // MagicResistanceCorrection returns amount of magic resistance correction
-func (h *Correction) MagicResistanceCorrection() Statistic {
-	return h.correction.MagicResistance
+func (e *Correction) MagicResistanceCorrection() Statistic {
+	return e.correction.MagicResistance
 }
 
 // CriticalStrikeChanceCorrection returns amount of critical strike chance correction
-func (h *Correction) CriticalStrikeChanceCorrection() Statistic {
-	return h.correction.CriticalStrikeChance
+func (e *Correction) CriticalStrikeChanceCorrection() Statistic {
+	return e.correction.CriticalStrikeChance
 }
 
 // CriticalStrikeFactorCorrection returns amount of critical strike factor correction
-func (h *Correction) CriticalStrikeFactorCorrection() Statistic {
-	return h.correction.CriticalStrikeFactor
+func (e *Correction) CriticalStrikeFactorCorrection() Statistic {
+	return e.correction.CriticalStrikeFactor
 }
 
 // CooldownReductionCorrection returns amount of cooldown reduction correction
-func (h *Correction) CooldownReductionCorrection() Statistic {
-	return h.correction.CooldownReduction
+func (e *Correction) CooldownReductionCorrection() Statistic {
+	return e.correction.CooldownReduction
 }
 
 // DamageThreatFactorCorrection returns amount of damage threat factor correction
-func (h *Correction) DamageThreatFactorCorrection() Statistic {
-	return h.correction.DamageThreatFactor
+func (e *Correction) DamageThreatFactorCorrection() Statistic {
+	return e.correction.DamageThreatFactor
 }
 
 // HealingThreatFactorCorrection returns amount of healing threat factor correction
-func (h *Correction) HealingThreatFactorCorrection() Statistic {
-	return h.correction.HealingThreatFactor
+func (e *Correction) HealingThreatFactorCorrection() Statistic {
+	return e.correction.HealingThreatFactor
 }
 
 // Stack returns stack number
-func (h *Correction) Stack() Statistic {
-	return h.stack
+func (e *Correction) Stack() Statistic {
+	return e.stack
 }
 
-// EffectDidAttach merges Correction effects and updates the UnitCorrection of the Object
-func (h *Correction) EffectDidAttach() error {
-	h.g.EffectQuery().BindObject(h).Each(func(o Effect) {
-		switch o := o.(type) {
+// EffectWillAttach merges Correction effects
+func (e *Correction) EffectWillAttach(g Game) error {
+	g.EffectQuery().BindObject(e).Each(func(f Effect) {
+		switch f := f.(type) {
 		case *Correction:
-			if h == o || h.name != o.name {
+			if e.name != f.name {
 				return
 			}
-			if h.expirationTime < o.expirationTime {
-				h.expirationTime = o.expirationTime
-				h.stack = o.stack
+			if e.expirationTime < f.expirationTime {
+				e.expirationTime = f.expirationTime
+				e.stack = f.stack
 			} else {
-				h.stack += o.stack
+				e.stack += f.stack
 			}
-			h.g.DetachEffect(o)
+			g.DetachEffect(f)
 		}
 	})
 
-	if h.stack > h.stackLimit {
-		h.stack = h.stackLimit
+	if e.stack > e.stackLimit {
+		e.stack = e.stackLimit
 	}
-	h.writeOutputUnitAttach()
-	h.Object().Register(h)
-	h.updateCorrection()
 	return nil
 }
 
-// EffectDidDetach updates the UnitCorrection of the Object
-func (h *Correction) EffectDidDetach() error {
-	h.Object().Unregister(h)
-	h.updateCorrection()
+// EffectDidAttach updates the UnitCorrection of the object unit
+func (e *Correction) EffectDidAttach(g Game) error {
+	e.writeOutputUnitAttach(g)
+	e.Object().Register(e.handler)
+	e.updateCorrection(g)
 	return nil
 }
 
-// Handle handles the Event
-func (h *Correction) Handle(p interface{}) {
+// EffectDidDetach updates the UnitCorrection of the object unit
+func (e *Correction) EffectDidDetach(g Game) error {
+	e.Object().Unregister(e.handler)
+	e.updateCorrection(g)
+	return nil
+}
+
+// handle handles the payload
+func (e *Correction) handle(g Game, p interface{}) {
 	switch p.(type) {
-	case *EventGameTick:
-		if h.g.Clock().Before(h.expirationTime) {
+	case EventGameTick:
+		if g.Clock().Before(e.expirationTime) {
 			return
 		}
-		h.writeOutputUnitDetach()
-		h.g.DetachEffect(h)
+		e.writeOutputUnitDetach(g)
+		g.DetachEffect(e)
 	}
 }
 
 // updateCorrection updates the UnitCorrection of the Object
-func (h *Correction) updateCorrection() {
+func (e *Correction) updateCorrection(g Game) {
 	c := MakeUnitCorrection()
-	h.g.EffectQuery().BindObject(h).Each(func(o Effect) {
-		switch o := o.(type) {
+	g.EffectQuery().BindObject(e).Each(func(f Effect) {
+		switch f := f.(type) {
 		case Corrector:
-			c.Armor += o.ArmorCorrection()
-			c.MagicResistance += o.MagicResistanceCorrection()
-			c.CriticalStrikeChance += o.CriticalStrikeChanceCorrection()
-			c.CriticalStrikeFactor += o.CriticalStrikeFactorCorrection()
-			c.CooldownReduction += o.CooldownReductionCorrection()
-			c.DamageThreatFactor += o.DamageThreatFactorCorrection()
-			c.HealingThreatFactor += o.HealingThreatFactorCorrection()
+			c.Armor += f.ArmorCorrection()
+			c.MagicResistance += f.MagicResistanceCorrection()
+			c.CriticalStrikeChance += f.CriticalStrikeChanceCorrection()
+			c.CriticalStrikeFactor += f.CriticalStrikeFactorCorrection()
+			c.CooldownReduction += f.CooldownReductionCorrection()
+			c.DamageThreatFactor += f.DamageThreatFactorCorrection()
+			c.HealingThreatFactor += f.HealingThreatFactorCorrection()
 		}
 	})
-	h.Object().UpdateCorrection(c)
+	e.Object().UpdateCorrection(c)
 }
 
 // writeOutputUnitAttach writes a OutputUnitAttach
-func (h *Correction) writeOutputUnitAttach() {
-	h.g.Writer().Write(OutputUnitAttach{
-		UnitID:         h.Object().ID(),
-		AttachmentName: h.name,
-		Stack:          h.stack,
-		ExpirationTime: h.expirationTime,
+func (e *Correction) writeOutputUnitAttach(g Game) {
+	g.Writer().Write(OutputUnitAttach{
+		UnitID:         e.Object().ID(),
+		AttachmentName: e.name,
+		Stack:          e.stack,
+		ExpirationTime: e.expirationTime,
 	})
 }
 
 // writeOutputUnitDetach writes a OutputUnitDetach
-func (h *Correction) writeOutputUnitDetach() {
-	h.g.Writer().Write(OutputUnitDetach{
-		UnitID:         h.Object().ID(),
-		AttachmentName: h.name,
+func (e *Correction) writeOutputUnitDetach(g Game) {
+	g.Writer().Write(OutputUnitDetach{
+		UnitID:         e.Object().ID(),
+		AttachmentName: e.name,
 	})
 }

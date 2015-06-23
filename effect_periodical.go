@@ -1,74 +1,94 @@
 package main
 
+import (
+	"errors"
+)
+
 type Periodical struct {
 	UnitPair
 	name           string
 	routine        func()
 	expirationTime InstanceTime
 
-	g Game
+	handler EventHandler
 }
 
-// EffectDidAttach removes duplicate Periodicals
-func (h *Periodical) EffectDidAttach() error {
-	ok := h.g.EffectQuery().BindSubject(h).BindObject(h).Every(func(o Effect) bool {
-		switch o := o.(type) {
+// NewPeriodical returns a Periodical
+func NewPeriodical(g Game, s Subject, o Object, name string, routine func(), t InstanceTime) *Periodical {
+	e := &Periodical{
+		UnitPair:       MakePair(s, o),
+		name:           name,
+		routine:        routine,
+		expirationTime: t,
+		handler:        new(func(interface{})),
+	}
+	*e.handler = func(p interface{}) { e.handle(g, p) }
+	return e
+}
+
+// EffectWillAttach removes duplicate Periodicals
+func (e *Periodical) EffectWillAttach(g Game) error {
+	ok := g.EffectQuery().BindSubject(e).BindObject(e).Every(func(f Effect) bool {
+		switch f := f.(type) {
 		case *Periodical:
-			if h == o || h.name != o.name {
+			if e.name != f.name {
 				return true
 			}
-			if h.expirationTime <= o.expirationTime {
+			if e.expirationTime <= f.expirationTime {
 				return false
 			}
-			h.g.DetachEffect(o)
+			g.DetachEffect(f)
 		}
 		return true
 	})
 	if !ok {
-		h.g.DetachEffect(h)
-		return nil
+		return errors.New("Already attached")
 	}
+	return nil
+}
 
-	h.writeOutputUnitAttach()
-	h.Object().Register(h)
+// EffectDidAttach does nothing
+func (e *Periodical) EffectDidAttach(g Game) error {
+	e.writeOutputUnitAttach(g)
+	e.Object().Register(e.handler)
 	return nil
 }
 
 // EffectDidDetach does nothing
-func (h *Periodical) EffectDidDetach() error {
-	h.Object().Unregister(h)
+func (e *Periodical) EffectDidDetach(g Game) error {
+	e.Object().Unregister(e.handler)
 	return nil
 }
 
-// Handle handles the Event
-func (h *Periodical) Handle(p interface{}) {
+// handle handles the Event
+func (e *Periodical) handle(g Game, p interface{}) {
 	switch p.(type) {
-	case *EventDead:
-		h.g.DetachEffect(h)
-	case *EventGameTick:
-		if h.g.Clock().Before(h.expirationTime) {
+	case EventDead:
+		g.DetachEffect(e)
+	case EventGameTick:
+		if g.Clock().Before(e.expirationTime) {
 			return
 		}
-		h.writeOutputUnitDetach()
-		h.g.DetachEffect(h)
-	case *EventPeriodicalTick:
-		h.routine()
+		e.writeOutputUnitDetach(g)
+		g.DetachEffect(e)
+	case EventPeriodicalTick:
+		e.routine()
 	}
 }
 
 // writeOutputUnitAttach writes a OutputUnitAttach
-func (h *Periodical) writeOutputUnitAttach() {
-	h.g.Writer().Write(OutputUnitAttach{
-		UnitID:         h.Object().ID(),
-		AttachmentName: h.name,
-		ExpirationTime: h.expirationTime,
+func (e *Periodical) writeOutputUnitAttach(g Game) {
+	g.Writer().Write(OutputUnitAttach{
+		UnitID:         e.Object().ID(),
+		AttachmentName: e.name,
+		ExpirationTime: e.expirationTime,
 	})
 }
 
 // writeOutputUnitDetach writes a OutputUnitDetach
-func (h *Periodical) writeOutputUnitDetach() {
-	h.g.Writer().Write(OutputUnitDetach{
-		UnitID:         h.Object().ID(),
-		AttachmentName: h.name,
+func (e *Periodical) writeOutputUnitDetach(g Game) {
+	g.Writer().Write(OutputUnitDetach{
+		UnitID:         e.Object().ID(),
+		AttachmentName: e.name,
 	})
 }

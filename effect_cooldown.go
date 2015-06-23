@@ -5,70 +5,83 @@ type Cooldown struct {
 	ability        *Ability
 	expirationTime InstanceTime
 
-	g Game
+	handler EventHandler
+}
+
+// NewCooldown returns a Cooldown
+func NewCooldown(g Game, o Object, a *Ability, t InstanceTime) *Cooldown {
+	e := &Cooldown{
+		UnitObject:     MakeObject(o),
+		ability:        a,
+		expirationTime: t,
+		handler:        new(func(interface{})),
+	}
+	*e.handler = func(p interface{}) { e.handle(g, p) }
+	return e
 }
 
 // Ability returns the Ability
-func (h *Cooldown) Ability() *Ability {
-	return h.ability
+func (e *Cooldown) Ability() *Ability {
+	return e.ability
 }
 
-// EffectDidAttach removes other Cooldown effects
-func (h *Cooldown) EffectDidAttach(g Game) error {
-	h.g.EffectQuery().BindObject(h).Each(func(o Effect) {
-		switch o := o.(type) {
+// EffectWillAttach removes other Cooldown effects
+func (e *Cooldown) EffectWillAttach(g Game) error {
+	g.EffectQuery().BindObject(e).Each(func(f Effect) {
+		switch f := f.(type) {
 		case *Cooldown:
-			if h == o {
+			if e.ability != f.ability {
 				return
 			}
-			if h.ability != o.ability {
-				return
-			}
-			h.g.DetachEffect(o)
+			g.DetachEffect(f)
 		}
 	})
+	return nil
+}
 
-	h.writeOutputUnitCooldown()
+// EffectDidAttach detaches itself if it is not active
+func (e *Cooldown) EffectDidAttach(g Game) error {
+	e.writeOutputUnitCooldown(g)
 
-	if !h.isActive() {
-		h.g.DetachEffect(h)
+	if !e.isActive(g) {
+		g.DetachEffect(e)
 		return nil
 	}
 
-	h.Object().Register(h)
+	e.Object().Register(e.handler)
 	return nil
 }
 
 // EffectDidDetach does nothing
-func (h *Cooldown) EffectDidDetach(g Game) error {
-	h.Object().Unregister(h)
+func (e *Cooldown) EffectDidDetach(g Game) error {
+	e.Object().Unregister(e.handler)
 	return nil
 }
 
-// Handle handles the Event
-func (h *Cooldown) Handle(p interface{}) {
+// handle handles the payload
+func (e *Cooldown) handle(g Game, p interface{}) {
 	switch p.(type) {
-	case *EventGameTick:
-		if h.isActive() {
+	case EventGameTick:
+		if e.isActive(g) {
 			return
 		}
-		h.writeOutputUnitCooldown()
-		h.g.DetachEffect(h)
+		e.writeOutputUnitCooldown(g)
+		g.DetachEffect(e)
 	}
 }
 
 // isActive returns true if the Cooldown is active
-func (h *Cooldown) isActive() bool {
-	return h.g.Clock().Before(h.expirationTime)
+func (e *Cooldown) isActive(g Game) bool {
+	return g.Clock().Before(e.expirationTime)
 }
 
 // writeOutputUnitCooldown writes a OutputUnitCooldown
-func (h *Cooldown) writeOutputUnitCooldown() {
+func (e *Cooldown) writeOutputUnitCooldown(g Game) {
 	// TODO write to only the object
-	h.g.Writer().Write(OutputUnitCooldown{
-		UnitID:         h.Object().ID(),
-		AbilityName:    h.ability.Name,
-		ExpirationTime: h.expirationTime,
-		Active:         h.isActive(),
+	g.Writer().Write(OutputUnitCooldown{
+		UnitID:         e.Object().ID(),
+		AbilityName:    e.ability.Name,
+		ExpirationTime: e.expirationTime,
+		Active:         e.isActive(g),
 	})
 }

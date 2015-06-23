@@ -10,122 +10,140 @@ type Activating struct {
 	ability        *Ability
 	expirationTime InstanceTime
 
-	g Game
+	handler EventHandler
+}
+
+// NewActivating returns a Activating
+func NewActivating(g Game, s Subject, o *Unit, a *Ability, t InstanceTime) *Activating {
+	e := &Activating{
+		UnitSubject:    MakeSubject(s),
+		object:         o,
+		ability:        a,
+		expirationTime: t,
+		handler:        new(func(interface{})),
+	}
+	*e.handler = func(p interface{}) { e.handle(g, p) }
+	return e
+}
+
+// MaybeObject returns the object unit or nil
+func (e *Activating) MaybeObject() *Unit {
+	return e.object
 }
 
 // Ability returns the Ability
-func (h *Activating) Ability() *Ability {
-	return h.ability
+func (e *Activating) Ability() *Ability {
+	return e.ability
 }
 
-// EffectDidAttach checks requirements
-func (h *Activating) EffectDidAttach(g Game) error {
-	ok := g.EffectQuery().BindSubject(h).Every(func(o Effect) bool {
-		switch o.(type) {
+// EffectWillAttach checks requirements
+func (e *Activating) EffectWillAttach(g Game) error {
+	ok := g.EffectQuery().BindSubject(e).Every(func(f Effect) bool {
+		switch f.(type) {
 		case *Activating:
-			if h != o {
-				return false
-			}
+			return false
 		}
 		return true
 	})
 	if !ok {
-		g.DetachEffect(h)
+		return errors.New("Already activating")
+	}
+
+	if err := e.checkRequirements(g); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// EffectDidAttach performs ability if it has no activation duration
+func (e *Activating) EffectDidAttach(g Game) error {
+	if e.ability.ActivationDuration == 0 {
+		e.perform(g)
 		return nil
 	}
 
-	if err := h.checkRequirements(); err != nil {
-		log.Debug(err)
-		h.g.DetachEffect(h)
-		return nil
+	e.Subject().Register(e.handler)
+	if e.object != nil {
+		e.object.Register(e.handler)
 	}
 
-	if h.ability.ActivationDuration == 0 {
-		h.perform()
-		return nil
-	}
+	e.writeOutputUnitActivating(g)
 
-	h.Subject().Register(h)
-	if h.object != nil {
-		h.object.Register(h)
-	}
-
-	h.writeOutputUnitActivating()
 	return nil
 }
 
 // EffectDidDetach does nothing
-func (h *Activating) EffectDidDetach() error {
-	h.Subject().Unregister(h)
-	if h.object != nil {
-		h.object.Unregister(h)
+func (e *Activating) EffectDidDetach(g Game) error {
+	e.Subject().Unregister(e.handler)
+	if e.object != nil {
+		e.object.Unregister(e.handler)
 	}
 	return nil
 }
 
-// Handle handles the Event
-func (h *Activating) Handle(p interface{}) {
+// handle handles the payload
+func (e *Activating) handle(g Game, p interface{}) {
 	switch p.(type) {
-	case *EventGameTick:
-		if h.g.Clock().Before(h.expirationTime) {
+	case EventGameTick:
+		if g.Clock().Before(e.expirationTime) {
 			return
 		}
-		h.perform()
-	case *EventDead:
-		h.writeOutputUnitActivated(false)
-		h.g.DetachEffect(h)
-		if h.Subject().IsDead() {
+		e.perform(g)
+	case EventDead:
+		if e.Subject().IsAlive() {
+			e.writeOutputUnitActivated(g, false)
+		}
+		g.DetachEffect(e)
+	case EventDisabled:
+		if err := e.checkDisable(g); err == nil {
 			return
 		}
-	case *EventDisabled:
-		if err := h.checkDisable(); err == nil {
+		e.writeOutputUnitActivated(g, false)
+		g.DetachEffect(e)
+	case EventTakenDamage:
+		if err := e.checkResource(); err == nil {
 			return
 		}
-		h.writeOutputUnitActivated(false)
-		h.g.DetachEffect(h)
-	case *EventTakenDamage:
-		if err := h.checkResource(); err == nil {
-			return
-		}
-		h.writeOutputUnitActivated(false)
-		h.g.DetachEffect(h)
+		e.writeOutputUnitActivated(g, false)
+		g.DetachEffect(e)
 	}
 }
 
 // perform performs the Ability
-func (h *Activating) perform() {
-	h.writeOutputUnitActivated(true)
-	if _, _, err := h.Subject().ModifyHealth(h.g.Writer(), -h.ability.HealthCost); err != nil {
+func (e *Activating) perform(g Game) {
+	e.writeOutputUnitActivated(g, true)
+	if _, _, err := e.Subject().ModifyHealth(g.Writer(), -e.ability.HealthCost); err != nil {
 		log.Fatal(err)
 	}
-	if _, _, err := h.Subject().ModifyMana(h.g.Writer(), -h.ability.ManaCost); err != nil {
+	if _, _, err := e.Subject().ModifyMana(g.Writer(), -e.ability.ManaCost); err != nil {
 		log.Fatal(err)
 	}
-	h.ability.Perform(h.g, h.Subject(), h.object)
-	h.g.DetachEffect(h)
-	h.g.Cooldown(h.Subject(), h.ability)
+	e.ability.Perform(g, e.Subject(), e.object)
+	g.DetachEffect(e)
+	g.Cooldown(e.Subject(), e.ability)
 }
 
 // checkRequirements checks all requirements
-func (h *Activating) checkRequirements() error {
-	if err := h.checkObject(); err != nil {
+func (e *Activating) checkRequirements(g Game) error {
+	if err := e.checkObject(); err != nil {
 		return err
 	}
-	if err := h.checkCooldown(); err != nil {
+	if err := e.checkCooldown(g); err != nil {
 		return err
 	}
-	if err := h.checkDisable(); err != nil {
+	if err := e.checkDisable(g); err != nil {
 		return err
 	}
-	if err := h.checkResource(); err != nil {
+	if err := e.checkResource(); err != nil {
 		return err
 	}
 	return nil
 }
 
 // checkObject checks the Object is valid
-func (h *Activating) checkObject() error {
-	switch h.ability.TargetType {
+func (e *Activating) checkObject() error {
+	switch e.ability.TargetType {
 	case TargetTypeNone:
 		// TODO WIP
 		/*
@@ -134,23 +152,23 @@ func (h *Activating) checkObject() error {
 			}
 		*/
 	case TargetTypeFriend:
-		if h.object == nil {
+		if e.object == nil {
 			return errors.New("The Object must be *Unit")
 		}
-		if h.object.Group() != h.Subject().Group() {
+		if e.object.Group() != e.Subject().Group() {
 			return errors.New("The Object must be friend")
 		}
-		if h.object.IsDead() {
+		if e.object.IsDead() {
 			return errors.New("The Object must be alive")
 		}
 	case TargetTypeEnemy:
-		if h.object == nil {
+		if e.object == nil {
 			return errors.New("The Object must be *Unit")
 		}
-		if h.object.Group() == h.Subject().Group() {
+		if e.object.Group() == e.Subject().Group() {
 			return errors.New("The Object must be enemy")
 		}
-		if h.object.IsDead() {
+		if e.object.IsDead() {
 			return errors.New("The Object must be alive")
 		}
 	default:
@@ -160,11 +178,11 @@ func (h *Activating) checkObject() error {
 }
 
 // checkCooldown checks the Subject does not have to wait the Cooldown
-func (h *Activating) checkCooldown() error {
-	ok := h.g.EffectQuery().BindObject(h.Subject()).Every(func(o Effect) bool {
-		switch o := o.(type) {
+func (e *Activating) checkCooldown(g Game) error {
+	ok := g.EffectQuery().BindObject(e.Subject()).Every(func(f Effect) bool {
+		switch f := f.(type) {
 		case *Cooldown:
-			if h.ability == o.Ability() {
+			if e.ability == f.Ability() {
 				return false
 			}
 		}
@@ -177,12 +195,12 @@ func (h *Activating) checkCooldown() error {
 }
 
 // checkDisable checks the Subject has not been interrupted by Disables
-func (h *Activating) checkDisable() error {
-	ok := h.g.EffectQuery().BindObject(h.Subject()).Every(func(o Effect) bool {
-		switch o := o.(type) {
+func (e *Activating) checkDisable(g Game) error {
+	ok := g.EffectQuery().BindObject(e.Subject()).Every(func(f Effect) bool {
+		switch f := f.(type) {
 		case *Disable:
-			for _, t := range h.ability.DisableTypes {
-				if o.disableType == t {
+			for _, t := range e.ability.DisableTypes {
+				if f.disableType == t {
 					return false
 				}
 			}
@@ -196,31 +214,31 @@ func (h *Activating) checkDisable() error {
 }
 
 // checkResource checks the Subject has enough resource
-func (h *Activating) checkResource() error {
-	if h.Subject().Health() <= h.ability.HealthCost {
+func (e *Activating) checkResource() error {
+	if e.Subject().Health() <= e.ability.HealthCost {
 		return errors.New("The Subject does not have enough health")
 	}
-	if h.Subject().Mana() < h.ability.ManaCost {
+	if e.Subject().Mana() < e.ability.ManaCost {
 		return errors.New("The Subject does not have enough mana")
 	}
 	return nil
 }
 
 // writeOutputUnitActivating writes a OutputUnitActivating
-func (h *Activating) writeOutputUnitActivating() {
-	h.g.Writer().Write(OutputUnitActivating{
-		UnitID:      h.Subject().ID(),
-		AbilityName: h.ability.Name,
-		StartTime:   h.g.Clock().Now(),
-		EndTime:     h.expirationTime,
+func (e *Activating) writeOutputUnitActivating(g Game) {
+	g.Writer().Write(OutputUnitActivating{
+		UnitID:      e.Subject().ID(),
+		AbilityName: e.ability.Name,
+		StartTime:   g.Clock().Now(),
+		EndTime:     e.expirationTime,
 	})
 }
 
 // writeOutputUnitActivated writes a OutputUnitActivated
-func (h *Activating) writeOutputUnitActivated(ok bool) {
-	h.g.Writer().Write(OutputUnitActivated{
-		UnitID:      h.Subject().ID(),
-		AbilityName: h.ability.Name,
+func (e *Activating) writeOutputUnitActivated(g Game, ok bool) {
+	g.Writer().Write(OutputUnitActivated{
+		UnitID:      e.Subject().ID(),
+		AbilityName: e.ability.Name,
 		OK:          ok,
 	})
 }

@@ -113,8 +113,8 @@ func (g *GameState) Ability(sid UnitID, oid *UnitID, abilityName string) error {
 	return nil
 }
 
-// PerformGameStateTick performs the game tick routine
-func (g *GameState) PerformGameStateTick() {
+// PerformGameTick performs the game tick routine
+func (g *GameState) PerformGameTick() {
 	g.stage.OnTick(g)
 	g.units.Each(func(u *Unit) {
 		if u.IsDead() {
