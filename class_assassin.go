@@ -1,6 +1,6 @@
 package main
 
-const AssassinStackName = "Tenecity"
+const AssassinStackName = "Tenacity"
 
 func AssassinStack(op Operator, o Object) {
 	c := UnitCorrection{
@@ -80,7 +80,7 @@ func NewClassAssassin() *Class {
 	}
 	e = Ability{
 		Name:               "Tenacity",
-		Description:        "Gains three Tenacity effects / Loses armor and magic resistance for 8 seconds / Tenecity effect increases critical strike chance and critical strike damage",
+		Description:        "Gains three Tenacity effects / Loses armor and magic resistance for 8 seconds / Tenacity effect increases critical strike chance and critical strike damage",
 		TargetType:         TargetTypeNone,
 		HealthCost:         0,
 		ManaCost:           32,
@@ -102,7 +102,7 @@ func NewClassAssassin() *Class {
 	}
 	r = Ability{
 		Name:               "Lethal Weapon",
-		Description:        "Deals pure damage / Silences target for 1 second / Consumes all Tenecity effects",
+		Description:        "Deals pure damage / Silences target for 1 second / Consumes all Tenacity effects",
 		TargetType:         TargetTypeEnemy,
 		HealthCost:         0,
 		ManaCost:           58,
