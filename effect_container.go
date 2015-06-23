@@ -1,8 +1,12 @@
 package main
 
+import (
+	"errors"
+)
+
 type EffectContainer interface {
-	Attach(Effect)
-	Detach(Effect)
+	Attach(Effect) error
+	Detach(Effect) error
 	Bind(*Unit) EffectContainer
 	BindSubject(Subject) EffectContainer
 	BindObject(Object) EffectContainer
@@ -16,9 +20,9 @@ type EffectSet map[Effect]bool
 
 type BoundEffectSet struct {
 	effects EffectSet
-	unit     *Unit
-	subject  *Unit
-	object   *Unit
+	unit    *Unit
+	subject *Unit
+	object  *Unit
 }
 
 // MakeEffectSet returns a EffectSet
@@ -27,63 +31,83 @@ func MakeEffectSet() EffectSet {
 }
 
 // Attach adds the Effect if not exists
-func (hs EffectSet) Attach(h Effect) {
-	if hs[h] {
-		return
+func (es EffectSet) Attach(e Effect) error {
+	if es[e] {
+		return errors.New("Already attached")
 	}
-	hs[h] = true
-	h.OnAttach()
+	if e, ok := e.(EffectWillAttach); ok {
+		if err := e.EffectWillAttach(); err != nil {
+			return err
+		}
+	}
+	es[e] = true
+	if e, ok := e.(EffectDidAttach); ok {
+		if err := e.EffectDidAttach(); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // Detach removes the Effect if exists
-func (hs EffectSet) Detach(h Effect) {
-	if !hs[h] {
-		return
+func (es EffectSet) Detach(e Effect) error {
+	if !es[e] {
+		return errors.New("Never attached")
 	}
-	delete(hs, h)
-	h.OnDetach()
+	if e, ok := e.(EffectWillDetach); ok {
+		if err := e.EffectWillDetach(); err != nil {
+			return err
+		}
+	}
+	delete(es, e)
+	if e, ok := e.(EffectDidDetach); ok {
+		if err := e.EffectDidDetach(); err != nil {
+			return err
+		}
+	}
+	return nil
 }
 
 // Bind binds the Unit
-func (hs EffectSet) Bind(u *Unit) EffectContainer {
+func (es EffectSet) Bind(u *Unit) EffectContainer {
 	return BoundEffectSet{
-		effects: hs,
-		unit:     u,
+		effects: es,
+		unit:    u,
 	}
 }
 
 // BindSubject binds the Subject
-func (hs EffectSet) BindSubject(s Subject) EffectContainer {
+func (es EffectSet) BindSubject(s Subject) EffectContainer {
 	return BoundEffectSet{
-		effects: hs,
-		subject:  s.Subject(),
+		effects: es,
+		subject: s.Subject(),
 	}
 }
 
 // BindObject binds the Object
-func (hs EffectSet) BindObject(o Object) EffectContainer {
+func (es EffectSet) BindObject(o Object) EffectContainer {
 	return BoundEffectSet{
-		effects: hs,
-		object:   o.Object(),
+		effects: es,
+		object:  o.Object(),
 	}
 }
 
 // Unbind unbinds the Units
-func (hs EffectSet) Unbind() EffectContainer {
-	return hs
+func (es EffectSet) Unbind() EffectContainer {
+	return es
 }
 
 // Each calls the callback function with each the Effect
-func (hs EffectSet) Each(callback func(Effect)) {
-	for h := range hs {
-		callback(h)
+func (es EffectSet) Each(callback func(Effect)) {
+	for e := range es {
+		callback(e)
 	}
 }
 
 // Every returns true if all of the callback result are true
-func (hs EffectSet) Every(callback func(Effect) bool) bool {
-	for h := range hs {
-		if !callback(h) {
+func (es EffectSet) Every(callback func(Effect) bool) bool {
+	for e := range es {
+		if !callback(e) {
 			return false
 		}
 	}
@@ -91,9 +115,9 @@ func (hs EffectSet) Every(callback func(Effect) bool) bool {
 }
 
 // Some returns true if any of the callback result are true
-func (hs EffectSet) Some(callback func(Effect) bool) bool {
-	for h := range hs {
-		if callback(h) {
+func (es EffectSet) Some(callback func(Effect) bool) bool {
+	for e := range es {
+		if callback(e) {
 			return true
 		}
 	}
@@ -101,78 +125,78 @@ func (hs EffectSet) Some(callback func(Effect) bool) bool {
 }
 
 // Attach adds the Effect if not exists
-func (bhs BoundEffectSet) Attach(h Effect) {
-	bhs.effects.Attach(h)
+func (bes BoundEffectSet) Attach(e Effect) error {
+	return bes.effects.Attach(e)
 }
 
 // Detach removes the Effect if exists
-func (bhs BoundEffectSet) Detach(h Effect) {
-	bhs.effects.Detach(h)
+func (bes BoundEffectSet) Detach(e Effect) error {
+	return bes.effects.Detach(e)
 }
 
 // Bind binds the Unit
-func (bhs BoundEffectSet) Bind(u *Unit) EffectContainer {
+func (bes BoundEffectSet) Bind(u *Unit) EffectContainer {
 	return BoundEffectSet{
-		effects: bhs.effects,
-		unit:     u,
-		subject:  bhs.subject,
-		object:   bhs.object,
+		effects: bes.effects,
+		unit:    u,
+		subject: bes.subject,
+		object:  bes.object,
 	}
 }
 
 // BindSubject binds the Subject
-func (bhs BoundEffectSet) BindSubject(s Subject) EffectContainer {
+func (bes BoundEffectSet) BindSubject(s Subject) EffectContainer {
 	return BoundEffectSet{
-		effects: bhs.effects,
-		unit:     bhs.unit,
-		subject:  s.Subject(),
-		object:   bhs.object,
+		effects: bes.effects,
+		unit:    bes.unit,
+		subject: s.Subject(),
+		object:  bes.object,
 	}
 }
 
 // BindObject binds the Object
-func (bhs BoundEffectSet) BindObject(o Object) EffectContainer {
+func (bes BoundEffectSet) BindObject(o Object) EffectContainer {
 	return BoundEffectSet{
-		effects: bhs.effects,
-		unit:     bhs.unit,
-		subject:  bhs.subject,
-		object:   o.Object(),
+		effects: bes.effects,
+		unit:    bes.unit,
+		subject: bes.subject,
+		object:  o.Object(),
 	}
 }
 
 // Unbind unbinds the Units
-func (bhs BoundEffectSet) Unbind() EffectContainer {
-	return bhs.effects
+func (bes BoundEffectSet) Unbind() EffectContainer {
+	return bes.effects
 }
 
 // Each calls the callback function with each the Effect
-func (bhs BoundEffectSet) Each(callback func(Effect)) {
-	bhs.effects.Each(func(h Effect) {
+func (bes BoundEffectSet) Each(callback func(Effect)) {
+	bes.effects.Each(func(e Effect) {
 		var subject, object *Unit
-		if _, ok := h.(Subject); ok {
-			subject = h.(Subject).Subject()
+		if _, ok := e.(Subject); ok {
+			subject = e.(Subject).Subject()
 		}
-		if _, ok := h.(Object); ok {
-			object = h.(Object).Object()
+		if _, ok := e.(Object); ok {
+			object = e.(Object).Object()
 		}
-		if bhs.unit != nil && bhs.unit != subject && bhs.unit != object {
+		if bes.unit != nil && bes.unit != subject && bes.unit != object {
 			return
 		}
-		if bhs.subject != nil && bhs.subject != subject {
+		if bes.subject != nil && bes.subject != subject {
 			return
 		}
-		if bhs.object != nil && bhs.object != object.Object() {
+		if bes.object != nil && bes.object != object.Object() {
 			return
 		}
-		callback(h)
+		callback(e)
 	})
 }
 
 // Every returns true if all of the callback result are true
-func (bhs BoundEffectSet) Every(callback func(Effect) bool) bool {
+func (bes BoundEffectSet) Every(callback func(Effect) bool) bool {
 	ok := true
-	bhs.Each(func(h Effect) {
-		if !ok || !callback(h) {
+	bes.Each(func(e Effect) {
+		if !ok || !callback(e) {
 			ok = false
 		}
 	})
@@ -180,10 +204,10 @@ func (bhs BoundEffectSet) Every(callback func(Effect) bool) bool {
 }
 
 // Some returns true if any of the callback result are true
-func (bhs BoundEffectSet) Some(callback func(Effect) bool) bool {
+func (bes BoundEffectSet) Some(callback func(Effect) bool) bool {
 	ok := false
-	bhs.Each(func(h Effect) {
-		if ok || callback(h) {
+	bes.Each(func(e Effect) {
+		if ok || callback(e) {
 			ok = true
 		}
 	})

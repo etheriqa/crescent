@@ -9,8 +9,8 @@ type Periodical struct {
 	op Operator
 }
 
-// OnAttach removes duplicate Periodicals
-func (h *Periodical) OnAttach() {
+// EffectDidAttach removes duplicate Periodicals
+func (h *Periodical) EffectDidAttach() error {
 	ok := h.op.Effects().BindSubject(h).BindObject(h).Every(func(o Effect) bool {
 		switch o := o.(type) {
 		case *Periodical:
@@ -26,16 +26,18 @@ func (h *Periodical) OnAttach() {
 	})
 	if !ok {
 		h.op.Effects().Detach(h)
-		return
+		return nil
 	}
 
 	h.writeOutputUnitAttach()
 	h.Object().Register(h)
+	return nil
 }
 
-// OnDetach does nothing
-func (h *Periodical) OnDetach() {
+// EffectDidDetach does nothing
+func (h *Periodical) EffectDidDetach() error {
 	h.Object().Unregister(h)
+	return nil
 }
 
 // Handle handles the Event

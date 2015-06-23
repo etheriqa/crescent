@@ -61,8 +61,8 @@ func (h *Correction) Stack() Statistic {
 	return h.stack
 }
 
-// OnAttach merges Correction effects and updates the UnitCorrection of the Object
-func (h *Correction) OnAttach() {
+// EffectDidAttach merges Correction effects and updates the UnitCorrection of the Object
+func (h *Correction) EffectDidAttach() error {
 	h.op.Effects().BindObject(h).Each(func(o Effect) {
 		switch o := o.(type) {
 		case *Correction:
@@ -85,12 +85,14 @@ func (h *Correction) OnAttach() {
 	h.writeOutputUnitAttach()
 	h.Object().Register(h)
 	h.updateCorrection()
+	return nil
 }
 
-// OnDetach updates the UnitCorrection of the Object
-func (h *Correction) OnDetach() {
+// EffectDidDetach updates the UnitCorrection of the Object
+func (h *Correction) EffectDidDetach() error {
 	h.Object().Unregister(h)
 	h.updateCorrection()
+	return nil
 }
 
 // Handle handles the Event

@@ -13,8 +13,8 @@ func (h *Cooldown) Ability() *Ability {
 	return h.ability
 }
 
-// OnAttach removes other Cooldown effects
-func (h *Cooldown) OnAttach() {
+// EffectDidAttach removes other Cooldown effects
+func (h *Cooldown) EffectDidAttach() error {
 	h.op.Effects().BindObject(h).Each(func(o Effect) {
 		switch o := o.(type) {
 		case *Cooldown:
@@ -32,15 +32,17 @@ func (h *Cooldown) OnAttach() {
 
 	if !h.isActive() {
 		h.op.Effects().Detach(h)
-		return
+		return nil
 	}
 
 	h.Object().Register(h)
+	return nil
 }
 
-// OnDetach does nothing
-func (h *Cooldown) OnDetach() {
+// EffectDidDetach does nothing
+func (h *Cooldown) EffectDidDetach() error {
 	h.Object().Unregister(h)
+	return nil
 }
 
 // Handle handles the Event

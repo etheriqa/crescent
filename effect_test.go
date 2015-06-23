@@ -9,12 +9,14 @@ type MockedEffectS struct{ MockedEffect }
 type MockedEffectO struct{ MockedEffect }
 type MockedEffectSO struct{ MockedEffect }
 
-func (m *MockedEffect) OnAttach() {
-	m.Called()
+func (m *MockedEffect) EffectDidAttach() error {
+	args := m.Called()
+	return args.Error(0)
 }
 
-func (m *MockedEffect) OnDetach() {
-	m.Called()
+func (m *MockedEffect) EffectDidDetach() error {
+	args := m.Called()
+	return args.Error(0)
 }
 
 func (m *MockedEffectS) Subject() *Unit {

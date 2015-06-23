@@ -28,8 +28,8 @@ type Disable struct {
 	op Operator
 }
 
-// OnAttach removes duplicate Disables
-func (h *Disable) OnAttach() {
+// EffectDidAttach removes duplicate Disables
+func (h *Disable) EffectDidAttach() error {
 	ok := h.op.Effects().BindObject(h).Every(func(o Effect) bool {
 		switch o := o.(type) {
 		case *Disable:
@@ -45,17 +45,19 @@ func (h *Disable) OnAttach() {
 	})
 	if !ok {
 		h.op.Effects().Detach(h)
-		return
+		return nil
 	}
 
 	h.writeOutputUnitAttach()
 	h.Object().Register(h)
 	h.Object().Dispatch(EventDisabled{})
+	return nil
 }
 
-// OnDetach does nothing
-func (h *Disable) OnDetach() {
+// EffectDidDetach does nothing
+func (h *Disable) EffectDidDetach() error {
 	h.Object().Unregister(h)
+	return nil
 }
 
 // Handle handles the Event

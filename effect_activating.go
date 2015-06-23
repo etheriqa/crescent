@@ -18,8 +18,8 @@ func (h *Activating) Ability() *Ability {
 	return h.ability
 }
 
-// OnAttach checks requirements
-func (h *Activating) OnAttach() {
+// EffectDidAttach checks requirements
+func (h *Activating) EffectDidAttach() error {
 	ok := h.op.Effects().BindSubject(h).Every(func(o Effect) bool {
 		switch o.(type) {
 		case *Activating:
@@ -31,18 +31,18 @@ func (h *Activating) OnAttach() {
 	})
 	if !ok {
 		h.op.Effects().Detach(h)
-		return
+		return nil
 	}
 
 	if err := h.checkRequirements(); err != nil {
 		log.Debug(err)
 		h.op.Effects().Detach(h)
-		return
+		return nil
 	}
 
 	if h.ability.ActivationDuration == 0 {
 		h.perform()
-		return
+		return nil
 	}
 
 	h.Subject().Register(h)
@@ -51,14 +51,16 @@ func (h *Activating) OnAttach() {
 	}
 
 	h.writeOutputUnitActivating()
+	return nil
 }
 
-// OnDetach does nothing
-func (h *Activating) OnDetach() {
+// EffectDidDetach does nothing
+func (h *Activating) EffectDidDetach() error {
 	h.Subject().Unregister(h)
 	if h.object != nil {
 		h.object.Unregister(h)
 	}
+	return nil
 }
 
 // Handle handles the Event
