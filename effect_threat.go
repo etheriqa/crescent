@@ -12,9 +12,8 @@ func NewThreat(g Game, s Subject, o Object, t Statistic) *Threat {
 	e := &Threat{
 		UnitPair: MakePair(s, o),
 		threat:   t,
-		handler:  new(func(interface{})),
 	}
-	*e.handler = func(p interface{}) { e.handle(g, p) }
+	e.handler = MakeEventHandler(func(p interface{}) { e.handle(g, p) })
 	return e
 }
 

@@ -14,9 +14,8 @@ func NewCooldown(g Game, o Object, a *Ability, t InstanceTime) *Cooldown {
 		UnitObject:     MakeObject(o),
 		ability:        a,
 		expirationTime: t,
-		handler:        new(func(interface{})),
 	}
-	*e.handler = func(p interface{}) { e.handle(g, p) }
+	e.handler = MakeEventHandler(func(p interface{}) { e.handle(g, p) })
 	return e
 }
 

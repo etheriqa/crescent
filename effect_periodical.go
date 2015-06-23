@@ -20,9 +20,8 @@ func NewPeriodical(g Game, s Subject, o Object, name string, routine func(), t I
 		name:           name,
 		routine:        routine,
 		expirationTime: t,
-		handler:        new(func(interface{})),
 	}
-	*e.handler = func(p interface{}) { e.handle(g, p) }
+	e.handler = MakeEventHandler(func(p interface{}) { e.handle(g, p) })
 	return e
 }
 

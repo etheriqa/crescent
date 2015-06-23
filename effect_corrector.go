@@ -30,9 +30,8 @@ func NewCorrection(g Game, o Object, c UnitCorrection, name string, l Statistic,
 		stackLimit:     l,
 		stack:          1,
 		expirationTime: t,
-		handler:        new(func(interface{})),
 	}
-	*e.handler = func(p interface{}) { e.handle(g, p) }
+	e.handler = MakeEventHandler(func(p interface{}) { e.handle(g, p) })
 	return e
 }
 

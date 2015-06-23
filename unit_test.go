@@ -52,6 +52,7 @@ func TestUnit(t *testing.T) {
 	assert.Equal(DefaultCooldownReduction, u.CooldownReduction())
 	assert.Equal(DefaultDamageThreatFactor, u.DamageThreatFactor())
 	assert.Equal(DefaultHealingThreatFactor, u.HealingThreatFactor())
+	assert.Empty(u.Abilities())
 	assert.Nil(u.Ability("Q"))
 
 	u.UpdateCorrection(UnitCorrection{

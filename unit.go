@@ -51,7 +51,7 @@ func NewUnit(id UnitID, group UnitGroup, name UnitName, class *Class) *Unit {
 		correction: MakeUnitCorrection(),
 		class:      class,
 
-		EventDispatcher: MakeEventHandlerSet(),
+		EventDispatcher: MakeEventDispatcher(),
 	}
 }
 

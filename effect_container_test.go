@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -61,37 +62,44 @@ func TestEffectSet(t *testing.T) {
 	assert.Equal(set, set.Bind(new(Unit)).Unbind())
 	assert.Equal(set, set.Bind(new(Unit)).Unbind().Unbind())
 
-	h1 := new(MockedFullEffect)
-	h2 := new(MockedFullEffect)
+	e := new(MockedFullEffect)
 	g := new(MockedGame)
 
-	h1.On("EffectWillAttach", g).Return(nil).Once()
-	h1.On("EffectDidAttach", g).Return(nil).Once()
-	set.Detach(g, h1)
-	set.Attach(g, h1)
-	set.Attach(g, h1)
-	h1.AssertExpectations(t)
+	e.On("EffectWillAttach", g).Return(nil).Once()
+	e.On("EffectDidAttach", g).Return(nil).Once()
+	assert.Implements((*error)(nil), set.Detach(g, e))
+	assert.Nil(set.Attach(g, e))
+	assert.Implements((*error)(nil), set.Attach(g, e))
+	e.AssertExpectations(t)
 
-	h2.On("EffectWillAttach", g).Return(nil).Once()
-	h2.On("EffectDidAttach", g).Return(nil).Once()
-	set.Detach(g, h2)
-	set.Attach(g, h2)
-	set.Attach(g, h2)
-	h2.AssertExpectations(t)
+	e.On("EffectWillDetach", g).Return(nil).Once()
+	e.On("EffectDidDetach", g).Return(nil).Once()
+	assert.Implements((*error)(nil), set.Attach(g, e))
+	assert.Nil(set.Detach(g, e))
+	assert.Implements((*error)(nil), set.Detach(g, e))
+	e.AssertExpectations(t)
 
-	h1.On("EffectWillDetach", g).Return(nil).Once()
-	h1.On("EffectDidDetach", g).Return(nil).Once()
-	set.Attach(g, h1)
-	set.Detach(g, h1)
-	set.Detach(g, h1)
-	h1.AssertExpectations(t)
+	e.On("EffectWillAttach", g).Return(errors.New("error")).Once()
+	assert.Implements((*error)(nil), set.Attach(g, e))
+	assert.False(set.Some(func(f Effect) bool { return e == f }))
+	e.AssertExpectations(t)
 
-	h1.On("EffectWillAttach", g).Return(nil).Once()
-	h1.On("EffectDidAttach", g).Return(nil).Once()
-	set.Detach(g, h1)
-	set.Attach(g, h1)
-	set.Attach(g, h1)
-	h1.AssertExpectations(t)
+	e.On("EffectWillAttach", g).Return(nil).Once()
+	e.On("EffectDidAttach", g).Return(errors.New("error")).Once()
+	assert.Implements((*error)(nil), set.Attach(g, e))
+	assert.True(set.Some(func(f Effect) bool { return e == f }))
+	e.AssertExpectations(t)
+
+	e.On("EffectWillDetach", g).Return(errors.New("error")).Once()
+	assert.Implements((*error)(nil), set.Detach(g, e))
+	assert.True(set.Some(func(f Effect) bool { return e == f }))
+	e.AssertExpectations(t)
+
+	e.On("EffectWillDetach", g).Return(nil).Once()
+	e.On("EffectDidDetach", g).Return(errors.New("error")).Once()
+	assert.Implements((*error)(nil), set.Detach(g, e))
+	assert.False(set.Some(func(f Effect) bool { return e == f }))
+	e.AssertExpectations(t)
 }
 
 func TestEffectSetEach(t *testing.T) {

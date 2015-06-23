@@ -1,6 +1,8 @@
 package main
 
-type EventHandler *func(interface{})
+type EventHandler interface {
+	Handle(interface{})
+}
 
 type EventDispatcher interface {
 	Register(EventHandler)
@@ -8,10 +10,22 @@ type EventDispatcher interface {
 	Dispatch(interface{})
 }
 
+type EventHandlerBared func(interface{})
+
 type EventHandlerSet map[EventHandler]bool
 
-// NewEventHandlerSet returns a EventHandlerSet
-func MakeEventHandlerSet() EventHandlerSet {
+// MakeEventHandler returns a EventHandlerBared
+func MakeEventHandler(h func(interface{})) EventHandlerBared {
+	return h
+}
+
+// Handle handles the payload
+func (hb EventHandlerBared) Handle(p interface{}) {
+	hb(p)
+}
+
+// MakeEventDispatcher returns a EventHandlerSet
+func MakeEventDispatcher() EventHandlerSet {
 	return make(map[EventHandler]bool)
 }
 
@@ -28,6 +42,6 @@ func (hs EventHandlerSet) Unregister(h EventHandler) {
 // Dispatch calls Handle with the payload
 func (hs EventHandlerSet) Dispatch(p interface{}) {
 	for h := range hs {
-		(*h)(p)
+		h.Handle(p)
 	}
 }

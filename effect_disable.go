@@ -38,9 +38,8 @@ func NewDisable(g Game, o Object, d DisableType, t InstanceTime) *Disable {
 		UnitObject:     MakeObject(o),
 		disableType:    d,
 		expirationTime: t,
-		handler:        new(func(interface{})),
 	}
-	*e.handler = func(p interface{}) { e.handle(g, p) }
+	e.handler = MakeEventHandler(func(p interface{}) { e.handle(g, p) })
 	return e
 }
 

@@ -20,9 +20,8 @@ func NewActivating(g Game, s Subject, o *Unit, a *Ability, t InstanceTime) *Acti
 		object:         o,
 		ability:        a,
 		expirationTime: t,
-		handler:        new(func(interface{})),
 	}
-	*e.handler = func(p interface{}) { e.handle(g, p) }
+	e.handler = MakeEventHandler(func(p interface{}) { e.handle(g, p) })
 	return e
 }
 

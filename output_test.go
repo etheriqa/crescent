@@ -46,6 +46,64 @@ func TestEncodeOutputFrame(t *testing.T) {
 	}
 
 	{
+		expected := []byte(`{"Type":"Stage","Data":{}}`)
+		actual, err := EncodeOutputFrame(OutputStage{})
+		if assert.Nil(err) {
+			assert.Equal(expected, actual)
+		}
+	}
+
+	{
+		expected := []byte(`{"Type":"Player","Data":{"UnitID":100,"Q":{"Name":"Q","Description":"Q Description","TargetType":3,"HealthCost":0,"ManaCost":10,"ActivationDuration":0,"CooldownDuration":40,"DisableTypes":["Stun"]},"W":{"Name":"W","Description":"W Description","TargetType":3,"HealthCost":0,"ManaCost":20,"ActivationDuration":0,"CooldownDuration":160,"DisableTypes":["Stun"]},"E":{"Name":"E","Description":"E Description","TargetType":3,"HealthCost":0,"ManaCost":40,"ActivationDuration":0,"CooldownDuration":400,"DisableTypes":["Stun"]},"R":{"Name":"R","Description":"R Description","TargetType":3,"HealthCost":0,"ManaCost":80,"ActivationDuration":0,"CooldownDuration":1200,"DisableTypes":["Stun"]}}}`)
+		actual, err := EncodeOutputFrame(OutputPlayer{
+			UnitID: 100,
+			Q: OutputPlayerAbility{
+				Name:               "Q",
+				Description:        "Q Description",
+				TargetType:         TargetTypeEnemy,
+				HealthCost:         0,
+				ManaCost:           10,
+				ActivationDuration: 0,
+				CooldownDuration:   2 * Second,
+				DisableTypes:       []string{"Stun"},
+			},
+			W: OutputPlayerAbility{
+				Name:               "W",
+				Description:        "W Description",
+				TargetType:         TargetTypeEnemy,
+				HealthCost:         0,
+				ManaCost:           20,
+				ActivationDuration: 0,
+				CooldownDuration:   8 * Second,
+				DisableTypes:       []string{"Stun"},
+			},
+			E: OutputPlayerAbility{
+				Name:               "E",
+				Description:        "E Description",
+				TargetType:         TargetTypeEnemy,
+				HealthCost:         0,
+				ManaCost:           40,
+				ActivationDuration: 0,
+				CooldownDuration:   20 * Second,
+				DisableTypes:       []string{"Stun"},
+			},
+			R: OutputPlayerAbility{
+				Name:               "R",
+				Description:        "R Description",
+				TargetType:         TargetTypeEnemy,
+				HealthCost:         0,
+				ManaCost:           80,
+				ActivationDuration: 0,
+				CooldownDuration:   60 * Second,
+				DisableTypes:       []string{"Stun"},
+			},
+		})
+		if assert.Nil(err) {
+			assert.Equal(expected, actual)
+		}
+	}
+
+	{
 		expected := []byte(`{"Type":"UnitJoin","Data":{"UnitID":100,"UnitGroup":0,"UnitName":"user","ClassName":"Healer","Health":500,"HealthMax":1000,"Mana":200,"ManaMax":400}}`)
 		actual, err := EncodeOutputFrame(OutputUnitJoin{
 			UnitID:    100,
