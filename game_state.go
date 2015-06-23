@@ -113,6 +113,18 @@ func (g *GameState) Ability(sid UnitID, oid *UnitID, abilityName string) error {
 	return nil
 }
 
+// Interrupt interrupts ability activation
+func (g *GameState) Interrupt(id UnitID) error {
+	u := g.units.Find(id)
+	if u == nil {
+		return errors.New("Unknown UnitID")
+	}
+	u.Dispatch(EventInterrupt{
+		UnitID: id,
+	})
+	return nil
+}
+
 // PerformGameTick performs the game tick routine
 func (g *GameState) PerformGameTick() {
 	g.stage.OnTick(g)

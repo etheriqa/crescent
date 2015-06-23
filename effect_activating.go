@@ -83,7 +83,7 @@ func (e *Activating) EffectDidDetach(g Game) error {
 
 // handle handles the payload
 func (e *Activating) handle(g Game, p interface{}) {
-	switch p.(type) {
+	switch p := p.(type) {
 	case EventGameTick:
 		if g.Clock().Before(e.expirationTime) {
 			return
@@ -102,6 +102,12 @@ func (e *Activating) handle(g Game, p interface{}) {
 		g.DetachEffect(e)
 	case EventTakenDamage:
 		if err := e.checkResource(); err == nil {
+			return
+		}
+		e.writeOutputUnitActivated(g, false)
+		g.DetachEffect(e)
+	case EventInterrupt:
+		if p.UnitID != e.Subject().ID() {
 			return
 		}
 		e.writeOutputUnitActivated(g, false)

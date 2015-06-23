@@ -9,3 +9,7 @@ type EventTakenDamage struct{}
 type EventDisabled struct{}
 
 type EventDead struct{}
+
+type EventInterrupt struct {
+	UnitID
+}

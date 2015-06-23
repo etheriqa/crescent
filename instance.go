@@ -72,7 +72,7 @@ func (i *Instance) Run() {
 			case InputAbility:
 				i.ability(cid, input)
 			case InputInterrupt:
-				// TODO WIP
+				i.interrupt(cid, input)
 			default:
 				log.Fatal("Unknown input type")
 			}
@@ -217,4 +217,12 @@ func (i *Instance) ability(cid ClientID, input InputAbility) {
 		return
 	}
 	i.g.Ability(i.uid[cid], input.ObjectUnitID, input.AbilityName)
+}
+
+// interrupt
+func (i *Instance) interrupt(cid ClientID, input InputInterrupt) {
+	if _, ok := i.uid[cid]; !ok {
+		return
+	}
+	i.g.Interrupt(i.uid[cid])
 }
