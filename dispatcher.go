@@ -1,54 +1,35 @@
 package main
 
-type Event uint8
-
-const (
-	_ Event = iota
-
-	EventGameTick
-	EventPeriodicalTick
-
-	EventDead
-	EventDisabled
-	EventTakenDamage
-)
-
 type EventHandler interface {
-	HandleEvent(Event)
+	Handle(interface{})
 }
 
 type EventDispatcher interface {
-	AddEventHandler(EventHandler, Event)
-	RemoveEventHandler(EventHandler, Event)
-	TriggerEvent(Event)
+	Register(EventHandler)
+	Unregister(EventHandler)
+	Dispatch(interface{})
 }
 
-type EventHandlerSet map[Event]map[EventHandler]bool
+type EventHandlerSet map[EventHandler]bool
 
-// NewEventDispatcher returns a EventDispatcher
+// NewEventHandlerSet returns a EventHandlerSet
 func MakeEventHandlerSet() EventHandlerSet {
-	return make(map[Event]map[EventHandler]bool)
+	return make(map[EventHandler]bool)
 }
 
-// AddEventHandler adds the EventHandler if not exists
-func (hs EventHandlerSet) AddEventHandler(h EventHandler, e Event) {
-	if hs[e] == nil {
-		hs[e] = make(map[EventHandler]bool)
-	}
-	hs[e][h] = true
+// Register adds the EventHandler if not contains
+func (hs EventHandlerSet) Register(h EventHandler) {
+	hs[h] = true
 }
 
-// RemoveEventHandler removes the EventHandler if exists
-func (hs EventHandlerSet) RemoveEventHandler(h EventHandler, e Event) {
-	if hs[e] == nil {
-		return
-	}
-	delete(hs[e], h)
+// Unregister removes the EventHandler if contains
+func (hs EventHandlerSet) Unregister(h EventHandler) {
+	delete(hs, h)
 }
 
-// TriggerEvent triggers the Event
-func (hs EventHandlerSet) TriggerEvent(e Event) {
-	for h := range hs[e] {
-		h.HandleEvent(e)
+// Dispatch calls Handle with the payload
+func (hs EventHandlerSet) Dispatch(p interface{}) {
+	for h := range hs {
+		h.Handle(p)
 	}
 }

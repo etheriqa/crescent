@@ -45,12 +45,9 @@ func (h *Activating) OnAttach() {
 		return
 	}
 
-	h.Subject().AddEventHandler(h, EventGameTick)
-	h.Subject().AddEventHandler(h, EventDead)
-	h.Subject().AddEventHandler(h, EventDisabled)
-	h.Subject().AddEventHandler(h, EventTakenDamage)
+	h.Subject().Register(h)
 	if h.object != nil {
-		h.object.AddEventHandler(h, EventDead)
+		h.object.Register(h)
 	}
 
 	h.writeOutputUnitActivating()
@@ -58,36 +55,33 @@ func (h *Activating) OnAttach() {
 
 // OnDetach does nothing
 func (h *Activating) OnDetach() {
-	h.Subject().RemoveEventHandler(h, EventGameTick)
-	h.Subject().RemoveEventHandler(h, EventDead)
-	h.Subject().RemoveEventHandler(h, EventDisabled)
-	h.Subject().RemoveEventHandler(h, EventTakenDamage)
+	h.Subject().Unregister(h)
 	if h.object != nil {
-		h.object.RemoveEventHandler(h, EventDead)
+		h.object.Unregister(h)
 	}
 }
 
-// HandleEvent handles the Event
-func (h *Activating) HandleEvent(e Event) {
-	switch e {
-	case EventGameTick:
+// Handle handles the Event
+func (h *Activating) Handle(p interface{}) {
+	switch p.(type) {
+	case *EventGameTick:
 		if h.op.Clock().Before(h.expirationTime) {
 			return
 		}
 		h.perform()
-	case EventDead:
+	case *EventDead:
 		h.writeOutputUnitActivated(false)
 		h.op.Handlers().Detach(h)
 		if h.Subject().IsDead() {
 			return
 		}
-	case EventDisabled:
+	case *EventDisabled:
 		if err := h.checkDisable(); err == nil {
 			return
 		}
 		h.writeOutputUnitActivated(false)
 		h.op.Handlers().Detach(h)
-	case EventTakenDamage:
+	case *EventTakenDamage:
 		if err := h.checkResource(); err == nil {
 			return
 		}

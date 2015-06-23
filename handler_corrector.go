@@ -83,20 +83,20 @@ func (h *Correction) OnAttach() {
 		h.stack = h.stackLimit
 	}
 	h.writeOutputUnitAttach()
-	h.Object().AddEventHandler(h, EventGameTick)
+	h.Object().Register(h)
 	h.updateCorrection()
 }
 
 // OnDetach updates the UnitCorrection of the Object
 func (h *Correction) OnDetach() {
-	h.Object().RemoveEventHandler(h, EventGameTick)
+	h.Object().Unregister(h)
 	h.updateCorrection()
 }
 
-// HandleEvent handles the Event
-func (h *Correction) HandleEvent(e Event) {
-	switch e {
-	case EventGameTick:
+// Handle handles the Event
+func (h *Correction) Handle(p interface{}) {
+	switch p.(type) {
+	case *EventGameTick:
 		if h.op.Clock().Before(h.expirationTime) {
 			return
 		}

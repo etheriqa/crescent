@@ -49,27 +49,25 @@ func (h *Disable) OnAttach() {
 	}
 
 	h.writeOutputUnitAttach()
-	h.Object().AddEventHandler(h, EventGameTick)
-	h.Object().AddEventHandler(h, EventDead)
-	h.Object().TriggerEvent(EventDisabled)
+	h.Object().Register(h)
+	h.Object().Dispatch(EventDisabled{})
 }
 
 // OnDetach does nothing
 func (h *Disable) OnDetach() {
-	h.Object().RemoveEventHandler(h, EventGameTick)
-	h.Object().RemoveEventHandler(h, EventDead)
+	h.Object().Unregister(h)
 }
 
-// HandleEvent handles the Event
-func (h *Disable) HandleEvent(e Event) {
-	switch e {
-	case EventGameTick:
+// Handle handles the Event
+func (h *Disable) Handle(p interface{}) {
+	switch p.(type) {
+	case *EventGameTick:
 		if h.op.Clock().Before(h.expirationTime) {
 			return
 		}
 		h.writeOutputUnitDetach()
 		h.op.Handlers().Detach(h)
-	case EventDead:
+	case *EventDead:
 		h.op.Handlers().Detach(h)
 	}
 }

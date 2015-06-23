@@ -151,7 +151,7 @@ func (g *Game) PerformGameTick() {
 		if u.IsDead() {
 			return
 		}
-		u.TriggerEvent(EventGameTick)
+		u.Dispatch(EventGameTick{})
 	})
 }
 
@@ -161,7 +161,7 @@ func (g *Game) PerformPeriodicalTick() {
 		if u.IsDead() {
 			return
 		}
-		u.TriggerEvent(EventPeriodicalTick)
+		u.Dispatch(EventPeriodicalTick{})
 	})
 }
 

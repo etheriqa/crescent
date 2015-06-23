@@ -30,30 +30,26 @@ func (h *Periodical) OnAttach() {
 	}
 
 	h.writeOutputUnitAttach()
-	h.Object().AddEventHandler(h, EventGameTick)
-	h.Object().AddEventHandler(h, EventPeriodicalTick)
-	h.Object().AddEventHandler(h, EventDead)
+	h.Object().Register(h)
 }
 
 // OnDetach does nothing
 func (h *Periodical) OnDetach() {
-	h.Object().RemoveEventHandler(h, EventGameTick)
-	h.Object().RemoveEventHandler(h, EventPeriodicalTick)
-	h.Object().RemoveEventHandler(h, EventDead)
+	h.Object().Unregister(h)
 }
 
-// HandleEvent handles the Event
-func (h *Periodical) HandleEvent(e Event) {
-	switch e {
-	case EventDead:
+// Handle handles the Event
+func (h *Periodical) Handle(p interface{}) {
+	switch p.(type) {
+	case *EventDead:
 		h.op.Handlers().Detach(h)
-	case EventGameTick:
+	case *EventGameTick:
 		if h.op.Clock().Before(h.expirationTime) {
 			return
 		}
 		h.writeOutputUnitDetach()
 		h.op.Handlers().Detach(h)
-	case EventPeriodicalTick:
+	case *EventPeriodicalTick:
 		h.routine()
 	}
 }

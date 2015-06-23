@@ -35,18 +35,18 @@ func (h *Cooldown) OnAttach() {
 		return
 	}
 
-	h.Object().AddEventHandler(h, EventGameTick)
+	h.Object().Register(h)
 }
 
 // OnDetach does nothing
 func (h *Cooldown) OnDetach() {
-	h.Object().RemoveEventHandler(h, EventGameTick)
+	h.Object().Unregister(h)
 }
 
-// HandleEvent handles the Event
-func (h *Cooldown) HandleEvent(e Event) {
-	switch e {
-	case EventGameTick:
+// Handle handles the Event
+func (h *Cooldown) Handle(p interface{}) {
+	switch p.(type) {
+	case *EventGameTick:
 		if h.isActive() {
 			return
 		}
