@@ -61,31 +61,36 @@ func TestEffectSet(t *testing.T) {
 	assert.Equal(set, set.Bind(new(Unit)).Unbind())
 	assert.Equal(set, set.Bind(new(Unit)).Unbind().Unbind())
 
-	h1 := new(MockedEffect)
-	h2 := new(MockedEffect)
+	h1 := new(MockedFullEffect)
+	h2 := new(MockedFullEffect)
+	g := new(MockedGame)
 
-	h1.On("EffectDidAttach").Return(nil).Once()
-	set.Detach(h1)
-	set.Attach(h1)
-	set.Attach(h1)
+	h1.On("EffectWillAttach", g).Return(nil).Once()
+	h1.On("EffectDidAttach", g).Return(nil).Once()
+	set.Detach(g, h1)
+	set.Attach(g, h1)
+	set.Attach(g, h1)
 	h1.AssertExpectations(t)
 
-	h2.On("EffectDidAttach").Return(nil).Once()
-	set.Detach(h2)
-	set.Attach(h2)
-	set.Attach(h2)
+	h2.On("EffectWillAttach", g).Return(nil).Once()
+	h2.On("EffectDidAttach", g).Return(nil).Once()
+	set.Detach(g, h2)
+	set.Attach(g, h2)
+	set.Attach(g, h2)
 	h2.AssertExpectations(t)
 
-	h1.On("EffectDidDetach").Return(nil).Once()
-	set.Attach(h1)
-	set.Detach(h1)
-	set.Detach(h1)
+	h1.On("EffectWillDetach", g).Return(nil).Once()
+	h1.On("EffectDidDetach", g).Return(nil).Once()
+	set.Attach(g, h1)
+	set.Detach(g, h1)
+	set.Detach(g, h1)
 	h1.AssertExpectations(t)
 
-	h1.On("EffectDidAttach").Return(nil).Once()
-	set.Detach(h1)
-	set.Attach(h1)
-	set.Attach(h1)
+	h1.On("EffectWillAttach", g).Return(nil).Once()
+	h1.On("EffectDidAttach", g).Return(nil).Once()
+	set.Detach(g, h1)
+	set.Attach(g, h1)
+	set.Attach(g, h1)
 	h1.AssertExpectations(t)
 }
 
@@ -93,9 +98,8 @@ func TestEffectSetEach(t *testing.T) {
 	assert := assert.New(t)
 	set := MakeEffectSet()
 	h1 := new(MockedEffect)
-	h1.On("EffectDidAttach").Return(nil)
 	h2 := new(MockedEffect)
-	h2.On("EffectDidAttach").Return(nil)
+	g := new(MockedGame)
 
 	{
 		hs := []Effect{}
@@ -104,7 +108,7 @@ func TestEffectSetEach(t *testing.T) {
 	}
 
 	{
-		set.Attach(h1)
+		set.Attach(g, h1)
 		hs := []Effect{}
 		set.Each(func(h Effect) { hs = append(hs, h) })
 		assert.Len(hs, 1)
@@ -112,7 +116,7 @@ func TestEffectSetEach(t *testing.T) {
 	}
 
 	{
-		set.Attach(h2)
+		set.Attach(g, h2)
 		hs := []Effect{}
 		set.Each(func(h Effect) { hs = append(hs, h) })
 		assert.Len(hs, 2)
@@ -125,18 +129,17 @@ func TestEffectSetEvery(t *testing.T) {
 	assert := assert.New(t)
 	set := MakeEffectSet()
 	h1 := new(MockedEffect)
-	h1.On("EffectDidAttach").Return(nil)
 	h2 := new(MockedEffect)
-	h2.On("EffectDidAttach").Return(nil)
+	g := new(MockedGame)
 
 	assert.True(set.Every(func(h Effect) bool { return true }))
 	assert.True(set.Every(func(h Effect) bool { return false }))
 
-	set.Attach(h1)
+	set.Attach(g, h1)
 	assert.True(set.Every(func(h Effect) bool { return true }))
 	assert.False(set.Every(func(h Effect) bool { return false }))
 
-	set.Attach(h2)
+	set.Attach(g, h2)
 	assert.True(set.Every(func(h Effect) bool { return true }))
 	assert.False(set.Every(func(h Effect) bool { return h.(*MockedEffect) == h1 }))
 	assert.False(set.Every(func(h Effect) bool { return h.(*MockedEffect) == h2 }))
@@ -147,18 +150,17 @@ func TestEffectSetSome(t *testing.T) {
 	assert := assert.New(t)
 	set := MakeEffectSet()
 	h1 := new(MockedEffect)
-	h1.On("EffectDidAttach").Return(nil)
 	h2 := new(MockedEffect)
-	h2.On("EffectDidAttach").Return(nil)
+	g := new(MockedGame)
 
 	assert.False(set.Some(func(h Effect) bool { return true }))
 	assert.False(set.Some(func(h Effect) bool { return false }))
 
-	set.Attach(h1)
+	set.Attach(g, h1)
 	assert.True(set.Some(func(h Effect) bool { return true }))
 	assert.False(set.Some(func(h Effect) bool { return false }))
 
-	set.Attach(h2)
+	set.Attach(g, h2)
 	assert.True(set.Some(func(h Effect) bool { return true }))
 	assert.True(set.Some(func(h Effect) bool { return h.(*MockedEffect) == h1 }))
 	assert.True(set.Some(func(h Effect) bool { return h.(*MockedEffect) == h2 }))
@@ -171,23 +173,15 @@ func TestEffectSetBoundEach(t *testing.T) {
 	s := new(Unit)
 	o := new(Unit)
 	h := new(MockedEffect)
-	h.On("EffectDidAttach").Return(nil).Once()
 	sh := new(MockedEffectS)
-	sh.On("EffectDidAttach").Return(nil).Once()
 	oh := new(MockedEffectO)
-	oh.On("EffectDidAttach").Return(nil).Once()
 	soh := new(MockedEffectSO)
-	soh.On("EffectDidAttach").Return(nil).Once()
+	g := new(MockedGame)
 
-	set.Bind(new(Unit)).Attach(h)
-	set.Bind(new(Unit)).Attach(sh)
-	set.Bind(new(Unit)).Attach(oh)
-	set.Bind(new(Unit)).Attach(soh)
-	h.AssertExpectations(t)
-	sh.AssertExpectations(t)
-	oh.AssertExpectations(t)
-	soh.AssertExpectations(t)
-
+	set.Attach(g, h)
+	set.Attach(g, sh)
+	set.Attach(g, oh)
+	set.Attach(g, soh)
 	sh.On("Subject").Return(s)
 	oh.On("Object").Return(o)
 	soh.On("Subject").Return(s)
@@ -281,10 +275,6 @@ func TestEffectSetBoundEach(t *testing.T) {
 		assert.Len(hs, 1)
 		assert.Contains(hs, soh)
 	}
-
-	h.On("EffectDidDetach").Return(nil).Once()
-	set.Bind(new(Unit)).Detach(h)
-	h.AssertExpectations(t)
 }
 
 func TestEffectSetBoundEvery(t *testing.T) {
@@ -293,22 +283,19 @@ func TestEffectSetBoundEvery(t *testing.T) {
 	s := new(Unit)
 	o := new(Unit)
 	h := new(MockedEffect)
-	h.On("EffectDidAttach").Return(nil)
 	sh := new(MockedEffectS)
-	sh.On("EffectDidAttach").Return(nil)
 	sh.On("Subject").Return(s)
 	oh := new(MockedEffectO)
-	oh.On("EffectDidAttach").Return(nil)
 	oh.On("Object").Return(o)
 	soh := new(MockedEffectSO)
-	soh.On("EffectDidAttach").Return(nil)
 	soh.On("Subject").Return(s)
 	soh.On("Object").Return(o)
+	g := new(MockedGame)
 
-	set.Attach(h)
-	set.Attach(sh)
-	set.Attach(oh)
-	set.Attach(soh)
+	set.Attach(g, h)
+	set.Attach(g, sh)
+	set.Attach(g, oh)
+	set.Attach(g, soh)
 
 	assert.True(set.Bind(new(Unit)).Every(func(h Effect) bool { return true }))
 	assert.True(set.Bind(new(Unit)).Every(func(h Effect) bool { return false }))
@@ -338,22 +325,19 @@ func TestEffectSetBoundSome(t *testing.T) {
 	s := new(Unit)
 	o := new(Unit)
 	h := new(MockedEffect)
-	h.On("EffectDidAttach").Return(nil)
 	sh := new(MockedEffectS)
-	sh.On("EffectDidAttach").Return(nil)
 	sh.On("Subject").Return(s)
 	oh := new(MockedEffectO)
-	oh.On("EffectDidAttach").Return(nil)
 	oh.On("Object").Return(o)
 	soh := new(MockedEffectSO)
-	soh.On("EffectDidAttach").Return(nil)
 	soh.On("Subject").Return(s)
 	soh.On("Object").Return(o)
+	g := new(MockedGame)
 
-	set.Attach(h)
-	set.Attach(sh)
-	set.Attach(oh)
-	set.Attach(soh)
+	set.Attach(g, h)
+	set.Attach(g, sh)
+	set.Attach(g, oh)
+	set.Attach(g, soh)
 
 	assert.False(set.Bind(new(Unit)).Some(func(h Effect) bool { return true }))
 	assert.False(set.Bind(new(Unit)).Some(func(h Effect) bool { return false }))

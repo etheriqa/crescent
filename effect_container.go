@@ -127,16 +127,6 @@ func (es EffectSet) Some(callback func(Effect) bool) bool {
 	return false
 }
 
-// Attach adds the Effect if not exists
-func (bes BoundEffectSet) Attach(g Game, e Effect) error {
-	return bes.effects.Attach(g, e)
-}
-
-// Detach removes the Effect if exists
-func (bes BoundEffectSet) Detach(g Game, e Effect) error {
-	return bes.effects.Detach(g, e)
-}
-
 // Bind binds the Unit
 func (bes BoundEffectSet) Bind(u *Unit) EffectQueryable {
 	return BoundEffectSet{

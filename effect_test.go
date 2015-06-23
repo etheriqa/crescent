@@ -8,16 +8,7 @@ type MockedEffect struct{ mock.Mock }
 type MockedEffectS struct{ MockedEffect }
 type MockedEffectO struct{ MockedEffect }
 type MockedEffectSO struct{ MockedEffect }
-
-func (m *MockedEffect) EffectDidAttach() error {
-	args := m.Called()
-	return args.Error(0)
-}
-
-func (m *MockedEffect) EffectDidDetach() error {
-	args := m.Called()
-	return args.Error(0)
-}
+type MockedFullEffect struct{ MockedEffect }
 
 func (m *MockedEffectS) Subject() *Unit {
 	args := m.Called()
@@ -37,4 +28,24 @@ func (m *MockedEffectSO) Subject() *Unit {
 func (m *MockedEffectSO) Object() *Unit {
 	args := m.Called()
 	return args.Get(0).(*Unit)
+}
+
+func (m *MockedFullEffect) EffectWillAttach(g Game) error {
+	args := m.Called(g)
+	return args.Error(0)
+}
+
+func (m *MockedFullEffect) EffectDidAttach(g Game) error {
+	args := m.Called(g)
+	return args.Error(0)
+}
+
+func (m *MockedFullEffect) EffectWillDetach(g Game) error {
+	args := m.Called(g)
+	return args.Error(0)
+}
+
+func (m *MockedFullEffect) EffectDidDetach(g Game) error {
+	args := m.Called(g)
+	return args.Error(0)
 }
