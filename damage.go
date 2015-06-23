@@ -6,18 +6,18 @@ type Damage struct {
 	criticalStrikeChance Statistic
 	criticalStrikeFactor Statistic
 
-	op Operator
+	g Game
 }
 
 // Perform performs the Damage
 func (d *Damage) Perform() (before, after Statistic, crit bool, err error) {
 	damage, crit := applyCriticalStrike(d.damage, d.criticalStrikeChance, d.criticalStrikeFactor)
-	before, after, err = d.Object().ModifyHealth(d.op.Writer(), -damage)
+	before, after, err = d.Object().ModifyHealth(d.g.Writer(), -damage)
 	if err != nil {
 		return
 	}
 
-	d.op.Writer().Write(OutputDamage{
+	d.g.Writer().Write(OutputDamage{
 		SubjectUnitID: d.Subject().ID(),
 		ObjectUnitID:  d.Object().ID(),
 		Damage:        damage,
@@ -31,6 +31,6 @@ func (d *Damage) Perform() (before, after Statistic, crit bool, err error) {
 		d.Object().Dispatch(EventTakenDamage{})
 	}
 
-	d.op.DamageThreat(d, d, damage)
+	d.g.DamageThreat(d, d, damage)
 	return
 }

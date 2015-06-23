@@ -6,12 +6,12 @@ type Periodical struct {
 	routine        func()
 	expirationTime InstanceTime
 
-	op Operator
+	g Game
 }
 
 // EffectDidAttach removes duplicate Periodicals
 func (h *Periodical) EffectDidAttach() error {
-	ok := h.op.Effects().BindSubject(h).BindObject(h).Every(func(o Effect) bool {
+	ok := h.g.Effects().BindSubject(h).BindObject(h).Every(func(o Effect) bool {
 		switch o := o.(type) {
 		case *Periodical:
 			if h == o || h.name != o.name {
@@ -20,12 +20,12 @@ func (h *Periodical) EffectDidAttach() error {
 			if h.expirationTime <= o.expirationTime {
 				return false
 			}
-			h.op.Effects().Detach(o)
+			h.g.Effects().Detach(o)
 		}
 		return true
 	})
 	if !ok {
-		h.op.Effects().Detach(h)
+		h.g.Effects().Detach(h)
 		return nil
 	}
 
@@ -44,13 +44,13 @@ func (h *Periodical) EffectDidDetach() error {
 func (h *Periodical) Handle(p interface{}) {
 	switch p.(type) {
 	case *EventDead:
-		h.op.Effects().Detach(h)
+		h.g.Effects().Detach(h)
 	case *EventGameTick:
-		if h.op.Clock().Before(h.expirationTime) {
+		if h.g.Clock().Before(h.expirationTime) {
 			return
 		}
 		h.writeOutputUnitDetach()
-		h.op.Effects().Detach(h)
+		h.g.Effects().Detach(h)
 	case *EventPeriodicalTick:
 		h.routine()
 	}
@@ -58,7 +58,7 @@ func (h *Periodical) Handle(p interface{}) {
 
 // writeOutputUnitAttach writes a OutputUnitAttach
 func (h *Periodical) writeOutputUnitAttach() {
-	h.op.Writer().Write(OutputUnitAttach{
+	h.g.Writer().Write(OutputUnitAttach{
 		UnitID:         h.Object().ID(),
 		AttachmentName: h.name,
 		ExpirationTime: h.expirationTime,
@@ -67,7 +67,7 @@ func (h *Periodical) writeOutputUnitAttach() {
 
 // writeOutputUnitDetach writes a OutputUnitDetach
 func (h *Periodical) writeOutputUnitDetach() {
-	h.op.Writer().Write(OutputUnitDetach{
+	h.g.Writer().Write(OutputUnitDetach{
 		UnitID:         h.Object().ID(),
 		AttachmentName: h.name,
 	})

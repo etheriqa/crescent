@@ -15,7 +15,7 @@ type Instance struct {
 	name map[ClientID]UserName
 	uid  map[ClientID]UnitID
 
-	g *Game
+	g *GameState
 	r InstanceInput
 	w InstanceOutputWriter
 }
@@ -28,7 +28,7 @@ func NewInstance(r InstanceInput, w InstanceOutputWriter) *Instance {
 		name: make(map[ClientID]UserName),
 		uid:  make(map[ClientID]UnitID),
 
-		g: NewGame(time, NewStagePrototype(), w),
+		g: NewGameState(time, NewStagePrototype(), w),
 		r: r,
 		w: w,
 	}
@@ -48,7 +48,7 @@ func (i *Instance) Run() {
 			if i.time.IsPeriodicalTick() {
 				i.g.PerformPeriodicalTick()
 			}
-			i.g.PerformGameTick()
+			i.g.PerformGameStateTick()
 		case input, ok := <-i.r:
 			if !ok {
 				log.Fatal("Cannot read from the input channel")
@@ -110,7 +110,7 @@ func (i *Instance) connect(cid ClientID, input InputConnect) {
 	i.w.Write(OutputMessage{
 		Message: fmt.Sprintf("%s has joined.", name),
 	})
-	i.g.SyncGame(i.w.BindClientID(cid))
+	i.g.SyncGameState(i.w.BindClientID(cid))
 }
 
 // disconnect
@@ -159,7 +159,7 @@ func (i *Instance) stage(cid ClientID, input InputStage) {
 	// TODO WIP
 	i.w.Write(OutputStage{})
 	i.uid = make(map[ClientID]UnitID)
-	i.g = NewGame(i.time, NewStagePrototype(), i.w)
+	i.g = NewGameState(i.time, NewStagePrototype(), i.w)
 }
 
 // join

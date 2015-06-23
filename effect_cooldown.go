@@ -5,7 +5,7 @@ type Cooldown struct {
 	ability        *Ability
 	expirationTime InstanceTime
 
-	op Operator
+	g Game
 }
 
 // Ability returns the Ability
@@ -15,7 +15,7 @@ func (h *Cooldown) Ability() *Ability {
 
 // EffectDidAttach removes other Cooldown effects
 func (h *Cooldown) EffectDidAttach() error {
-	h.op.Effects().BindObject(h).Each(func(o Effect) {
+	h.g.Effects().BindObject(h).Each(func(o Effect) {
 		switch o := o.(type) {
 		case *Cooldown:
 			if h == o {
@@ -24,14 +24,14 @@ func (h *Cooldown) EffectDidAttach() error {
 			if h.ability != o.ability {
 				return
 			}
-			h.op.Effects().Detach(o)
+			h.g.Effects().Detach(o)
 		}
 	})
 
 	h.writeOutputUnitCooldown()
 
 	if !h.isActive() {
-		h.op.Effects().Detach(h)
+		h.g.Effects().Detach(h)
 		return nil
 	}
 
@@ -53,19 +53,19 @@ func (h *Cooldown) Handle(p interface{}) {
 			return
 		}
 		h.writeOutputUnitCooldown()
-		h.op.Effects().Detach(h)
+		h.g.Effects().Detach(h)
 	}
 }
 
 // isActive returns true if the Cooldown is active
 func (h *Cooldown) isActive() bool {
-	return h.op.Clock().Before(h.expirationTime)
+	return h.g.Clock().Before(h.expirationTime)
 }
 
 // writeOutputUnitCooldown writes a OutputUnitCooldown
 func (h *Cooldown) writeOutputUnitCooldown() {
 	// TODO write to only the object
-	h.op.Writer().Write(OutputUnitCooldown{
+	h.g.Writer().Write(OutputUnitCooldown{
 		UnitID:         h.Object().ID(),
 		AbilityName:    h.ability.Name,
 		ExpirationTime: h.expirationTime,

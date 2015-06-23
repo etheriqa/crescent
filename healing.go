@@ -6,26 +6,26 @@ type Healing struct {
 	criticalStrikeChance Statistic
 	criticalStrikeFactor Statistic
 
-	op Operator
+	g Game
 }
 
 // Perform performs the Healing
 func (h *Healing) Perform() (before, after Statistic, crit bool, err error) {
 	healing, crit := applyCriticalStrike(h.healing, h.criticalStrikeChance, h.criticalStrikeFactor)
-	before, after, err = h.Object().ModifyHealth(h.op.Writer(), healing)
+	before, after, err = h.Object().ModifyHealth(h.g.Writer(), healing)
 	if err != nil {
 		return
 	}
 
-	h.op.Writer().Write(OutputHealing{
+	h.g.Writer().Write(OutputHealing{
 		SubjectUnitID: h.Subject().ID(),
 		ObjectUnitID:  h.Object().ID(),
 		Healing:       healing,
 		IsCritical:    crit,
 	})
 
-	h.op.Units().EachEnemy(h.Subject(), func(enemy *Unit) {
-		h.op.HealingThreat(h, enemy, healing)
+	h.g.Units().EachEnemy(h.Subject(), func(enemy *Unit) {
+		h.g.HealingThreat(h, enemy, healing)
 	})
 	return
 }

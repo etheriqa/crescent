@@ -10,7 +10,7 @@ type Activating struct {
 	ability        *Ability
 	expirationTime InstanceTime
 
-	op Operator
+	g Game
 }
 
 // Ability returns the Ability
@@ -20,7 +20,7 @@ func (h *Activating) Ability() *Ability {
 
 // EffectDidAttach checks requirements
 func (h *Activating) EffectDidAttach() error {
-	ok := h.op.Effects().BindSubject(h).Every(func(o Effect) bool {
+	ok := h.g.Effects().BindSubject(h).Every(func(o Effect) bool {
 		switch o.(type) {
 		case *Activating:
 			if h != o {
@@ -30,13 +30,13 @@ func (h *Activating) EffectDidAttach() error {
 		return true
 	})
 	if !ok {
-		h.op.Effects().Detach(h)
+		h.g.Effects().Detach(h)
 		return nil
 	}
 
 	if err := h.checkRequirements(); err != nil {
 		log.Debug(err)
-		h.op.Effects().Detach(h)
+		h.g.Effects().Detach(h)
 		return nil
 	}
 
@@ -67,13 +67,13 @@ func (h *Activating) EffectDidDetach() error {
 func (h *Activating) Handle(p interface{}) {
 	switch p.(type) {
 	case *EventGameTick:
-		if h.op.Clock().Before(h.expirationTime) {
+		if h.g.Clock().Before(h.expirationTime) {
 			return
 		}
 		h.perform()
 	case *EventDead:
 		h.writeOutputUnitActivated(false)
-		h.op.Effects().Detach(h)
+		h.g.Effects().Detach(h)
 		if h.Subject().IsDead() {
 			return
 		}
@@ -82,28 +82,28 @@ func (h *Activating) Handle(p interface{}) {
 			return
 		}
 		h.writeOutputUnitActivated(false)
-		h.op.Effects().Detach(h)
+		h.g.Effects().Detach(h)
 	case *EventTakenDamage:
 		if err := h.checkResource(); err == nil {
 			return
 		}
 		h.writeOutputUnitActivated(false)
-		h.op.Effects().Detach(h)
+		h.g.Effects().Detach(h)
 	}
 }
 
 // perform performs the Ability
 func (h *Activating) perform() {
 	h.writeOutputUnitActivated(true)
-	if _, _, err := h.Subject().ModifyHealth(h.op.Writer(), -h.ability.HealthCost); err != nil {
+	if _, _, err := h.Subject().ModifyHealth(h.g.Writer(), -h.ability.HealthCost); err != nil {
 		log.Fatal(err)
 	}
-	if _, _, err := h.Subject().ModifyMana(h.op.Writer(), -h.ability.ManaCost); err != nil {
+	if _, _, err := h.Subject().ModifyMana(h.g.Writer(), -h.ability.ManaCost); err != nil {
 		log.Fatal(err)
 	}
-	h.ability.Perform(h.op, h.Subject(), h.object)
-	h.op.Effects().Detach(h)
-	h.op.Cooldown(h.Subject(), h.ability)
+	h.ability.Perform(h.g, h.Subject(), h.object)
+	h.g.Effects().Detach(h)
+	h.g.Cooldown(h.Subject(), h.ability)
 }
 
 // checkRequirements checks all requirements
@@ -161,7 +161,7 @@ func (h *Activating) checkObject() error {
 
 // checkCooldown checks the Subject does not have to wait the Cooldown
 func (h *Activating) checkCooldown() error {
-	ok := h.op.Effects().BindObject(h.Subject()).Every(func(o Effect) bool {
+	ok := h.g.Effects().BindObject(h.Subject()).Every(func(o Effect) bool {
 		switch o := o.(type) {
 		case *Cooldown:
 			if h.ability == o.Ability() {
@@ -178,7 +178,7 @@ func (h *Activating) checkCooldown() error {
 
 // checkDisable checks the Subject has not been interrupted by Disables
 func (h *Activating) checkDisable() error {
-	ok := h.op.Effects().BindObject(h.Subject()).Every(func(o Effect) bool {
+	ok := h.g.Effects().BindObject(h.Subject()).Every(func(o Effect) bool {
 		switch o := o.(type) {
 		case *Disable:
 			for _, t := range h.ability.DisableTypes {
@@ -208,17 +208,17 @@ func (h *Activating) checkResource() error {
 
 // writeOutputUnitActivating writes a OutputUnitActivating
 func (h *Activating) writeOutputUnitActivating() {
-	h.op.Writer().Write(OutputUnitActivating{
+	h.g.Writer().Write(OutputUnitActivating{
 		UnitID:      h.Subject().ID(),
 		AbilityName: h.ability.Name,
-		StartTime:   h.op.Clock().Now(),
+		StartTime:   h.g.Clock().Now(),
 		EndTime:     h.expirationTime,
 	})
 }
 
 // writeOutputUnitActivated writes a OutputUnitActivated
 func (h *Activating) writeOutputUnitActivated(ok bool) {
-	h.op.Writer().Write(OutputUnitActivated{
+	h.g.Writer().Write(OutputUnitActivated{
 		UnitID:      h.Subject().ID(),
 		AbilityName: h.ability.Name,
 		OK:          ok,

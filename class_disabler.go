@@ -28,19 +28,19 @@ func NewClassDisabler() *Class {
 		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(op Operator, s Subject, o *Unit) {
+		Perform: func(g Game, s Subject, o *Unit) {
 			c := UnitCorrection{
 				MagicResistance: -15,
 			}
-			op.Correction(o, c, 1, 12*Second, q.Name)
-			_, _, _, err := op.PhysicalDamage(s, o, 160).Perform()
+			g.Correction(o, c, 1, 12*Second, q.Name)
+			_, _, _, err := g.PhysicalDamage(s, o, 160).Perform()
 			if err != nil {
 				log.Fatal(err)
 			}
 			if o.IsDead() {
 				return
 			}
-			op.DoT(op.PhysicalDamage(s, o, 20), 4*Second, q.Name)
+			g.DoT(g.PhysicalDamage(s, o, 20), 4*Second, q.Name)
 		},
 	}
 	w = Ability{
@@ -55,15 +55,15 @@ func NewClassDisabler() *Class {
 			DisableTypeStun,
 			DisableTypeSilence,
 		},
-		Perform: func(op Operator, s Subject, o *Unit) {
-			_, _, _, err := op.PhysicalDamage(s, o, 275).Perform()
+		Perform: func(g Game, s Subject, o *Unit) {
+			_, _, _, err := g.PhysicalDamage(s, o, 275).Perform()
 			if err != nil {
 				log.Fatal(err)
 			}
 			if o.IsDead() {
 				return
 			}
-			op.Disable(o, DisableTypeSilence, Second/2)
+			g.Disable(o, DisableTypeSilence, Second/2)
 		},
 	}
 	e = Ability{
@@ -77,15 +77,15 @@ func NewClassDisabler() *Class {
 		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(op Operator, s Subject, o *Unit) {
-			_, _, _, err := op.MagicDamage(s, o, 430).Perform()
+		Perform: func(g Game, s Subject, o *Unit) {
+			_, _, _, err := g.MagicDamage(s, o, 430).Perform()
 			if err != nil {
 				log.Fatal(err)
 			}
 			if o.IsDead() {
 				return
 			}
-			op.Disable(o, DisableTypeStun, 2*Second)
+			g.Disable(o, DisableTypeStun, 2*Second)
 		},
 	}
 	r = Ability{
@@ -99,16 +99,16 @@ func NewClassDisabler() *Class {
 		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(op Operator, s Subject, o *Unit) {
+		Perform: func(g Game, s Subject, o *Unit) {
 			c := UnitCorrection{
 				CriticalStrikeChance: 0.2,
 				CriticalStrikeFactor: 0.5,
 			}
-			op.Units().EachFriend(s.Subject(), func(u *Unit) {
+			g.Units().EachFriend(s.Subject(), func(u *Unit) {
 				if u.IsDead() {
 					return
 				}
-				op.Correction(u, c, 1, 10*Second, r.Name)
+				g.Correction(u, c, 1, 10*Second, r.Name)
 			})
 		},
 	}

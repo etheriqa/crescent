@@ -18,5 +18,5 @@ type Ability struct {
 	ActivationDuration InstanceDuration
 	CooldownDuration   InstanceDuration
 	DisableTypes       []DisableType
-	Perform            func(Operator, Subject, *Unit)
+	Perform            func(Game, Subject, *Unit)
 }

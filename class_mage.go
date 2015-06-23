@@ -33,19 +33,19 @@ func NewClassMage() *Class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		Perform: func(op Operator, s Subject, o *Unit) {
+		Perform: func(g Game, s Subject, o *Unit) {
 			c := UnitCorrection{
 				Armor: -10,
 			}
-			op.Correction(o, c, 1, 8*Second, q.Name)
-			_, _, _, err := op.MagicDamage(s, o, 155).Perform()
+			g.Correction(o, c, 1, 8*Second, q.Name)
+			_, _, _, err := g.MagicDamage(s, o, 155).Perform()
 			if err != nil {
 				log.Fatal(err)
 			}
 			if rand.Float64() > 0.1 {
 				return
 			}
-			op.ResetCooldown(s.Subject(), &w)
+			g.ResetCooldown(s.Subject(), &w)
 		},
 	}
 	w = Ability{
@@ -60,12 +60,12 @@ func NewClassMage() *Class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		Perform: func(op Operator, s Subject, o *Unit) {
-			op.DoT(op.MagicDamage(s, o, 15), 10*Second, w.Name)
+		Perform: func(g Game, s Subject, o *Unit) {
+			g.DoT(g.MagicDamage(s, o, 15), 10*Second, w.Name)
 			if rand.Float64() > 0.2 {
 				return
 			}
-			op.ResetCooldown(s.Subject(), &e)
+			g.ResetCooldown(s.Subject(), &e)
 		},
 	}
 	e = Ability{
@@ -80,8 +80,8 @@ func NewClassMage() *Class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		Perform: func(op Operator, s Subject, o *Unit) {
-			_, _, _, err := op.MagicDamage(s, o, 420).Perform()
+		Perform: func(g Game, s Subject, o *Unit) {
+			_, _, _, err := g.MagicDamage(s, o, 420).Perform()
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -99,16 +99,16 @@ func NewClassMage() *Class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		Perform: func(op Operator, s Subject, o *Unit) {
-			op.Units().EachEnemy(s.Subject(), func(enemy *Unit) {
-				_, _, _, err := op.MagicDamage(s, enemy, 800).Perform()
+		Perform: func(g Game, s Subject, o *Unit) {
+			g.Units().EachEnemy(s.Subject(), func(enemy *Unit) {
+				_, _, _, err := g.MagicDamage(s, enemy, 800).Perform()
 				if err != nil {
 					log.Fatal(err)
 				}
 				if enemy.IsDead() {
 					return
 				}
-				op.DoT(op.MagicDamage(s, enemy, 10), 10*Second, r.Name)
+				g.DoT(g.MagicDamage(s, enemy, 10), 10*Second, r.Name)
 			})
 		},
 	}

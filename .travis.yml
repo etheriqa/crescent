@@ -4,4 +4,4 @@ install:
   - go get github.com/mattn/goveralls
 script:
   - make cover.out
-  - $HOME/gopath/bin/goveralls -coverprofile=cover.out -service=travis-ci || true
+  - $HOME/ggath/bin/goveralls -coverprofile=cover.out -service=travis-ci || true

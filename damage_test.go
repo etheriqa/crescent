@@ -15,7 +15,7 @@ func TestDamage(t *testing.T) {
 	o := NewUnit(1, 1, "object", &Class{
 		Health: 1000,
 	})
-	op := new(MockedOperator)
+	g := new(MockedGame)
 
 	{
 		damage := Damage{
@@ -23,7 +23,7 @@ func TestDamage(t *testing.T) {
 			damage:               100,
 			criticalStrikeChance: 0,
 			criticalStrikeFactor: 0,
-			op:                   op,
+			g:                   g,
 		}
 		w := new(MockedInstanceOutputWriter)
 		w.On("Write", OutputUnitResource{
@@ -37,15 +37,15 @@ func TestDamage(t *testing.T) {
 			Damage:        100,
 			IsCritical:    false,
 		}).Return().Once()
-		op.On("Writer").Return(w).Twice()
-		op.On("DamageThreat", &damage, &damage, Statistic(100)).Return().Once()
+		g.On("Writer").Return(w).Twice()
+		g.On("DamageThreat", &damage, &damage, Statistic(100)).Return().Once()
 		before, after, crit, err := damage.Perform()
 		assert.Equal(Statistic(1000), before)
 		assert.Equal(Statistic(900), after)
 		assert.False(crit)
 		assert.Nil(err)
 		w.AssertExpectations(t)
-		op.AssertExpectations(t)
+		g.AssertExpectations(t)
 	}
 
 	{
@@ -54,7 +54,7 @@ func TestDamage(t *testing.T) {
 			damage:               1000,
 			criticalStrikeChance: 0,
 			criticalStrikeFactor: 0,
-			op:                   op,
+			g:                   g,
 		}
 		w := new(MockedInstanceOutputWriter)
 		w.On("Write", OutputUnitResource{
@@ -68,14 +68,14 @@ func TestDamage(t *testing.T) {
 			Damage:        1000,
 			IsCritical:    false,
 		}).Return().Once()
-		op.On("Writer").Return(w).Twice()
+		g.On("Writer").Return(w).Twice()
 		before, after, crit, err := damage.Perform()
 		assert.Equal(Statistic(900), before)
 		assert.Equal(Statistic(0), after)
 		assert.False(crit)
 		assert.Nil(err)
 		w.AssertExpectations(t)
-		op.AssertExpectations(t)
+		g.AssertExpectations(t)
 	}
 
 	{
@@ -84,10 +84,10 @@ func TestDamage(t *testing.T) {
 			damage:               100,
 			criticalStrikeChance: 0,
 			criticalStrikeFactor: 0,
-			op:                   op,
+			g:                   g,
 		}
 		w := new(MockedInstanceOutputWriter)
-		op.On("Writer").Return(w).Once()
+		g.On("Writer").Return(w).Once()
 		_, _, _, err := damage.Perform()
 		assert.NotNil(err)
 	}

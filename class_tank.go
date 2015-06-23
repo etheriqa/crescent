@@ -28,12 +28,12 @@ func NewClassTank() *Class {
 		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(op Operator, s Subject, o *Unit) {
+		Perform: func(g Game, s Subject, o *Unit) {
 			c := UnitCorrection{
 				DamageThreatFactor: 0.4,
 			}
-			op.Correction(s.Subject(), c, 5, 8*Second, q.Name)
-			_, _, _, err := op.TrueDamage(s, o, 120).Perform()
+			g.Correction(s.Subject(), c, 5, 8*Second, q.Name)
+			_, _, _, err := g.TrueDamage(s, o, 120).Perform()
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -50,13 +50,13 @@ func NewClassTank() *Class {
 		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(op Operator, s Subject, o *Unit) {
+		Perform: func(g Game, s Subject, o *Unit) {
 			c := UnitCorrection{
 				Armor:           50,
 				MagicResistance: 50,
 			}
-			op.Correction(s.Subject(), c, 1, 4*Second, w.Name)
-			_, _, _, err := op.PhysicalDamage(s, o, 200).Perform()
+			g.Correction(s.Subject(), c, 1, 4*Second, w.Name)
+			_, _, _, err := g.PhysicalDamage(s, o, 200).Perform()
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -73,12 +73,12 @@ func NewClassTank() *Class {
 		DisableTypes: []DisableType{
 			DisableTypeStun,
 		},
-		Perform: func(op Operator, s Subject, o *Unit) {
-			before, after, _, err := op.PhysicalDamage(s, o, 345).Perform()
+		Perform: func(g Game, s Subject, o *Unit) {
+			before, after, _, err := g.PhysicalDamage(s, o, 345).Perform()
 			if err != nil {
 				log.Fatal(err)
 			}
-			s.Subject().ModifyHealth(op.Writer(), before-after)
+			s.Subject().ModifyHealth(g.Writer(), before-after)
 		},
 	}
 	r = Ability{
@@ -93,12 +93,12 @@ func NewClassTank() *Class {
 			DisableTypeStun,
 			DisableTypeSilence,
 		},
-		Perform: func(op Operator, s Subject, o *Unit) {
+		Perform: func(g Game, s Subject, o *Unit) {
 			c := UnitCorrection{
 				Armor:           150,
 				MagicResistance: 150,
 			}
-			op.Correction(s.Subject(), c, 1, 5*Second, r.Name)
+			g.Correction(s.Subject(), c, 1, 5*Second, r.Name)
 		},
 	}
 	return class

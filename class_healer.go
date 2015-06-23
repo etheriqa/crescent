@@ -29,12 +29,12 @@ func NewClassHealer() *Class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		Perform: func(op Operator, s Subject, o *Unit) {
-			before, after, _, err := op.MagicDamage(s, o, 175).Perform()
+		Perform: func(g Game, s Subject, o *Unit) {
+			before, after, _, err := g.MagicDamage(s, o, 175).Perform()
 			if err != nil {
 				log.Fatal(err)
 			}
-			s.Subject().ModifyMana(op.Writer(), (before-after)*0.1)
+			s.Subject().ModifyMana(g.Writer(), (before-after)*0.1)
 		},
 	}
 	w = Ability{
@@ -49,8 +49,8 @@ func NewClassHealer() *Class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		Perform: func(op Operator, s Subject, o *Unit) {
-			_, _, _, err := op.Healing(s, o, 620).Perform()
+		Perform: func(g Game, s Subject, o *Unit) {
+			_, _, _, err := g.Healing(s, o, 620).Perform()
 			if err != nil {
 				log.Fatal(err)
 			}
@@ -68,8 +68,8 @@ func NewClassHealer() *Class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		Perform: func(op Operator, s Subject, o *Unit) {
-			op.HoT(op.Healing(s.Subject(), o, 65), 8*Second, e.Name)
+		Perform: func(g Game, s Subject, o *Unit) {
+			g.HoT(g.Healing(s.Subject(), o, 65), 8*Second, e.Name)
 		},
 	}
 	r = Ability{
@@ -84,21 +84,21 @@ func NewClassHealer() *Class {
 			DisableTypeSilence,
 			DisableTypeStun,
 		},
-		Perform: func(op Operator, s Subject, o *Unit) {
+		Perform: func(g Game, s Subject, o *Unit) {
 			c := UnitCorrection{
 				CriticalStrikeChance: 0.5,
 				CriticalStrikeFactor: 1.5,
 			}
-			op.Correction(s.Subject(), c, 1, 8*Second, r.Name)
-			op.Units().EachFriend(s.Subject(), func(friend *Unit) {
+			g.Correction(s.Subject(), c, 1, 8*Second, r.Name)
+			g.Units().EachFriend(s.Subject(), func(friend *Unit) {
 				if friend.IsDead() {
 					return
 				}
-				_, _, _, err := op.Healing(s.Subject(), friend, 425).Perform()
+				_, _, _, err := g.Healing(s.Subject(), friend, 425).Perform()
 				if err != nil {
 					log.Fatal(err)
 				}
-				op.HoT(op.Healing(s.Subject(), friend, 25), 8*Second, r.Name)
+				g.HoT(g.Healing(s.Subject(), friend, 25), 8*Second, r.Name)
 			})
 		},
 	}

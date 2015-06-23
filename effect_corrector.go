@@ -18,7 +18,7 @@ type Correction struct {
 	stack          Statistic
 	expirationTime InstanceTime
 
-	op Operator
+	g Game
 }
 
 // ArmorCorrection returns amount of armor correction
@@ -63,7 +63,7 @@ func (h *Correction) Stack() Statistic {
 
 // EffectDidAttach merges Correction effects and updates the UnitCorrection of the Object
 func (h *Correction) EffectDidAttach() error {
-	h.op.Effects().BindObject(h).Each(func(o Effect) {
+	h.g.Effects().BindObject(h).Each(func(o Effect) {
 		switch o := o.(type) {
 		case *Correction:
 			if h == o || h.name != o.name {
@@ -75,7 +75,7 @@ func (h *Correction) EffectDidAttach() error {
 			} else {
 				h.stack += o.stack
 			}
-			h.op.Effects().Detach(o)
+			h.g.Effects().Detach(o)
 		}
 	})
 
@@ -99,18 +99,18 @@ func (h *Correction) EffectDidDetach() error {
 func (h *Correction) Handle(p interface{}) {
 	switch p.(type) {
 	case *EventGameTick:
-		if h.op.Clock().Before(h.expirationTime) {
+		if h.g.Clock().Before(h.expirationTime) {
 			return
 		}
 		h.writeOutputUnitDetach()
-		h.op.Effects().Detach(h)
+		h.g.Effects().Detach(h)
 	}
 }
 
 // updateCorrection updates the UnitCorrection of the Object
 func (h *Correction) updateCorrection() {
 	c := MakeUnitCorrection()
-	h.op.Effects().BindObject(h).Each(func(o Effect) {
+	h.g.Effects().BindObject(h).Each(func(o Effect) {
 		switch o := o.(type) {
 		case Corrector:
 			c.Armor += o.ArmorCorrection()
@@ -127,7 +127,7 @@ func (h *Correction) updateCorrection() {
 
 // writeOutputUnitAttach writes a OutputUnitAttach
 func (h *Correction) writeOutputUnitAttach() {
-	h.op.Writer().Write(OutputUnitAttach{
+	h.g.Writer().Write(OutputUnitAttach{
 		UnitID:         h.Object().ID(),
 		AttachmentName: h.name,
 		Stack:          h.stack,
@@ -137,7 +137,7 @@ func (h *Correction) writeOutputUnitAttach() {
 
 // writeOutputUnitDetach writes a OutputUnitDetach
 func (h *Correction) writeOutputUnitDetach() {
-	h.op.Writer().Write(OutputUnitDetach{
+	h.g.Writer().Write(OutputUnitDetach{
 		UnitID:         h.Object().ID(),
 		AttachmentName: h.name,
 	})

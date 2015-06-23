@@ -1,177 +1,212 @@
 package main
 
-import (
-	"errors"
-)
+type Game interface {
+	Clock() InstanceClock
+	Effects() EffectContainer
+	Units() UnitContainer
 
-type Game struct {
-	clock InstanceClock
+	Writer() InstanceOutputWriter
 
-	stage    Stage
-	effects EffectContainer
-	units    UnitContainer
+	Join(UnitGroup, UnitName, *Class) (UnitID, error)
+	Leave(UnitID) error
 
-	w InstanceOutputWriter
+	Activating(Subject, *Unit, *Ability)
+	Cooldown(Object, *Ability)
+	ResetCooldown(Object, *Ability)
+	Correction(Object, UnitCorrection, Statistic, InstanceDuration, string)
+	Disable(Object, DisableType, InstanceDuration)
+	DamageThreat(Subject, Object, Statistic)
+	HealingThreat(Subject, Object, Statistic)
+	DoT(*Damage, InstanceDuration, string)
+	HoT(*Healing, InstanceDuration, string)
+
+	PhysicalDamage(Subject, Object, Statistic) *Damage
+	MagicDamage(Subject, Object, Statistic) *Damage
+	TrueDamage(Subject, Object, Statistic) *Damage
+	PureDamage(Subject, Object, Statistic) *Damage
+
+	Healing(Subject, Object, Statistic) *Healing
 }
 
-// NewGame returns a Game
-func NewGame(clock InstanceClock, stage Stage, w InstanceOutputWriter) *Game {
-	g := &Game{
-		clock: clock,
-
-		stage:    stage,
-		effects: MakeEffectSet(),
-		units:    NewUnitMap(),
-
-		w: w,
-	}
-	stage.Initialize(g)
-	return g
+// Clock returns the InstanceClock
+func (g *GameState) Clock() InstanceClock {
+	return g.clock
 }
 
-// SyncGame sends the game state
-func (g *Game) SyncGame(w InstanceOutputWriter) {
-	g.units.Each(func(u *Unit) {
-		w.Write(OutputUnitJoin{
-			UnitID:    u.ID(),
-			UnitGroup: u.Group(),
-			UnitName:  u.Name(),
-			ClassName: u.ClassName(),
-			Health:    u.Health(),
-			HealthMax: u.HealthMax(),
-			Mana:      u.Mana(),
-			ManaMax:   u.ManaMax(),
-		})
+// Effects returns the EffectContainer {
+func (g *GameState) Effects() EffectContainer {
+	return g.effects
+}
+
+// Units returns the UnitContainer {
+func (g *GameState) Units() UnitContainer {
+	return g.units
+}
+
+// Writer returns the InstanceOutputWriter
+func (g *GameState) Writer() InstanceOutputWriter {
+	return g.w
+}
+
+// Activating attaches a Activating Effect
+func (g *GameState) Activating(s Subject, o *Unit, a *Ability) {
+	g.effects.Attach(&Activating{
+		UnitSubject:    MakeSubject(s),
+		object:         o,
+		ability:        a,
+		expirationTime: g.clock.Add(a.ActivationDuration),
+
+		g: g,
 	})
 }
 
-// SyncUnit sends the unit information
-func (g *Game) SyncUnit(w InstanceOutputWriter, id UnitID) {
-	// TODO refactor
-	u := g.units.Find(id)
-	// TODO handle the error
-	if u == nil {
-		return
-	}
-	as := make([]OutputPlayerAbility, 4)
-	for i := 0; i < 4; i++ {
-		dts := make([]string, 0)
-		for _, dt := range u.Abilities()[i].DisableTypes {
-			switch dt {
-			case DisableTypeSilence:
-				dts = append(dts, "Silence")
-			case DisableTypeStun:
-				dts = append(dts, "Stun")
-			}
-		}
-		as[i] = OutputPlayerAbility{
-			Name:               u.Abilities()[i].Name,
-			Description:        u.Abilities()[i].Description,
-			TargetType:         u.Abilities()[i].TargetType,
-			HealthCost:         u.Abilities()[i].HealthCost,
-			ManaCost:           u.Abilities()[i].ManaCost,
-			ActivationDuration: u.Abilities()[i].ActivationDuration,
-			CooldownDuration:   u.Abilities()[i].CooldownDuration,
-			DisableTypes:       dts,
-		}
-	}
-	w.Write(OutputPlayer{
-		UnitID: id,
-		Q:      as[0],
-		W:      as[1],
-		E:      as[2],
-		R:      as[3],
+// Cooldown attaches a Cooldown Effect
+func (g *GameState) Cooldown(o Object, a *Ability) {
+	g.effects.Attach(&Cooldown{
+		UnitObject:     MakeObject(o),
+		ability:        a,
+		expirationTime: g.clock.Add(a.CooldownDuration),
+
+		g: g,
 	})
 }
 
-// Join creates a Unit and adds it to the game
-func (g *Game) Join(group UnitGroup, name UnitName, class *Class) (id UnitID, err error) {
-	u, err := g.units.Join(group, name, class)
-	if err != nil {
-		return
-	}
-	id = u.ID()
-	g.w.Write(OutputUnitJoin{
-		UnitID:    u.ID(),
-		UnitGroup: u.Group(),
-		UnitName:  u.Name(),
-		ClassName: u.ClassName(),
-		Health:    u.Health(),
-		HealthMax: u.HealthMax(),
-		Mana:      u.Mana(),
-		ManaMax:   u.ManaMax(),
-	})
-	return
-}
+// ResetCooldown detaches Cooldown effects
+func (g *GameState) ResetCooldown(o Object, a *Ability) {
+	g.effects.Attach(&Cooldown{
+		UnitObject:     MakeObject(o),
+		ability:        a,
+		expirationTime: g.clock.Now(),
 
-// Leave removes the Unit
-func (g *Game) Leave(id UnitID) (err error) {
-	if err = g.units.Leave(id); err != nil {
-		return
-	}
-	g.w.Write(OutputUnitLeave{
-		UnitID: id,
-	})
-	return
-}
-
-// Ability activates the ability
-func (g *Game) Ability(sid UnitID, oid *UnitID, abilityName string) error {
-	s := g.units.Find(sid)
-	if s == nil {
-		return errors.New("Unknown subject UnitID")
-	}
-	var o *Unit
-	if oid != nil {
-		o = g.units.Find(*oid)
-		if o == nil {
-			return errors.New("Unknown object UnitID")
-		}
-	}
-	// TODO refactor
-	switch abilityName {
-	case "Q":
-		g.Activating(s, o, s.Abilities()[0])
-	case "W":
-		g.Activating(s, o, s.Abilities()[1])
-	case "E":
-		g.Activating(s, o, s.Abilities()[2])
-	case "R":
-		g.Activating(s, o, s.Abilities()[3])
-	default:
-		return errors.New("Unknown ability name")
-	}
-	return nil
-}
-
-// PerformGameTick performs the game tick routine
-func (g *Game) PerformGameTick() {
-	g.stage.OnTick(g)
-	g.units.Each(func(u *Unit) {
-		if u.IsDead() {
-			return
-		}
-		u.Dispatch(EventGameTick{})
+		g: g,
 	})
 }
 
-// PerformPeriodicalTick performs the periodical rick routine
-func (g *Game) PerformPeriodicalTick() {
-	g.units.Each(func(u *Unit) {
-		if u.IsDead() {
-			return
-		}
-		u.Dispatch(EventPeriodicalTick{})
+// Correction attaches a Correction Effect
+func (g *GameState) Correction(o Object, c UnitCorrection, l Statistic, d InstanceDuration, name string) {
+	g.effects.Attach(&Correction{
+		UnitObject:     MakeObject(o),
+		name:           name,
+		correction:     c,
+		stackLimit:     l,
+		stack:          1,
+		expirationTime: g.clock.Add(d),
+
+		g: g,
 	})
 }
 
-// PerformRegenerationTick performs the regeneration tick routine
-func (g *Game) PerformRegenerationTick() {
-	g.units.Each(func(u *Unit) {
-		if u.IsDead() {
-			return
-		}
-		u.ModifyHealth(g.w, u.HealthRegeneration())
-		u.ModifyMana(g.w, u.ManaRegeneration())
+// Disable attaches a Disable Effect
+func (g *GameState) Disable(o Object, t DisableType, d InstanceDuration) {
+	g.effects.Attach(&Disable{
+		UnitObject:     MakeObject(o),
+		disableType:    t,
+		expirationTime: g.clock.Add(d),
+
+		g: g,
 	})
+}
+
+// DamageThreat attaches a Threat Effect
+func (g *GameState) DamageThreat(s Subject, o Object, d Statistic) {
+	g.effects.Attach(&Threat{
+		UnitPair: MakePair(s, o),
+		threat:   d * s.Subject().DamageThreatFactor(),
+
+		g: g,
+	})
+}
+
+// HealingThreat attaches a Threat Effect
+func (g *GameState) HealingThreat(s Subject, o Object, h Statistic) {
+	g.effects.Attach(&Threat{
+		UnitPair: MakePair(s, o),
+		threat:   h * s.Subject().HealingThreatFactor(),
+
+		g: g,
+	})
+}
+
+// DoT attaches a Periodical Effect
+func (g *GameState) DoT(damage *Damage, d InstanceDuration, name string) {
+	g.effects.Attach(&Periodical{
+		UnitPair:       MakePair(damage, damage),
+		name:           name,
+		routine:        func() { damage.Perform() },
+		expirationTime: g.clock.Add(d),
+
+		g: g,
+	})
+}
+
+// HoT attaches a Periodical Effect
+func (g *GameState) HoT(healing *Healing, d InstanceDuration, name string) {
+	g.effects.Attach(&Periodical{
+		UnitPair:       MakePair(healing, healing),
+		name:           name,
+		routine:        func() { healing.Perform() },
+		expirationTime: g.clock.Add(d),
+
+		g: g,
+	})
+}
+
+// PhysicalDamage returns a Damage
+func (g *GameState) PhysicalDamage(s Subject, o Object, d Statistic) *Damage {
+	return &Damage{
+		UnitPair:             MakePair(s, o),
+		damage:               d * o.Object().PhysicalDamageReductionFactor(),
+		criticalStrikeChance: s.Subject().CriticalStrikeChance(),
+		criticalStrikeFactor: s.Subject().CriticalStrikeFactor(),
+
+		g: g,
+	}
+}
+
+// MagicDamage returns a Damage
+func (g *GameState) MagicDamage(s Subject, o Object, d Statistic) *Damage {
+	return &Damage{
+		UnitPair:             MakePair(s, o),
+		damage:               d * o.Object().MagicDamageReductionFactor(),
+		criticalStrikeChance: s.Subject().CriticalStrikeChance(),
+		criticalStrikeFactor: s.Subject().CriticalStrikeFactor(),
+
+		g: g,
+	}
+}
+
+// TrueDamage returns a Damage
+func (g *GameState) TrueDamage(s Subject, o Object, d Statistic) *Damage {
+	return &Damage{
+		UnitPair:             MakePair(s, o),
+		damage:               d,
+		criticalStrikeChance: s.Subject().CriticalStrikeChance(),
+		criticalStrikeFactor: s.Subject().CriticalStrikeFactor(),
+
+		g: g,
+	}
+}
+
+// PureDamage returns a Damage
+func (g *GameState) PureDamage(s Subject, o Object, d Statistic) *Damage {
+	return &Damage{
+		UnitPair:             MakePair(s, o),
+		damage:               d,
+		criticalStrikeChance: 0,
+		criticalStrikeFactor: 0,
+
+		g: g,
+	}
+}
+
+// Healing returns a Healing
+func (g *GameState) Healing(s Subject, o Object, h Statistic) *Healing {
+	return &Healing{
+		UnitPair:             MakePair(s, o),
+		healing:              h,
+		criticalStrikeChance: s.Subject().CriticalStrikeChance(),
+		criticalStrikeFactor: s.Subject().CriticalStrikeFactor(),
+
+		g: g,
+	}
 }

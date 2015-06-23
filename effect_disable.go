@@ -25,12 +25,12 @@ type Disable struct {
 	disableType    DisableType
 	expirationTime InstanceTime
 
-	op Operator
+	g Game
 }
 
 // EffectDidAttach removes duplicate Disables
 func (h *Disable) EffectDidAttach() error {
-	ok := h.op.Effects().BindObject(h).Every(func(o Effect) bool {
+	ok := h.g.Effects().BindObject(h).Every(func(o Effect) bool {
 		switch o := o.(type) {
 		case *Disable:
 			if h == o || h.disableType != o.disableType {
@@ -39,12 +39,12 @@ func (h *Disable) EffectDidAttach() error {
 			if h.expirationTime <= o.expirationTime {
 				return false
 			}
-			h.op.Effects().Detach(o)
+			h.g.Effects().Detach(o)
 		}
 		return true
 	})
 	if !ok {
-		h.op.Effects().Detach(h)
+		h.g.Effects().Detach(h)
 		return nil
 	}
 
@@ -64,19 +64,19 @@ func (h *Disable) EffectDidDetach() error {
 func (h *Disable) Handle(p interface{}) {
 	switch p.(type) {
 	case *EventGameTick:
-		if h.op.Clock().Before(h.expirationTime) {
+		if h.g.Clock().Before(h.expirationTime) {
 			return
 		}
 		h.writeOutputUnitDetach()
-		h.op.Effects().Detach(h)
+		h.g.Effects().Detach(h)
 	case *EventDead:
-		h.op.Effects().Detach(h)
+		h.g.Effects().Detach(h)
 	}
 }
 
 // writeOutputUnitAttach writes a OutputUnitAttach
 func (h *Disable) writeOutputUnitAttach() {
-	h.op.Writer().Write(OutputUnitAttach{
+	h.g.Writer().Write(OutputUnitAttach{
 		UnitID:         h.Object().ID(),
 		AttachmentName: h.disableType.String(),
 		ExpirationTime: h.expirationTime,
@@ -85,7 +85,7 @@ func (h *Disable) writeOutputUnitAttach() {
 
 // writeOutputUnitDetach writes a OutputUnitDetach
 func (h *Disable) writeOutputUnitDetach() {
-	h.op.Writer().Write(OutputUnitDetach{
+	h.g.Writer().Write(OutputUnitDetach{
 		UnitID:         h.Object().ID(),
 		AttachmentName: h.disableType.String(),
 	})
