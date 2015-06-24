@@ -1,4 +1,8 @@
-package crescent
+package class
+
+import (
+	. "github.com/etheriqa/crescent"
+)
 
 const AssassinStackName = "Tenacity"
 
@@ -45,7 +49,7 @@ func NewClassAssassin() *Class {
 				}
 				_, _, crit, err := g.PhysicalDamage(s, o, 45).Perform()
 				if err != nil {
-					log.Fatal(err)
+					Logger().Fatal(err)
 				}
 				if crit {
 					AssassinStack(g, MakeObject(s.Subject()))
@@ -67,7 +71,7 @@ func NewClassAssassin() *Class {
 		Perform: func(g Game, s Subject, o *Unit) {
 			_, _, crit, err := g.PhysicalDamage(s, o, 80).Perform()
 			if err != nil {
-				log.Fatal(err)
+				Logger().Fatal(err)
 			}
 			if crit {
 				AssassinStack(g, MakeObject(s.Subject()))
@@ -116,19 +120,19 @@ func NewClassAssassin() *Class {
 			g.EffectQuery().Each(func(e Effect) {
 				switch e := e.(type) {
 				case *Correction:
-					if e.name == AssassinStackName {
+					if e.Name() == AssassinStackName {
 						stack += e.Stack()
 					}
 				}
 			})
 			_, _, _, err := g.PureDamage(s, o, 400+stack*100).Perform()
 			if err != nil {
-				log.Fatal(err)
+				Logger().Fatal(err)
 			}
 			g.EffectQuery().Each(func(e Effect) {
 				switch e := e.(type) {
 				case *Correction:
-					if e.name == AssassinStackName {
+					if e.Name() == AssassinStackName {
 						g.DetachEffect(e)
 					}
 				}

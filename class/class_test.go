@@ -1,4 +1,4 @@
-package crescent
+package class
 
 import (
 	"testing"

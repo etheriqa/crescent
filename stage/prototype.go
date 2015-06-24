@@ -1,4 +1,8 @@
-package crescent
+package stage
+
+import (
+	. "github.com/etheriqa/crescent"
+)
 
 type StagePrototype struct {
 	prototype             *Unit
@@ -193,9 +197,9 @@ func (s *StagePrototype) maxThreatEnemy(g Game) *Unit {
 			if h.Subject().IsDead() {
 				return
 			}
-			if u == nil || h.threat > threat {
+			if u == nil || h.Threat() > threat {
 				u = h.Subject()
-				threat = h.threat
+				threat = h.Threat()
 			}
 		}
 	})

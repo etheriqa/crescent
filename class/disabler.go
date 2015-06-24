@@ -1,4 +1,8 @@
-package crescent
+package class
+
+import (
+	. "github.com/etheriqa/crescent"
+)
 
 func NewClassDisabler() *Class {
 	var q, w, e, r Ability
@@ -35,7 +39,7 @@ func NewClassDisabler() *Class {
 			g.Correction(o, c, q.Name, 1, 12*Second)
 			_, _, _, err := g.PhysicalDamage(s, o, 160).Perform()
 			if err != nil {
-				log.Fatal(err)
+				Logger().Fatal(err)
 			}
 			if o.IsDead() {
 				return
@@ -58,7 +62,7 @@ func NewClassDisabler() *Class {
 		Perform: func(g Game, s Subject, o *Unit) {
 			_, _, _, err := g.PhysicalDamage(s, o, 275).Perform()
 			if err != nil {
-				log.Fatal(err)
+				Logger().Fatal(err)
 			}
 			if o.IsDead() {
 				return
@@ -80,7 +84,7 @@ func NewClassDisabler() *Class {
 		Perform: func(g Game, s Subject, o *Unit) {
 			_, _, _, err := g.MagicDamage(s, o, 430).Perform()
 			if err != nil {
-				log.Fatal(err)
+				Logger().Fatal(err)
 			}
 			if o.IsDead() {
 				return

@@ -1,4 +1,8 @@
-package crescent
+package class
+
+import (
+	. "github.com/etheriqa/crescent"
+)
 
 func NewClassTank() *Class {
 	var q, w, e, r Ability
@@ -35,7 +39,7 @@ func NewClassTank() *Class {
 			g.Correction(s.Subject(), c, q.Name, 5, 8*Second)
 			_, _, _, err := g.TrueDamage(s, o, 120).Perform()
 			if err != nil {
-				log.Fatal(err)
+				Logger().Fatal(err)
 			}
 		},
 	}
@@ -58,7 +62,7 @@ func NewClassTank() *Class {
 			g.Correction(s.Subject(), c, w.Name, 1, 4*Second)
 			_, _, _, err := g.PhysicalDamage(s, o, 200).Perform()
 			if err != nil {
-				log.Fatal(err)
+				Logger().Fatal(err)
 			}
 		},
 	}
@@ -76,7 +80,7 @@ func NewClassTank() *Class {
 		Perform: func(g Game, s Subject, o *Unit) {
 			before, after, _, err := g.PhysicalDamage(s, o, 345).Perform()
 			if err != nil {
-				log.Fatal(err)
+				Logger().Fatal(err)
 			}
 			s.Subject().ModifyHealth(g.Writer(), before-after)
 		},

@@ -17,6 +17,11 @@ func NewThreat(g Game, s Subject, o Object, t Statistic) *Threat {
 	return e
 }
 
+// Threat returns amount of threat
+func (e *Threat) Threat() Statistic {
+	return e.threat
+}
+
 // EffectWillAttach merges Threat effects
 func (e *Threat) EffectWillAttach(g Game) error {
 	g.EffectQuery().BindSubject(e).BindObject(e).Each(func(f Effect) {

@@ -35,6 +35,11 @@ func NewCorrection(g Game, o Object, c UnitCorrection, name string, l Statistic,
 	return e
 }
 
+// Name returns the name
+func (e *Correction) Name() string {
+	return e.name
+}
+
 // ArmorCorrection returns amount of armor correction
 func (e *Correction) ArmorCorrection() Statistic {
 	return e.correction.Armor

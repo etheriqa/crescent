@@ -4,6 +4,8 @@ import (
 	"flag"
 
 	"github.com/etheriqa/crescent"
+	"github.com/etheriqa/crescent/class"
+	"github.com/etheriqa/crescent/stage"
 )
 
 func main() {
@@ -13,6 +15,16 @@ func main() {
 	app := crescent.App{
 		Addr:   *addr,
 		Origin: *origin,
+		StageFactory: crescent.StageFactories{
+			1: stage.NewStagePrototype,
+		},
+		ClassFactory: crescent.ClassFactories{
+			"Tank":     class.NewClassTank,
+			"Assassin": class.NewClassAssassin,
+			"Disabler": class.NewClassDisabler,
+			"Mage":     class.NewClassMage,
+			"Healer":   class.NewClassHealer,
+		},
 	}
 	app.Run()
 }

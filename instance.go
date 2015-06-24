@@ -16,19 +16,27 @@ type Instance struct {
 	uid  map[ClientID]UnitID
 
 	g *GameState
+
+	sf StageFactory
+	cf ClassFactory
+
 	r InstanceInput
 	w InstanceOutputWriter
 }
 
 // NewInstance returns a Instance
-func NewInstance(r InstanceInput, w InstanceOutputWriter) *Instance {
+func NewInstance(sf StageFactory, cf ClassFactory, r InstanceInput, w InstanceOutputWriter) *Instance {
 	time := new(InstanceTime)
 	return &Instance{
 		time: time,
 		name: make(map[ClientID]UserName),
 		uid:  make(map[ClientID]UnitID),
 
-		g: NewGameState(time, NewStagePrototype(), w),
+		g: NewGameState(time, sf.New(1), w), // TODO remove magic number
+
+		cf: cf,
+		sf: sf,
+
 		r: r,
 		w: w,
 	}
@@ -156,10 +164,13 @@ func (i *Instance) chat(cid ClientID, input InputChat) {
 
 // stage
 func (i *Instance) stage(cid ClientID, input InputStage) {
-	// TODO WIP
+	s := i.sf.New(input.StageID)
+	if s == nil {
+		return
+	}
 	i.w.Write(OutputStage{})
 	i.uid = make(map[ClientID]UnitID)
-	i.g = NewGameState(i.time, NewStagePrototype(), i.w)
+	i.g = NewGameState(i.time, s, i.w)
 }
 
 // join
@@ -168,23 +179,11 @@ func (i *Instance) join(cid ClientID, input InputJoin) {
 	if _, ok := i.uid[cid]; ok {
 		return
 	}
-	// TODO refactor: make ClassFactory
-	var class *Class
-	switch input.ClassName {
-	case "Assassin":
-		class = NewClassAssassin()
-	case "Disabler":
-		class = NewClassDisabler()
-	case "Healer":
-		class = NewClassHealer()
-	case "Mage":
-		class = NewClassMage()
-	case "Tank":
-		class = NewClassTank()
-	default:
+	c := i.cf.New(input.ClassName)
+	if c == nil {
 		return
 	}
-	uid, err := i.g.Join(UnitGroupPlayer, UnitName(i.name[cid]), class)
+	uid, err := i.g.Join(UnitGroupPlayer, UnitName(i.name[cid]), c)
 	if err != nil {
 		log.WithFields(logrus.Fields{
 			"cid":  cid,

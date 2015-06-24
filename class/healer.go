@@ -1,4 +1,8 @@
-package crescent
+package class
+
+import (
+	. "github.com/etheriqa/crescent"
+)
 
 func NewClassHealer() *Class {
 	var q, w, e, r Ability
@@ -32,7 +36,7 @@ func NewClassHealer() *Class {
 		Perform: func(g Game, s Subject, o *Unit) {
 			before, after, _, err := g.MagicDamage(s, o, 175).Perform()
 			if err != nil {
-				log.Fatal(err)
+				Logger().Fatal(err)
 			}
 			s.Subject().ModifyMana(g.Writer(), (before-after)*0.1)
 		},
@@ -52,7 +56,7 @@ func NewClassHealer() *Class {
 		Perform: func(g Game, s Subject, o *Unit) {
 			_, _, _, err := g.Healing(s, o, 620).Perform()
 			if err != nil {
-				log.Fatal(err)
+				Logger().Fatal(err)
 			}
 		},
 	}
@@ -96,7 +100,7 @@ func NewClassHealer() *Class {
 				}
 				_, _, _, err := g.Healing(s.Subject(), friend, 425).Perform()
 				if err != nil {
-					log.Fatal(err)
+					Logger().Fatal(err)
 				}
 				g.HoT(g.Healing(s.Subject(), friend, 25), r.Name, 8*Second)
 			})

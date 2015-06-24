@@ -1,7 +1,9 @@
-package crescent
+package class
 
 import (
 	"math/rand"
+
+	. "github.com/etheriqa/crescent"
 )
 
 func NewClassMage() *Class {
@@ -40,7 +42,7 @@ func NewClassMage() *Class {
 			g.Correction(o, c, q.Name, 1, 8*Second)
 			_, _, _, err := g.MagicDamage(s, o, 155).Perform()
 			if err != nil {
-				log.Fatal(err)
+				Logger().Fatal(err)
 			}
 			if rand.Float64() > 0.1 {
 				return
@@ -83,7 +85,7 @@ func NewClassMage() *Class {
 		Perform: func(g Game, s Subject, o *Unit) {
 			_, _, _, err := g.MagicDamage(s, o, 420).Perform()
 			if err != nil {
-				log.Fatal(err)
+				Logger().Fatal(err)
 			}
 		},
 	}
@@ -103,7 +105,7 @@ func NewClassMage() *Class {
 			g.UnitQuery().EachEnemy(s.Subject(), func(enemy *Unit) {
 				_, _, _, err := g.MagicDamage(s, enemy, 800).Perform()
 				if err != nil {
-					log.Fatal(err)
+					Logger().Fatal(err)
 				}
 				if enemy.IsDead() {
 					return
