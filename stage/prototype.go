@@ -84,7 +84,7 @@ func (s *StagePrototype) actPrototype(g Game) {
 		return
 	case s.prototype.Health() == s.prototype.HealthMax():
 		return
-	case s.prototype.Health() > s.prototype.HealthMax()*0.5:
+	case s.prototype.Health() > s.prototype.HealthMax()*0.6:
 		if s.prototypePhase != 1 {
 			s.prototypePhase = 1
 			g.Cooldown(s.prototype, s.prototype.Ability("Attack"))
@@ -210,7 +210,7 @@ func NewClassStagePrototype() (class *Class) {
 	var attack, falcon, shark, iron, ray, bell, silver, dandelion, tidalBore, diamond, pastorale, vines, waveCrest, morningLull, jadeite Ability
 	class = &Class{
 		Name:                 "Prototype",
-		Health:               40000,
+		Health:               50000,
 		HealthRegeneration:   0,
 		Mana:                 1000,
 		ManaRegeneration:     0,

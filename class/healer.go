@@ -10,7 +10,7 @@ func NewClassHealer() *Class {
 		Name:                 "Healer",
 		Health:               1030,
 		HealthRegeneration:   24,
-		Mana:                 570,
+		Mana:                 550,
 		ManaRegeneration:     31,
 		Armor:                DefaultArmor,
 		MagicResistance:      DefaultMagicResistance,
@@ -38,7 +38,7 @@ func NewClassHealer() *Class {
 			if err != nil {
 				Logger().Fatal(err)
 			}
-			s.Subject().ModifyMana(g.Writer(), (before-after)*0.1)
+			s.Subject().ModifyMana(g.Writer(), (before-after)*0.05)
 		},
 	}
 	w = Ability{
@@ -46,7 +46,7 @@ func NewClassHealer() *Class {
 		Description:        "Restores target's health",
 		TargetType:         TargetTypeFriend,
 		HealthCost:         0,
-		ManaCost:           19,
+		ManaCost:           25,
 		ActivationDuration: 2 * Second,
 		CooldownDuration:   1 * Second,
 		DisableTypes: []DisableType{
@@ -65,7 +65,7 @@ func NewClassHealer() *Class {
 		Description:        "Grants a healing over time effect for 8 seconds to target",
 		TargetType:         TargetTypeFriend,
 		HealthCost:         0,
-		ManaCost:           31,
+		ManaCost:           46,
 		ActivationDuration: 3 * Second,
 		CooldownDuration:   7 * Second,
 		DisableTypes: []DisableType{
@@ -73,7 +73,7 @@ func NewClassHealer() *Class {
 			DisableTypeStun,
 		},
 		Perform: func(g Game, s Subject, o *Unit) {
-			g.HoT(NewHealing(s.Subject(), o, 65), e.Name, 8*Second)
+			g.HoT(NewHealing(s.Subject(), o, 55), e.Name, 12*Second)
 		},
 	}
 	r = Ability{
@@ -81,7 +81,7 @@ func NewClassHealer() *Class {
 		Description:        "Restores health to all party members / Grunt healing over time effects for 8 seconds to all party members / Increases critical strike chance and critical strike factor for 8 seconds",
 		TargetType:         TargetTypeNone,
 		HealthCost:         0,
-		ManaCost:           135,
+		ManaCost:           168,
 		ActivationDuration: 4 * Second,
 		CooldownDuration:   60 * Second,
 		DisableTypes: []DisableType{
