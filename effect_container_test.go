@@ -57,6 +57,7 @@ func TestEffectSet(t *testing.T) {
 
 	set := MakeEffectSet()
 	assert.Implements((*EffectContainer)(nil), set)
+	assert.Implements((*EffectQueryable)(nil), set)
 
 	assert.NotEqual(set, set.Bind(new(Unit)))
 	assert.Equal(set, set.Bind(new(Unit)).Unbind())

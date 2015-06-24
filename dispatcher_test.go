@@ -30,18 +30,20 @@ func (m *MockedEventDispatcher) Dispatch(p interface{}) {
 func TestEventHandlerBared(t *testing.T) {
 	assert := assert.New(t)
 	nCalled := 0
-	payload := (interface{})(1000)
-	f := func(p interface{}) {
+	h := MakeEventHandler(func(p interface{}) {
 		nCalled++
-		assert.Equal(payload, p)
-	}
-	h := MakeEventHandler(f)
-	h.Handle(payload)
+		assert.Equal((interface{})("payload"), p)
+	})
+	assert.Implements((*EventHandler)(nil), h)
+	h.Handle("payload")
 	assert.Equal(1, nCalled)
 }
 
 func TestEventHandlerSet(t *testing.T) {
+	assert := assert.New(t)
 	hs := MakeEventDispatcher()
+	assert.Implements((*EventDispatcher)(nil), hs)
+
 	h := new(MockedEventHandler)
 
 	hs.Unregister(h)
