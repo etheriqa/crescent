@@ -284,7 +284,7 @@ func NewClassStagePrototype() (class *Class) {
 			if o.IsDead() {
 				return
 			}
-			g.DoT(NewMagicDamage(s, o, 35), ray.Name, 10*Second)
+			g.DoT(NewMagicDamage(s, o, 45), ray.Name, 10*Second)
 		},
 	}
 	bell = Ability{
@@ -300,7 +300,7 @@ func NewClassStagePrototype() (class *Class) {
 				if enemy.IsDead() {
 					return
 				}
-				NewMagicDamage(s, enemy, 180).Perform(g)
+				NewMagicDamage(s, enemy, 280).Perform(g)
 			})
 		},
 	}
