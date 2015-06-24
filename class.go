@@ -28,6 +28,12 @@ type Class struct {
 	Abilities            []*Ability
 }
 
+type ClassFactory interface {
+	New(ClassName) *Class
+}
+
+type ClassFactories map[ClassName](func() *Class)
+
 // Ability returns the Ability
 func (c *Class) Ability(name string) *Ability {
 	for _, a := range c.Abilities {
@@ -36,4 +42,13 @@ func (c *Class) Ability(name string) *Ability {
 		}
 	}
 	return nil
+}
+
+// New creates a Class
+func (cf ClassFactories) New(name ClassName) *Class {
+	if f, ok := cf[name]; !ok {
+		return nil
+	} else {
+		return f()
+	}
 }
