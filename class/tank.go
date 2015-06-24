@@ -37,7 +37,7 @@ func NewClassTank() *Class {
 				DamageThreatFactor: 0.4,
 			}
 			g.Correction(s.Subject(), c, q.Name, 5, 8*Second)
-			_, _, _, err := g.TrueDamage(s, o, 120).Perform()
+			_, _, _, err := NewTrueDamage(s, o, 120).Perform(g)
 			if err != nil {
 				Logger().Fatal(err)
 			}
@@ -60,7 +60,7 @@ func NewClassTank() *Class {
 				MagicResistance: 50,
 			}
 			g.Correction(s.Subject(), c, w.Name, 1, 4*Second)
-			_, _, _, err := g.PhysicalDamage(s, o, 200).Perform()
+			_, _, _, err := NewPhysicalDamage(s, o, 200).Perform(g)
 			if err != nil {
 				Logger().Fatal(err)
 			}
@@ -78,7 +78,7 @@ func NewClassTank() *Class {
 			DisableTypeStun,
 		},
 		Perform: func(g Game, s Subject, o *Unit) {
-			before, after, _, err := g.PhysicalDamage(s, o, 345).Perform()
+			before, after, _, err := NewPhysicalDamage(s, o, 345).Perform(g)
 			if err != nil {
 				Logger().Fatal(err)
 			}

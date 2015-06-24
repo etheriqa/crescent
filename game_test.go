@@ -88,28 +88,3 @@ func (m *MockedGame) DoT(damage *Damage, name string, d InstanceDuration) {
 func (m *MockedGame) HoT(healing *Healing, name string, d InstanceDuration) {
 	m.Called(healing, name, d)
 }
-
-func (m *MockedGame) PhysicalDamage(s Subject, o Object, d Statistic) *Damage {
-	args := m.Called(s, o, d)
-	return args.Get(0).(*Damage)
-}
-
-func (m *MockedGame) MagicDamage(s Subject, o Object, d Statistic) *Damage {
-	args := m.Called(s, o, d)
-	return args.Get(0).(*Damage)
-}
-
-func (m *MockedGame) TrueDamage(s Subject, o Object, d Statistic) *Damage {
-	args := m.Called(s, o, d)
-	return args.Get(0).(*Damage)
-}
-
-func (m *MockedGame) PureDamage(s Subject, o Object, d Statistic) *Damage {
-	args := m.Called(s, o, d)
-	return args.Get(0).(*Damage)
-}
-
-func (m *MockedGame) Healing(s Subject, o Object, h Statistic) *Healing {
-	args := m.Called(s, o, h)
-	return args.Get(0).(*Healing)
-}

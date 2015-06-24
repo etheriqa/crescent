@@ -232,7 +232,7 @@ func NewClassStagePrototype() (class *Class) {
 		},
 		Perform: func(g Game, s Subject, o *Unit) {
 			baseDamage := 100 + 100*(1-s.Subject().Health()/s.Subject().HealthMax())
-			g.PhysicalDamage(s, o, baseDamage).Perform()
+			NewPhysicalDamage(s, o, baseDamage).Perform(g)
 		},
 	}
 	falcon = Ability{
@@ -245,7 +245,7 @@ func NewClassStagePrototype() (class *Class) {
 		},
 		Perform: func(g Game, s Subject, o *Unit) {
 			baseDamage := Statistic(160)
-			g.PhysicalDamage(s, o, baseDamage).Perform()
+			NewPhysicalDamage(s, o, baseDamage).Perform(g)
 		},
 	}
 	shark = Ability{
@@ -258,7 +258,7 @@ func NewClassStagePrototype() (class *Class) {
 		},
 		Perform: func(g Game, s Subject, o *Unit) {
 			baseDamage := Statistic(310)
-			g.PhysicalDamage(s, o, baseDamage).Perform()
+			NewPhysicalDamage(s, o, baseDamage).Perform(g)
 		},
 	}
 	iron = Ability{
@@ -280,11 +280,11 @@ func NewClassStagePrototype() (class *Class) {
 			DisableTypeSilence,
 		},
 		Perform: func(g Game, s Subject, o *Unit) {
-			g.MagicDamage(s, o, 100).Perform()
+			NewMagicDamage(s, o, 100).Perform(g)
 			if o.IsDead() {
 				return
 			}
-			g.DoT(g.MagicDamage(s, o, 35), ray.Name, 10*Second)
+			g.DoT(NewMagicDamage(s, o, 35), ray.Name, 10*Second)
 		},
 	}
 	bell = Ability{
@@ -300,7 +300,7 @@ func NewClassStagePrototype() (class *Class) {
 				if enemy.IsDead() {
 					return
 				}
-				g.MagicDamage(s, enemy, 180).Perform()
+				NewMagicDamage(s, enemy, 180).Perform(g)
 			})
 		},
 	}
@@ -350,7 +350,7 @@ func NewClassStageIron() (class *Class) {
 		CooldownDuration:   5 * Second,
 		DisableTypes:       []DisableType{},
 		Perform: func(g Game, s Subject, o *Unit) {
-			g.MagicDamage(s, o, 120).Perform()
+			NewMagicDamage(s, o, 120).Perform(g)
 		},
 	}
 	return class
@@ -389,7 +389,7 @@ func NewClassStageSilver() (class *Class) {
 		CooldownDuration:   5 * Second,
 		DisableTypes:       []DisableType{},
 		Perform: func(g Game, s Subject, o *Unit) {
-			g.MagicDamage(s, o, 270).Perform()
+			NewMagicDamage(s, o, 270).Perform(g)
 		},
 	}
 	return class

@@ -26,13 +26,6 @@ type Game interface {
 	HealingThreat(Subject, Object, Statistic)
 	DoT(*Damage, string, InstanceDuration)
 	HoT(*Healing, string, InstanceDuration)
-
-	PhysicalDamage(Subject, Object, Statistic) *Damage
-	MagicDamage(Subject, Object, Statistic) *Damage
-	TrueDamage(Subject, Object, Statistic) *Damage
-	PureDamage(Subject, Object, Statistic) *Damage
-
-	Healing(Subject, Object, Statistic) *Healing
 }
 
 // Rand returns the *rand.Rand
@@ -138,70 +131,10 @@ func (g *GameState) HealingThreat(s Subject, o Object, h Statistic) {
 
 // DoT attaches a Periodical Effect
 func (g *GameState) DoT(damage *Damage, name string, d InstanceDuration) {
-	g.AttachEffect(NewPeriodical(g, damage, damage, name, func() { damage.Perform() }, g.clock.Add(d)))
+	g.AttachEffect(NewPeriodical(g, damage, damage, name, func() { damage.Perform(g) }, g.clock.Add(d)))
 }
 
 // HoT attaches a Periodical Effect
 func (g *GameState) HoT(healing *Healing, name string, d InstanceDuration) {
-	g.AttachEffect(NewPeriodical(g, healing, healing, name, func() { healing.Perform() }, g.clock.Add(d)))
-}
-
-// PhysicalDamage returns a Damage
-func (g *GameState) PhysicalDamage(s Subject, o Object, d Statistic) *Damage {
-	return &Damage{
-		UnitPair:             MakePair(s, o),
-		damage:               d * o.Object().PhysicalDamageReductionFactor(),
-		criticalStrikeChance: s.Subject().CriticalStrikeChance(),
-		criticalStrikeFactor: s.Subject().CriticalStrikeFactor(),
-
-		g: g,
-	}
-}
-
-// MagicDamage returns a Damage
-func (g *GameState) MagicDamage(s Subject, o Object, d Statistic) *Damage {
-	return &Damage{
-		UnitPair:             MakePair(s, o),
-		damage:               d * o.Object().MagicDamageReductionFactor(),
-		criticalStrikeChance: s.Subject().CriticalStrikeChance(),
-		criticalStrikeFactor: s.Subject().CriticalStrikeFactor(),
-
-		g: g,
-	}
-}
-
-// TrueDamage returns a Damage
-func (g *GameState) TrueDamage(s Subject, o Object, d Statistic) *Damage {
-	return &Damage{
-		UnitPair:             MakePair(s, o),
-		damage:               d,
-		criticalStrikeChance: s.Subject().CriticalStrikeChance(),
-		criticalStrikeFactor: s.Subject().CriticalStrikeFactor(),
-
-		g: g,
-	}
-}
-
-// PureDamage returns a Damage
-func (g *GameState) PureDamage(s Subject, o Object, d Statistic) *Damage {
-	return &Damage{
-		UnitPair:             MakePair(s, o),
-		damage:               d,
-		criticalStrikeChance: 0,
-		criticalStrikeFactor: 0,
-
-		g: g,
-	}
-}
-
-// Healing returns a Healing
-func (g *GameState) Healing(s Subject, o Object, h Statistic) *Healing {
-	return &Healing{
-		UnitPair:             MakePair(s, o),
-		healing:              h,
-		criticalStrikeChance: s.Subject().CriticalStrikeChance(),
-		criticalStrikeFactor: s.Subject().CriticalStrikeFactor(),
-
-		g: g,
-	}
+	g.AttachEffect(NewPeriodical(g, healing, healing, name, func() { healing.Perform(g) }, g.clock.Add(d)))
 }
