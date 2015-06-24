@@ -24,13 +24,26 @@ func TestUnit(t *testing.T) {
 		HealingThreatFactor:  DefaultHealingThreatFactor,
 		Abilities:            []*Ability{},
 	}
-	u := NewUnit(100, 0, "user", class, MakeEventDispatcher())
+	dispatcher := new(MockedEventDispatcher)
+	u := NewUnit(100, 0, "user", class, dispatcher)
 
 	assert.Implements((*Subject)(nil), u)
 	assert.Implements((*Object)(nil), u)
+	assert.Implements((*EventDispatcher)(nil), u)
 
 	assert.Equal(u, u.Subject())
 	assert.Equal(u, u.Object())
+
+	h := new(MockedEventHandler)
+	dispatcher.On("Register", h).Return().Once()
+	dispatcher.On("Dispatch", (interface{})("payload")).Return().Once()
+	dispatcher.On("Unregister", h).Return().Once()
+	u.Register(h)
+	u.Dispatch("payload")
+	u.Unregister(h)
+	dispatcher.AssertExpectations(t)
+	h.AssertExpectations(t)
+
 	assert.Equal(UnitID(100), u.ID())
 	assert.Equal(UnitGroup(0), u.Group())
 	assert.Equal(UnitName("user"), u.Name())
