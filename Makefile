@@ -2,18 +2,14 @@ TARGET = crescent
 COVER = cover.out
 SRCS = $(shell find . -name '*.go')
 
-.PHONY: all test cover run watch
+.PHONY: all test build cover run watch
 
-all: test $(TARGET)
-
-$(TARGET): $(SRCS)
-	go build -o $(TARGET) github.com/etheriqa/crescent/app
+all: test build
 
 test:
 	go test -v
 
-$(COVER): $(SRCS)
-	go test -v -covermode=count -coverprofile=$(COVER)
+build: $(TARGET)
 
 cover: $(COVER)
 	go tool cover -html=$(COVER)
@@ -22,4 +18,10 @@ run: $(TARGET)
 	./$(TARGET)
 
 watch:
-	fswatch -o $(SRCS) | while read line; do clear; date; echo; make; done
+	fswatch-run --latency 0.1 --include '\.go$$' --exclude '\.' . 'make test'
+
+$(TARGET): $(SRCS)
+	go build -o $(TARGET) github.com/etheriqa/crescent/app
+
+$(COVER): $(SRCS)
+	go test -v -covermode=count -coverprofile=$(COVER)
