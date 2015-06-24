@@ -1,6 +1,8 @@
 package crescent
 
 import (
+	"math/rand"
+
 	"github.com/Sirupsen/logrus"
 )
 
@@ -9,6 +11,7 @@ var log = logrus.New()
 type App struct {
 	Addr   string
 	Origin string
+	Seed   int64
 	StageFactory
 	ClassFactory
 }
@@ -23,10 +26,12 @@ func (a App) Run() {
 	log.WithFields(logrus.Fields{
 		"addr":   a.Addr,
 		"origin": a.Origin,
+		"seed":   a.Seed,
 	}).Info("Start up")
 	i := MakeInstanceInput(1024)
 	o := MakeInstanceOutput(1024)
-	instance := NewInstance(a.StageFactory, a.ClassFactory, i, o)
+	rand := rand.New(rand.NewSource(a.Seed))
+	instance := NewInstance(a.StageFactory, a.ClassFactory, rand, i, o)
 	network := NewNetwork(a.Origin, o, i)
 	go instance.Run()
 	network.Run(a.Addr)

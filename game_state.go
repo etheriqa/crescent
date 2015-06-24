@@ -2,28 +2,29 @@ package crescent
 
 import (
 	"errors"
+	"math/rand"
 )
 
 type GameState struct {
+	rand  *rand.Rand
 	clock InstanceClock
+	w     InstanceOutputWriter
 
 	stage   Stage
 	effects EffectSet
 	units   *UnitMap
-
-	w InstanceOutputWriter
 }
 
 // NewGameState returns a GameState
-func NewGameState(clock InstanceClock, stage Stage, w InstanceOutputWriter) *GameState {
+func NewGameState(rand *rand.Rand, clock InstanceClock, w InstanceOutputWriter, stage Stage) *GameState {
 	g := &GameState{
+		rand:  rand,
 		clock: clock,
+		w:     w,
 
 		stage:   stage,
 		effects: MakeEffectSet(),
 		units:   NewUnitMap(),
-
-		w: w,
 	}
 	stage.Initialize(g)
 	return g

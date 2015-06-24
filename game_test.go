@@ -1,10 +1,17 @@
 package crescent
 
 import (
+	"math/rand"
+
 	"github.com/stretchr/testify/mock"
 )
 
 type MockedGame struct{ mock.Mock }
+
+func (m *MockedGame) Rand() *rand.Rand {
+	args := m.Called()
+	return args.Get(0).(*rand.Rand)
+}
 
 func (m *MockedGame) Clock() InstanceClock {
 	args := m.Called()

@@ -20,19 +20,20 @@ type Instance struct {
 	sf StageFactory
 	cf ClassFactory
 
-	r InstanceInput
-	w InstanceOutputWriter
+	rand *rand.Rand
+	r    InstanceInput
+	w    InstanceOutputWriter
 }
 
 // NewInstance returns a Instance
-func NewInstance(sf StageFactory, cf ClassFactory, r InstanceInput, w InstanceOutputWriter) *Instance {
+func NewInstance(sf StageFactory, cf ClassFactory, rand *rand.Rand, r InstanceInput, w InstanceOutputWriter) *Instance {
 	time := new(InstanceTime)
 	return &Instance{
 		time: time,
 		name: make(map[ClientID]UserName),
 		uid:  make(map[ClientID]UnitID),
 
-		g: NewGameState(time, sf.New(1), w), // TODO remove magic number
+		g: NewGameState(rand, time, w, sf.New(1)), // TODO remove magic number
 
 		cf: cf,
 		sf: sf,
@@ -170,7 +171,7 @@ func (i *Instance) stage(cid ClientID, input InputStage) {
 	}
 	i.w.Write(OutputStage{})
 	i.uid = make(map[ClientID]UnitID)
-	i.g = NewGameState(i.time, s, i.w)
+	i.g = NewGameState(i.rand, i.time, i.w, s)
 }
 
 // join

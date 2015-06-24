@@ -1,6 +1,11 @@
 package crescent
 
+import (
+	"math/rand"
+)
+
 type Game interface {
+	Rand() *rand.Rand
 	Clock() InstanceClock
 	Writer() InstanceOutputWriter
 
@@ -28,6 +33,11 @@ type Game interface {
 	PureDamage(Subject, Object, Statistic) *Damage
 
 	Healing(Subject, Object, Statistic) *Healing
+}
+
+// Rand returns the *rand.Rand
+func (g *GameState) Rand() *rand.Rand {
+	return g.rand
 }
 
 // Clock returns the InstanceClock

@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"time"
 
 	"github.com/etheriqa/crescent"
 	"github.com/etheriqa/crescent/class"
@@ -15,6 +16,7 @@ func main() {
 	app := crescent.App{
 		Addr:   *addr,
 		Origin: *origin,
+		Seed:   time.Now().UnixNano(),
 		StageFactory: crescent.StageFactories{
 			1: stage.NewStagePrototype,
 		},
