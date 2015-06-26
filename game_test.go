@@ -81,10 +81,10 @@ func (m *MockedGame) HealingThreat(s Subject, o Object, h Statistic) {
 	m.Called(s, o, h)
 }
 
-func (m *MockedGame) DoT(damage *Damage, name string, d InstanceDuration) {
+func (m *MockedGame) DoT(damage Damage, name string, d InstanceDuration) {
 	m.Called(damage, name, d)
 }
 
-func (m *MockedGame) HoT(healing *Healing, name string, d InstanceDuration) {
+func (m *MockedGame) HoT(healing Healing, name string, d InstanceDuration) {
 	m.Called(healing, name, d)
 }

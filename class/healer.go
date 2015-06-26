@@ -34,7 +34,7 @@ func NewClassHealer() *Class {
 			DisableTypeStun,
 		},
 		Perform: func(g Game, s Subject, o *Unit) {
-			before, after, _, err := NewMagicDamage(s, o, 175).Perform(g)
+			before, after, _, err := MakeMagicDamage(s, o, 175).Perform(g)
 			if err != nil {
 				Logger().Fatal(err)
 			}
@@ -54,7 +54,7 @@ func NewClassHealer() *Class {
 			DisableTypeStun,
 		},
 		Perform: func(g Game, s Subject, o *Unit) {
-			_, _, _, err := NewHealing(s, o, 620).Perform(g)
+			_, _, _, err := MakeHealing(s, o, 620).Perform(g)
 			if err != nil {
 				Logger().Fatal(err)
 			}
@@ -73,7 +73,7 @@ func NewClassHealer() *Class {
 			DisableTypeStun,
 		},
 		Perform: func(g Game, s Subject, o *Unit) {
-			g.HoT(NewHealing(s.Subject(), o, 55), e.Name, 12*Second)
+			g.HoT(MakeHealing(s.Subject(), o, 55), e.Name, 12*Second)
 		},
 	}
 	r = Ability{
@@ -98,11 +98,11 @@ func NewClassHealer() *Class {
 				if friend.IsDead() {
 					return
 				}
-				_, _, _, err := NewHealing(s.Subject(), friend, 425).Perform(g)
+				_, _, _, err := MakeHealing(s.Subject(), friend, 425).Perform(g)
 				if err != nil {
 					Logger().Fatal(err)
 				}
-				g.HoT(NewHealing(s.Subject(), friend, 25), r.Name, 8*Second)
+				g.HoT(MakeHealing(s.Subject(), friend, 25), r.Name, 8*Second)
 			})
 		},
 	}

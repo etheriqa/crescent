@@ -7,9 +7,9 @@ type Healing struct {
 	criticalStrikeFactor Statistic
 }
 
-// NewHealing returns a Healing
-func NewHealing(s Subject, o Object, healing Statistic) *Healing {
-	return &Healing{
+// MakeHealing returns a Healing
+func MakeHealing(s Subject, o Object, healing Statistic) Healing {
+	return Healing{
 		UnitPair:             MakePair(s, o),
 		healing:              healing,
 		criticalStrikeChance: s.Subject().CriticalStrikeChance(),
@@ -18,7 +18,7 @@ func NewHealing(s Subject, o Object, healing Statistic) *Healing {
 }
 
 // Perform performs the Healing
-func (h *Healing) Perform(g Game) (before, after Statistic, crit bool, err error) {
+func (h Healing) Perform(g Game) (before, after Statistic, crit bool, err error) {
 	healing, crit := applyCriticalStrike(g.Rand(), h.healing, h.criticalStrikeChance, h.criticalStrikeFactor)
 	before, after, err = h.Object().ModifyHealth(g.Writer(), healing)
 	if err != nil {

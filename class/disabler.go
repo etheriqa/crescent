@@ -37,14 +37,14 @@ func NewClassDisabler() *Class {
 				MagicResistance: -15,
 			}
 			g.Correction(o, c, q.Name, 1, 12*Second)
-			_, _, _, err := NewPhysicalDamage(s, o, 160).Perform(g)
+			_, _, _, err := MakePhysicalDamage(s, o, 160).Perform(g)
 			if err != nil {
 				Logger().Fatal(err)
 			}
 			if o.IsDead() {
 				return
 			}
-			g.DoT(NewPhysicalDamage(s, o, 20), q.Name, 4*Second)
+			g.DoT(MakePhysicalDamage(s, o, 20), q.Name, 4*Second)
 		},
 	}
 	w = Ability{
@@ -60,7 +60,7 @@ func NewClassDisabler() *Class {
 			DisableTypeSilence,
 		},
 		Perform: func(g Game, s Subject, o *Unit) {
-			_, _, _, err := NewPhysicalDamage(s, o, 275).Perform(g)
+			_, _, _, err := MakePhysicalDamage(s, o, 275).Perform(g)
 			if err != nil {
 				Logger().Fatal(err)
 			}
@@ -82,7 +82,7 @@ func NewClassDisabler() *Class {
 			DisableTypeStun,
 		},
 		Perform: func(g Game, s Subject, o *Unit) {
-			_, _, _, err := NewMagicDamage(s, o, 430).Perform(g)
+			_, _, _, err := MakeMagicDamage(s, o, 430).Perform(g)
 			if err != nil {
 				Logger().Fatal(err)
 			}

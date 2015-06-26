@@ -47,7 +47,7 @@ func NewClassAssassin() *Class {
 				if o.IsDead() {
 					return
 				}
-				_, _, crit, err := NewPhysicalDamage(s, o, 45).Perform(g)
+				_, _, crit, err := MakePhysicalDamage(s, o, 45).Perform(g)
 				if err != nil {
 					Logger().Fatal(err)
 				}
@@ -69,7 +69,7 @@ func NewClassAssassin() *Class {
 			DisableTypeStun,
 		},
 		Perform: func(g Game, s Subject, o *Unit) {
-			_, _, crit, err := NewPhysicalDamage(s, o, 80).Perform(g)
+			_, _, crit, err := MakePhysicalDamage(s, o, 80).Perform(g)
 			if err != nil {
 				Logger().Fatal(err)
 			}
@@ -79,7 +79,7 @@ func NewClassAssassin() *Class {
 			if o.IsDead() {
 				return
 			}
-			g.DoT(NewPhysicalDamage(s, o, 10), w.Name, 10*Second)
+			g.DoT(MakePhysicalDamage(s, o, 10), w.Name, 10*Second)
 		},
 	}
 	e = Ability{
@@ -125,7 +125,7 @@ func NewClassAssassin() *Class {
 					}
 				}
 			})
-			_, _, _, err := NewPureDamage(s, o, 400+stack*100).Perform(g)
+			_, _, _, err := MakePureDamage(s, o, 400+stack*100).Perform(g)
 			if err != nil {
 				Logger().Fatal(err)
 			}

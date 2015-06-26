@@ -24,8 +24,8 @@ type Game interface {
 	Disable(Object, DisableType, InstanceDuration)
 	DamageThreat(Subject, Object, Statistic)
 	HealingThreat(Subject, Object, Statistic)
-	DoT(*Damage, string, InstanceDuration)
-	HoT(*Healing, string, InstanceDuration)
+	DoT(Damage, string, InstanceDuration)
+	HoT(Healing, string, InstanceDuration)
 }
 
 // Rand returns the *rand.Rand
@@ -130,11 +130,11 @@ func (g *GameState) HealingThreat(s Subject, o Object, h Statistic) {
 }
 
 // DoT attaches a Periodical Effect
-func (g *GameState) DoT(damage *Damage, name string, d InstanceDuration) {
+func (g *GameState) DoT(damage Damage, name string, d InstanceDuration) {
 	g.AttachEffect(NewPeriodical(g, damage, damage, name, func() { damage.Perform(g) }, g.clock.Add(d)))
 }
 
 // HoT attaches a Periodical Effect
-func (g *GameState) HoT(healing *Healing, name string, d InstanceDuration) {
+func (g *GameState) HoT(healing Healing, name string, d InstanceDuration) {
 	g.AttachEffect(NewPeriodical(g, healing, healing, name, func() { healing.Perform(g) }, g.clock.Add(d)))
 }

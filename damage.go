@@ -7,9 +7,9 @@ type Damage struct {
 	criticalStrikeFactor Statistic
 }
 
-// NewPhysicalDamage returns a physical Damage
-func NewPhysicalDamage(s Subject, o Object, damage Statistic) *Damage {
-	return &Damage{
+// MakePhysicalDamage returns a physical Damage
+func MakePhysicalDamage(s Subject, o Object, damage Statistic) Damage {
+	return Damage{
 		UnitPair:             MakePair(s, o),
 		damage:               damage * o.Object().PhysicalDamageReductionFactor(),
 		criticalStrikeChance: s.Subject().CriticalStrikeChance(),
@@ -17,9 +17,9 @@ func NewPhysicalDamage(s Subject, o Object, damage Statistic) *Damage {
 	}
 }
 
-// NewMagicDamage returns a magic Damage
-func NewMagicDamage(s Subject, o Object, damage Statistic) *Damage {
-	return &Damage{
+// MakeMagicDamage returns a magic Damage
+func MakeMagicDamage(s Subject, o Object, damage Statistic) Damage {
+	return Damage{
 		UnitPair:             MakePair(s, o),
 		damage:               damage * o.Object().MagicDamageReductionFactor(),
 		criticalStrikeChance: s.Subject().CriticalStrikeChance(),
@@ -27,9 +27,9 @@ func NewMagicDamage(s Subject, o Object, damage Statistic) *Damage {
 	}
 }
 
-// NewTrueDamage returns a true Damage
-func NewTrueDamage(s Subject, o Object, damage Statistic) *Damage {
-	return &Damage{
+// MakeTrueDamage returns a true Damage
+func MakeTrueDamage(s Subject, o Object, damage Statistic) Damage {
+	return Damage{
 		UnitPair:             MakePair(s, o),
 		damage:               damage,
 		criticalStrikeChance: s.Subject().CriticalStrikeChance(),
@@ -37,9 +37,9 @@ func NewTrueDamage(s Subject, o Object, damage Statistic) *Damage {
 	}
 }
 
-// NewPureDamage returns a pure Damage
-func NewPureDamage(s Subject, o Object, damage Statistic) *Damage {
-	return &Damage{
+// MakePureDamage returns a pure Damage
+func MakePureDamage(s Subject, o Object, damage Statistic) Damage {
+	return Damage{
 		UnitPair:             MakePair(s, o),
 		damage:               damage,
 		criticalStrikeChance: 0,
@@ -48,7 +48,7 @@ func NewPureDamage(s Subject, o Object, damage Statistic) *Damage {
 }
 
 // Perform performs the Damage
-func (d *Damage) Perform(g Game) (before, after Statistic, crit bool, err error) {
+func (d Damage) Perform(g Game) (before, after Statistic, crit bool, err error) {
 	damage, crit := applyCriticalStrike(g.Rand(), d.damage, d.criticalStrikeChance, d.criticalStrikeFactor)
 	before, after, err = d.Object().ModifyHealth(g.Writer(), -damage)
 	if err != nil {

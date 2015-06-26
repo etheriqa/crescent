@@ -40,7 +40,7 @@ func NewClassMage() *Class {
 				Armor: -10,
 			}
 			g.Correction(o, c, q.Name, 1, 8*Second)
-			_, _, _, err := NewMagicDamage(s, o, 155).Perform(g)
+			_, _, _, err := MakeMagicDamage(s, o, 155).Perform(g)
 			if err != nil {
 				Logger().Fatal(err)
 			}
@@ -63,7 +63,7 @@ func NewClassMage() *Class {
 			DisableTypeStun,
 		},
 		Perform: func(g Game, s Subject, o *Unit) {
-			g.DoT(NewMagicDamage(s, o, 15), w.Name, 10*Second)
+			g.DoT(MakeMagicDamage(s, o, 15), w.Name, 10*Second)
 			if rand.Float64() > 0.2 {
 				return
 			}
@@ -83,7 +83,7 @@ func NewClassMage() *Class {
 			DisableTypeStun,
 		},
 		Perform: func(g Game, s Subject, o *Unit) {
-			_, _, _, err := NewMagicDamage(s, o, 420).Perform(g)
+			_, _, _, err := MakeMagicDamage(s, o, 420).Perform(g)
 			if err != nil {
 				Logger().Fatal(err)
 			}
@@ -103,14 +103,14 @@ func NewClassMage() *Class {
 		},
 		Perform: func(g Game, s Subject, o *Unit) {
 			g.UnitQuery().EachEnemy(s.Subject(), func(enemy *Unit) {
-				_, _, _, err := NewMagicDamage(s, enemy, 800).Perform(g)
+				_, _, _, err := MakeMagicDamage(s, enemy, 800).Perform(g)
 				if err != nil {
 					Logger().Fatal(err)
 				}
 				if enemy.IsDead() {
 					return
 				}
-				g.DoT(NewMagicDamage(s, enemy, 10), r.Name, 10*Second)
+				g.DoT(MakeMagicDamage(s, enemy, 10), r.Name, 10*Second)
 			})
 		},
 	}
