@@ -15,7 +15,7 @@ type Instance struct {
 	name map[ClientID]UserName
 	uid  map[ClientID]UnitID
 
-	g *GameState
+	world *World
 
 	sf StageFactory
 	cf ClassFactory
@@ -33,7 +33,7 @@ func NewInstance(sf StageFactory, cf ClassFactory, rand *rand.Rand, r InstanceIn
 		name: make(map[ClientID]UserName),
 		uid:  make(map[ClientID]UnitID),
 
-		g: NewGameState(rand, time, w, sf.New(1)), // TODO remove magic number
+		world: NewWorld(rand, time, w, sf.New(1)), // TODO remove magic number
 
 		cf: cf,
 		sf: sf,
@@ -52,12 +52,12 @@ func (i *Instance) Run() {
 			*i.time = i.time.Add(GameTick)
 			if i.time.IsRegenerationTick() {
 				i.sync(i.w)
-				i.g.PerformRegenerationTick()
+				i.world.PerformRegenerationTick()
 			}
 			if i.time.IsPeriodicalTick() {
-				i.g.PerformPeriodicalTick()
+				i.world.PerformPeriodicalTick()
 			}
-			i.g.PerformGameTick()
+			i.world.PerformGameTick()
 		case input, ok := <-i.r:
 			if !ok {
 				log.Fatal("Cannot read from the input channel")
@@ -119,7 +119,7 @@ func (i *Instance) connect(cid ClientID, input InputConnect) {
 	i.w.Write(OutputMessage{
 		Message: fmt.Sprintf("%s has joined.", name),
 	})
-	i.g.SyncGameState(i.w.BindClientID(cid))
+	i.world.SyncWorld(i.w.BindClientID(cid))
 }
 
 // disconnect
@@ -171,7 +171,7 @@ func (i *Instance) stage(cid ClientID, input InputStage) {
 	}
 	i.w.Write(OutputStage{})
 	i.uid = make(map[ClientID]UnitID)
-	i.g = NewGameState(i.rand, i.time, i.w, s)
+	i.world = NewWorld(i.rand, i.time, i.w, s)
 }
 
 // join
@@ -184,7 +184,7 @@ func (i *Instance) join(cid ClientID, input InputJoin) {
 	if c == nil {
 		return
 	}
-	uid, err := i.g.Join(UnitGroupPlayer, UnitName(i.name[cid]), c)
+	uid, err := i.world.Join(UnitGroupPlayer, UnitName(i.name[cid]), c)
 	if err != nil {
 		log.WithFields(logrus.Fields{
 			"cid":  cid,
@@ -193,7 +193,7 @@ func (i *Instance) join(cid ClientID, input InputJoin) {
 		return
 	}
 	i.uid[cid] = uid
-	i.g.SyncUnit(i.w.BindClientID(cid), uid)
+	i.world.SyncUnit(i.w.BindClientID(cid), uid)
 }
 
 // leave
@@ -201,7 +201,7 @@ func (i *Instance) leave(cid ClientID, input InputLeave) {
 	if _, ok := i.uid[cid]; !ok {
 		return
 	}
-	if err := i.g.Leave(i.uid[cid]); err != nil {
+	if err := i.world.Leave(i.uid[cid]); err != nil {
 		log.WithFields(logrus.Fields{
 			"cid":  cid,
 			"type": "leave",
@@ -216,7 +216,7 @@ func (i *Instance) ability(cid ClientID, input InputAbility) {
 	if _, ok := i.uid[cid]; !ok {
 		return
 	}
-	i.g.Ability(i.uid[cid], input.ObjectUnitID, input.AbilityName)
+	i.world.Ability(i.uid[cid], input.ObjectUnitID, input.AbilityName)
 }
 
 // interrupt
@@ -224,5 +224,5 @@ func (i *Instance) interrupt(cid ClientID, input InputInterrupt) {
 	if _, ok := i.uid[cid]; !ok {
 		return
 	}
-	i.g.Interrupt(i.uid[cid])
+	i.world.Interrupt(i.uid[cid])
 }
