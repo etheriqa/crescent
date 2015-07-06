@@ -1,7 +1,7 @@
 package stage
 
 import (
-	. "github.com/etheriqa/crescent"
+	. "github.com/etheriqa/crescent/game"
 )
 
 type StagePrototype struct {

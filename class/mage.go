@@ -3,7 +3,7 @@ package class
 import (
 	"math/rand"
 
-	. "github.com/etheriqa/crescent"
+	. "github.com/etheriqa/crescent/game"
 )
 
 func NewClassMage() *Class {

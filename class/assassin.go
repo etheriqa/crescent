@@ -1,7 +1,7 @@
 package class
 
 import (
-	. "github.com/etheriqa/crescent"
+	. "github.com/etheriqa/crescent/game"
 )
 
 const AssassinStackName = "Tenacity"
