@@ -29,8 +29,8 @@ type InputChat struct {
 	Message string
 }
 
-type InputStage struct {
-	StageID StageID
+type InputLevel struct {
+	LevelID LevelID
 }
 
 type InputJoin struct {
@@ -69,8 +69,8 @@ func DecodeInputFrame(p []byte) (interface{}, error) {
 		if err = json.Unmarshal(*f.Data, &i); err == nil {
 			return i, nil
 		}
-	case "Stage":
-		i := InputStage{}
+	case "Level":
+		i := InputLevel{}
 		if err = json.Unmarshal(*f.Data, &i); err == nil {
 			return i, nil
 		}

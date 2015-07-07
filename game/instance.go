@@ -17,7 +17,7 @@ type Instance struct {
 
 	world *World
 
-	sf StageFactory
+	sf LevelFactory
 	cf ClassFactory
 
 	rand *rand.Rand
@@ -26,7 +26,7 @@ type Instance struct {
 }
 
 // NewInstance returns a Instance
-func NewInstance(sf StageFactory, cf ClassFactory, rand *rand.Rand, r InstanceInput, w InstanceOutputWriter) *Instance {
+func NewInstance(sf LevelFactory, cf ClassFactory, rand *rand.Rand, r InstanceInput, w InstanceOutputWriter) *Instance {
 	time := new(InstanceTime)
 	return &Instance{
 		time: time,
@@ -72,8 +72,8 @@ func (i *Instance) Run() {
 				i.profile(cid, input)
 			case InputChat:
 				i.chat(cid, input)
-			case InputStage:
-				i.stage(cid, input)
+			case InputLevel:
+				i.level(cid, input)
 			case InputJoin:
 				i.join(cid, input)
 			case InputLeave:
@@ -114,7 +114,7 @@ func (i *Instance) connect(cid ClientID, input InputConnect) {
 		Message: "/profile <name> : change your name",
 	})
 	i.w.BindClientID(cid).Write(OutputMessage{
-		Message: "/stage 1 : reset stage",
+		Message: "/level 1 : reset level",
 	})
 	i.w.Write(OutputMessage{
 		Message: fmt.Sprintf("%s has joined.", name),
@@ -163,13 +163,13 @@ func (i *Instance) chat(cid ClientID, input InputChat) {
 	}).Infof("%s: %s", name, message)
 }
 
-// stage
-func (i *Instance) stage(cid ClientID, input InputStage) {
-	s := i.sf.New(input.StageID)
+// level
+func (i *Instance) level(cid ClientID, input InputLevel) {
+	s := i.sf.New(input.LevelID)
 	if s == nil {
 		return
 	}
-	i.w.Write(OutputStage{})
+	i.w.Write(OutputLevel{})
 	i.uid = make(map[ClientID]UnitID)
 	i.world = NewWorld(i.rand, i.time, i.w, s)
 }

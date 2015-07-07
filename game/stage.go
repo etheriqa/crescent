@@ -1,20 +1,20 @@
 package game
 
-type StageID uint64
+type LevelID uint64
 
-type Stage interface {
+type Level interface {
 	Initialize(Game) error
 	OnTick(Game)
 }
 
-type StageFactory interface {
-	New(StageID) Stage
+type LevelFactory interface {
+	New(LevelID) Level
 }
 
-type StageFactories map[StageID](func() Stage)
+type LevelFactories map[LevelID](func() Level)
 
-// New creates a Stage
-func (sf StageFactories) New(id StageID) Stage {
+// New creates a Level
+func (sf LevelFactories) New(id LevelID) Level {
 	if f, ok := sf[id]; !ok {
 		return nil
 	} else {

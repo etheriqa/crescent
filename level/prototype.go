@@ -1,10 +1,10 @@
-package stage
+package level
 
 import (
 	. "github.com/etheriqa/crescent/game"
 )
 
-type StagePrototype struct {
+type LevelPrototype struct {
 	prototype             *Unit
 	prototypePhase        int
 	prototypeCooldownTime InstanceTime
@@ -18,12 +18,12 @@ type StagePrototype struct {
 	silverLeavingTime *InstanceTime
 }
 
-func NewStagePrototype() Stage {
-	return &StagePrototype{}
+func NewLevelPrototype() Level {
+	return &LevelPrototype{}
 }
 
-func (s *StagePrototype) Initialize(g Game) error {
-	id, err := g.Join(UnitGroupAI, "P-0", NewClassStagePrototype())
+func (s *LevelPrototype) Initialize(g Game) error {
+	id, err := g.Join(UnitGroupAI, "P-0", NewClassLevelPrototype())
 	if err != nil {
 		return err
 	}
@@ -32,14 +32,14 @@ func (s *StagePrototype) Initialize(g Game) error {
 	return nil
 }
 
-func (s *StagePrototype) OnTick(g Game) {
+func (s *LevelPrototype) OnTick(g Game) {
 	s.syncMinion(g)
 	s.actPrototype(g)
 	s.actIron(g)
 	s.actSilver(g)
 }
 
-func (s *StagePrototype) syncMinion(g Game) {
+func (s *LevelPrototype) syncMinion(g Game) {
 	g.UnitQuery().EachFriend(s.prototype, func(u *Unit) {
 		switch u.ClassName() {
 		case ClassName("Iron"):
@@ -76,7 +76,7 @@ func (s *StagePrototype) syncMinion(g Game) {
 	}
 }
 
-func (s *StagePrototype) actPrototype(g Game) {
+func (s *LevelPrototype) actPrototype(g Game) {
 	switch {
 	case g.Clock().Before(s.prototypeCooldownTime):
 		return
@@ -105,7 +105,7 @@ func (s *StagePrototype) actPrototype(g Game) {
 	}
 }
 
-func (s *StagePrototype) actPrototypePhase1(g Game) {
+func (s *LevelPrototype) actPrototypePhase1(g Game) {
 	o := s.maxThreatEnemy(g)
 	if o == nil {
 		return
@@ -119,7 +119,7 @@ func (s *StagePrototype) actPrototypePhase1(g Game) {
 	s.prototypeCooldownTime = g.Clock().Add(3 * Second)
 }
 
-func (s *StagePrototype) actPrototypePhase2(g Game) {
+func (s *LevelPrototype) actPrototypePhase2(g Game) {
 	o := s.maxThreatEnemy(g)
 	if o == nil {
 		return
@@ -138,7 +138,7 @@ func (s *StagePrototype) actPrototypePhase2(g Game) {
 	s.prototypeCooldownTime = g.Clock().Add(2 * Second)
 }
 
-func (s *StagePrototype) actIron(g Game) {
+func (s *LevelPrototype) actIron(g Game) {
 	if s.iron == nil {
 		return
 	}
@@ -158,7 +158,7 @@ func (s *StagePrototype) actIron(g Game) {
 	g.Activating(s.iron, o, s.iron.Ability("Iron"))
 }
 
-func (s *StagePrototype) actSilver(g Game) {
+func (s *LevelPrototype) actSilver(g Game) {
 	if s.silver == nil {
 		return
 	}
@@ -178,7 +178,7 @@ func (s *StagePrototype) actSilver(g Game) {
 	g.Activating(s.silver, o, s.silver.Ability("Silver"))
 }
 
-func (s *StagePrototype) isActivating(g Game, u *Unit) bool {
+func (s *LevelPrototype) isActivating(g Game, u *Unit) bool {
 	return g.EffectQuery().BindSubject(u).Some(func(h Effect) bool {
 		switch h.(type) {
 		case *Activating:
@@ -188,7 +188,7 @@ func (s *StagePrototype) isActivating(g Game, u *Unit) bool {
 	})
 }
 
-func (s *StagePrototype) maxThreatEnemy(g Game) *Unit {
+func (s *LevelPrototype) maxThreatEnemy(g Game) *Unit {
 	var u *Unit
 	var threat Statistic
 	g.EffectQuery().BindObject(s.prototype).Each(func(h Effect) {
@@ -206,7 +206,7 @@ func (s *StagePrototype) maxThreatEnemy(g Game) *Unit {
 	return u
 }
 
-func NewClassStagePrototype() (class *Class) {
+func NewClassLevelPrototype() (class *Class) {
 	var attack, falcon, shark, iron, ray, bell, silver, dandelion, tidalBore, diamond, pastorale, vines, waveCrest, morningLull, jadeite Ability
 	class = &Class{
 		Name:                 "Prototype",
@@ -268,7 +268,7 @@ func NewClassStagePrototype() (class *Class) {
 		CooldownDuration:   30 * Second,
 		DisableTypes:       []DisableType{},
 		Perform: func(g Game, s Subject, o *Unit) {
-			g.Join(s.Subject().Group(), "Iron-PX1", NewClassStageIron())
+			g.Join(s.Subject().Group(), "Iron-PX1", NewClassLevelIron())
 		},
 	}
 	ray = Ability{
@@ -311,13 +311,13 @@ func NewClassStagePrototype() (class *Class) {
 		CooldownDuration:   40 * Second,
 		DisableTypes:       []DisableType{},
 		Perform: func(g Game, s Subject, o *Unit) {
-			g.Join(s.Subject().Group(), "Silver-PX2", NewClassStageSilver())
+			g.Join(s.Subject().Group(), "Silver-PX2", NewClassLevelSilver())
 		},
 	}
 	return
 }
 
-func NewClassStageIron() (class *Class) {
+func NewClassLevelIron() (class *Class) {
 	var silence, iron Ability
 	class = &Class{
 		Name:                 "Iron",
@@ -356,7 +356,7 @@ func NewClassStageIron() (class *Class) {
 	return class
 }
 
-func NewClassStageSilver() (class *Class) {
+func NewClassLevelSilver() (class *Class) {
 	var stun, silver Ability
 	class = &Class{
 		Name:                 "Silver",

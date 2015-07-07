@@ -10,23 +10,23 @@ type World struct {
 	clock InstanceClock
 	w     InstanceOutputWriter
 
-	stage   Stage
+	level   Level
 	effects EffectSet
 	units   *UnitMap
 }
 
 // NewWorld returns a World
-func NewWorld(rand *rand.Rand, clock InstanceClock, w InstanceOutputWriter, stage Stage) *World {
+func NewWorld(rand *rand.Rand, clock InstanceClock, w InstanceOutputWriter, level Level) *World {
 	g := &World{
 		rand:  rand,
 		clock: clock,
 		w:     w,
 
-		stage:   stage,
+		level:   level,
 		effects: MakeEffectSet(),
 		units:   NewUnitMap(),
 	}
-	stage.Initialize(g)
+	level.Initialize(g)
 	return g
 }
 
@@ -128,7 +128,7 @@ func (w *World) Interrupt(id UnitID) error {
 
 // PerformGameTick performs the game tick routine
 func (w *World) PerformGameTick() {
-	w.stage.OnTick(w)
+	w.level.OnTick(w)
 	w.units.Each(func(u *Unit) {
 		if u.IsDead() {
 			return

@@ -12,7 +12,7 @@ type App struct {
 	Addr   string
 	Origin string
 	Seed   int64
-	StageFactory
+	LevelFactory
 	ClassFactory
 }
 
@@ -31,7 +31,7 @@ func (a App) Run() {
 	i := MakeInstanceInput(1024)
 	o := MakeInstanceOutput(1024)
 	rand := rand.New(rand.NewSource(a.Seed))
-	instance := NewInstance(a.StageFactory, a.ClassFactory, rand, i, o)
+	instance := NewInstance(a.LevelFactory, a.ClassFactory, rand, i, o)
 	network := NewNetwork(a.Origin, o, i)
 	go instance.Run()
 	network.Run(a.Addr)

@@ -46,8 +46,8 @@ func TestEncodeOutputFrame(t *testing.T) {
 	}
 
 	{
-		expected := []byte(`{"Type":"Stage","Data":{}}`)
-		actual, err := EncodeOutputFrame(OutputStage{})
+		expected := []byte(`{"Type":"Level","Data":{}}`)
+		actual, err := EncodeOutputFrame(OutputLevel{})
 		if assert.Nil(err) {
 			assert.Equal(expected, actual)
 		}

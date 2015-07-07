@@ -50,10 +50,10 @@ func TestDecodeInputFrame(t *testing.T) {
 	}
 
 	{
-		json := []byte(`{"Type":"Stage","Data":{"StageID":1}}`)
+		json := []byte(`{"Type":"Level","Data":{"LevelID":1}}`)
 		input, err := DecodeInputFrame(json)
-		if assert.Nil(err) && assert.IsType(InputStage{}, input) {
-			assert.Equal(StageID(1), input.(InputStage).StageID)
+		if assert.Nil(err) && assert.IsType(InputLevel{}, input) {
+			assert.Equal(LevelID(1), input.(InputLevel).LevelID)
 		}
 	}
 

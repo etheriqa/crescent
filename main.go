@@ -6,7 +6,7 @@ import (
 
 	"github.com/etheriqa/crescent/class"
 	"github.com/etheriqa/crescent/game"
-	"github.com/etheriqa/crescent/stage"
+	"github.com/etheriqa/crescent/level"
 )
 
 func main() {
@@ -17,8 +17,8 @@ func main() {
 		Addr:   *addr,
 		Origin: *origin,
 		Seed:   time.Now().UnixNano(),
-		StageFactory: game.StageFactories{
-			1: stage.NewStagePrototype,
+		LevelFactory: game.LevelFactories{
+			1: level.NewLevelPrototype,
 		},
 		ClassFactory: game.ClassFactories{
 			"Tank":     class.NewClassTank,
