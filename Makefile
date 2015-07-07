@@ -4,7 +4,7 @@ SRCS = $(shell find . -name '*.go')
 TARGET_PACKAGE = github.com/etheriqa/crescent
 TEST_PACKAGE = github.com/etheriqa/crescent/game
 
-.PHONY: all test build cover run watch
+.PHONY: all test build cover clean watch
 
 all: test build
 
@@ -16,8 +16,8 @@ build: $(TARGET)
 cover: $(COVER)
 	go tool cover -html=$(COVER)
 
-run: $(TARGET)
-	./$(TARGET)
+clean:
+	rm -f $(TARGET) $(COVER)
 
 watch:
 	fswatch-run --latency 0.1 --include '\.go$$' --exclude '\.' . 'make test'
