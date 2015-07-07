@@ -1,8 +1,6 @@
 package class
 
 import (
-	"math/rand"
-
 	. "github.com/etheriqa/crescent/game"
 )
 
@@ -44,7 +42,7 @@ func NewClassMage() *Class {
 			if err != nil {
 				Logger().Fatal(err)
 			}
-			if rand.Float64() > 0.1 {
+			if g.Rand().Float64() > 0.1 {
 				return
 			}
 			g.ResetCooldown(s.Subject(), &w)
@@ -64,7 +62,7 @@ func NewClassMage() *Class {
 		},
 		Perform: func(g Game, s Subject, o *Unit) {
 			g.DoT(MakeMagicDamage(s, o, 15), w.Name, 10*Second)
-			if rand.Float64() > 0.2 {
+			if g.Rand().Float64() > 0.2 {
 				return
 			}
 			g.ResetCooldown(s.Subject(), &e)
