@@ -10,5 +10,5 @@ A client application is [here](https://github.com/etheriqa/crescent-client).
 
 ```sh
 go get github.com/etheriqa/crescent
-crescent
+$GOPATH/bin/crescent
 ```
